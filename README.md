@@ -1,5 +1,5 @@
-FutureGrid Teefaa
+Cloudmesh Teefaa
 =================
 
-The project Documentation is located at http://futuregrid.github.com/teefaa/
+The project Documentation is located at http://cloudmesh.github.com/teefaa/
 Test

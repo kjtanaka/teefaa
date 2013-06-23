@@ -7,7 +7,7 @@
     alt="Fork me on GitHub"></a>
 
 
-Welcome to FutureGrid Teefaa!
+Welcome to Cloudmesh Teefaa!
 ====================
 
 .. sidebar:: Table of Contents
@@ -21,7 +21,7 @@ Welcome to FutureGrid Teefaa!
    license
 
 
-FutureGrid Teefaa is a set of deployment scripts for System Provisioning(includes 
+Cloudmesh Teefaa is a set of deployment scripts for System Provisioning(includes 
 Baremetal Provisioning). Which is designed as simple, flexible, programable and 
 collaboratable so that users/developers can build, test and appreciate new Open 
 Source Technologies as quickly as possible.

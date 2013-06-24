@@ -19,8 +19,8 @@ def node_ensure(nodename,np,properties,note,gpus=0):
         output = run('pbsnodes %s' % nodename)
     if output.return_code != 0:
         with prefix('LANG=en_US.UTF-8'):
-            run('qmgr -c \"create node %s\"' % nodename)
-            run('qmgr -c \"set node %s np = %s\"' % (nodename, np))
-            run('qmgr -c \"set node %s properties = %s\"' % (nodename, properties))
-            run('qmgr -c \"set node %s note = %s\"' % (nodename, note))
-            run('qmgr -c \"set node %s gpus = %s\"' % (nodename, gpus))
+            run('echo qmgr -c \"create node %s\"' % nodename)
+            run('echo qmgr -c \"set node %s np = %s\"' % (nodename, np))
+            run('echo qmgr -c \"set node %s properties = %s\"' % (nodename, properties))
+            run('echo qmgr -c \"set node %s note = %s\"' % (nodename, note))
+            run('echo qmgr -c \"set node %s gpus = %s\"' % (nodename, gpus))

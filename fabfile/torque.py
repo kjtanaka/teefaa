@@ -25,6 +25,6 @@ def node_ensure(nodename,np,properties,note,gpus=0):
         time.sleep(1)
         run('qmgr -c \"set node %s properties = %s\"' % (nodename, properties))
         time.sleep(1)
-        run('qmgr -c \"set node %s note = %s\"' % (nodename, note))
+        run('qmgr -c \"set node %s note = HPC\"' % (nodename))
         time.sleep(1)
         run('qmgr -c \"set node %s gpus = %s\"' % (nodename, gpus))

@@ -16,5 +16,5 @@ def node_ensure(nodename,np,properties,note,gpus=0):
     --- ensure node exists'''
     env.host_string = 'i136'
     with settings(warn_only = True):
-        output = run('pbsnodes|grep %s' % nodename)
+        output = run('pbsnodes |grep ^%s |grep ^%s[0-9]' % nodename)
         print output.return_code

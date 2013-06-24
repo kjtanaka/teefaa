@@ -13,12 +13,14 @@ from platform import dist
 from fabric.api import *
 from fabric.contrib import *
 from cuisine import *
+from system import power, pxeboot, wait_till_ping, wait_till_ssh
 
 @task
-def bootstrap(host, imagename):
-    ''':host,imagename  -  Bootstrap OS'''
+def bootstrap(hostname, imagename):
+    ''':hostname,imagename  -  Bootstrap OS'''
 
-    env.host_string = host
+    env.host_string = hostname
+    env.disable_known_hosts = True
     if not env.user == 'root':
         print 'You need to login as root for bootstrap.'
         print 'So add the option \"--user root\"'
@@ -47,6 +49,20 @@ def bootstrap(host, imagename):
     bp.condition()
     bp.install_bootloader()
 
+@task
+def osprovisioning(hostname, imagename):
+    ''':hostname,imagename | Provisioning'''
+    env.disable_known_hosts = True
+    pxeboot(hostname, 'netboot')
+    power(hostname, 'off')
+    power(hostname, 'wait_till_off')
+    power(hostname, 'on')
+    power(hostname, 'wait_till_on')
+    wait_till_ping(hostname, '100')
+    wait_till_ssh(hostname, '100')
+    bootstrap(hostname, imagename)
+    pxeboot(hostname, 'localboot')
+    
 class BaremetalProvisioning:
 
     def __init__(self, host, image):
@@ -58,10 +74,9 @@ class BaremetalProvisioning:
         self.data = host['disk']['partitions']['data']
         self.scheme = image['partition_scheme']
         self.bootloader = image['bootloader']
-
+    
     def partitioning(self):
-        '''mbr scheme partitioning'''
-
+        '''partitioning'''
         run('aptitude update')
         package_ensure('parted')
         if self.scheme == 'mbr':
@@ -93,8 +108,6 @@ class BaremetalProvisioning:
 
     def makefs(self):
         '''Make Filesytem'''
-    
-        # Initialize partition number as;
         pnum = 1
         if self.scheme == 'gpt':
             pnum += 1
@@ -107,7 +120,6 @@ class BaremetalProvisioning:
 
     def mountfs(self):
         '''Mount Filesystem'''
-        # Initialize partition number as;
         pnum = 1
         if self.scheme == 'gpt':
             pnum += 1
@@ -138,7 +150,7 @@ class BaremetalProvisioning:
         elif method == "btsync":
             run("mkdir -p /mnt/BTsync")
             run("ln -s /mnt/BTsync /BTsync")
-            mkbtseed(self.image['btcfg'], self.image['btbin'])
+            self.make_btsync_seed()
             count = 0
             while not files.exists(self.image['osimage']):
                 time.sleep(30)
@@ -168,6 +180,16 @@ class BaremetalProvisioning:
                 exit(1)
             run('rm -f %s' % local)
     
+    def make_btsync_seed(self):
+        ''':hostname,btcfg,btsync | Make a seed of Bittorrent Sync'''
+        btcfg, btsync = self.image['btcfg'], self.image['btbin']
+        if not file_is_dir('/BTsync/image'):
+            run('mkdir -p /BTsync/image')
+        put(btcfg, '/BTsync/btsync.conf')
+        put(btsync, '/BTsync/btsync', mode=755)
+        #files.sed('/BTsync/btsync.conf', 'DEVNAME', self.host)
+        run('/BTsync/btsync --config /BTsync/btsync.conf')
+
 class BaremetalProvisioningRedHat(BaremetalProvisioning):
     
     def __init__(self, host, image):
@@ -362,18 +384,19 @@ class BaremetalProvisioningUbuntu(BaremetalProvisioning):
         run('reboot')
 
 @task
-def mkbtseed(btcfg, btbin):
-    ''':btsync_conf,btsync_bin | Make a seed of Bittorrent Sync'''
-    if not files.exists('/BTsync/image'):
+def make_btsync_seed(hostname, btcfg, btsync):
+    ''':hostname,btcfg,btsync | Make a seed of Bittorrent Sync'''
+    env.host_string = hostname
+    if not file_is_dir('/BTsync/image'):
         run('mkdir -p /BTsync/image')
     put(btcfg, '/BTsync/btsync.conf')
-    put(btbin, '/BTsync/btsync', mode=755)
-    files.sed('/BTsync/btsync.conf', 'DEVNAME', env.host)
+    put(btsync, '/BTsync/btsync', mode=755)
+    files.sed('/BTsync/btsync.conf', 'DEVNAME', hostname)
     run('/BTsync/btsync --config /BTsync/btsync.conf')
 
 @task
 def make_livecd(livecd_name, livecd_cfg='ymlfile/scratch/livecd.yml'):
-    ''':livecd_name=XXXXX,livecd_cfg=cfg/livecd.yaml | Make LiveCD'''
+    ''':livecd_name,livecd_cfg=ymlfile/scratch/livecd.yml | Make LiveCD'''
     livecd = read_ymlfile('livecd.yml')[livecd_name]
 
     packages = [

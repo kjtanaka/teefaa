@@ -16,6 +16,6 @@ def node_ensure(nodename,np,properties,note,gpus=0):
     --- ensure node exists'''
     env.host_string = 'i136'
     with settings(warn_only = True):
-        output = run('pbsnodes |grep ^%s -A 5 |grep -v ^%s[0-9]' % (nodename, nodename))
+        output = run('pbsnodes |grep ^%s |grep -v ^%s[0-9]' % (nodename, nodename))
     if output.return_code != 0:
         run('qmgr -c \'create node %s\'' % nodename)

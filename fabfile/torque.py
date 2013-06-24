@@ -17,4 +17,6 @@ def node_ensure(nodename,np,properties,note,gpus=0):
     env.host_string = 'i136'
     with settings(warn_only = True):
         output = run('pbsnodes |grep ^%s |grep -v ^%s[0-9]' % (nodename, nodename))
-        print output.return_code
+    if output.return_code != 0:
+        print 'create node'
+

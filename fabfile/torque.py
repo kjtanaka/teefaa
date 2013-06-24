@@ -6,6 +6,7 @@
 
 import os
 import sys
+import time
 from fabric.api import *
 from fabric.contrib import *
 from cuisine import *
@@ -19,8 +20,12 @@ def node_ensure(nodename,np,properties,note,gpus=0):
         output = run('pbsnodes %s' % nodename)
     if output.return_code != 0:
         with prefix('LANG=en_US.UTF-8'):
-            run('echo qmgr -c \"create node %s\"' % nodename)
-            run('echo qmgr -c \"set node %s np = %s\"' % (nodename, np))
-            run('echo qmgr -c \"set node %s properties = %s\"' % (nodename, properties))
-            run('echo qmgr -c \"set node %s note = %s\"' % (nodename, note))
-            run('echo qmgr -c \"set node %s gpus = %s\"' % (nodename, gpus))
+            run('qmgr -c \"create node %s\"' % nodename)
+            time.sleep(3)
+            run('qmgr -c \"set node %s np = %s\"' % (nodename, np))
+            time.sleep(3)
+            run('qmgr -c \"set node %s properties = %s\"' % (nodename, properties))
+            time.sleep(3)
+            run('qmgr -c \"set node %s note = %s\"' % (nodename, note))
+            time.sleep(3)
+            run('qmgr -c \"set node %s gpus = %s\"' % (nodename, gpus))

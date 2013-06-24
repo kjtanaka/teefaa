@@ -26,3 +26,10 @@ def node_ensure(nodename,np,properties,note):
         run('echo set node %s properties = %s|qmgr' % (nodename, properties))
         time.sleep(1)
         run('echo set node %s note = %s|qmgr' % (nodename, note))
+    else:
+        run('echo set node %s np = %s|qmgr' % (nodename, np))
+        time.sleep(1)
+        run('echo set node %s properties = %s|qmgr' % (nodename, properties))
+        time.sleep(1)
+        run('echo set node %s note = %s|qmgr' % (nodename, note))
+

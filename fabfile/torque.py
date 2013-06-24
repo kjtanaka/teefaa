@@ -12,19 +12,17 @@ from fabric.contrib import *
 from cuisine import *
 
 @task
-def node_ensure(nodename,np,properties,note,gpus=0):
+def node_ensure(nodename,np,properties,note):
     ''':nodename,np,properties,note,gpus=0
     --- ensure node exists'''
     env.host_string = 'i136'
     with settings(warn_only = True):
         output = run('pbsnodes %s' % nodename)
     if output.return_code != 0:
-        run('qmgr -c \"create node %s\"' % nodename)
+        run('echo create node %s|qmgr' % nodename)
         time.sleep(1)
-        run('qmgr -c \"set node %s np = %s\"' % (nodename, np))
+        run('echo set node %s np = %s|qmgr' % (nodename, np))
         time.sleep(1)
-        run('qmgr -c \"set node %s properties = %s\"' % (nodename, properties))
+        run('echo set node %s properties = %s|qmgr' % (nodename, properties))
         time.sleep(1)
-        run('qmgr -c \"set node %s note = HPC\"' % (nodename))
-        time.sleep(1)
-        run('qmgr -c \"set node %s gpus = %s\"' % (nodename, gpus))
+        run('echo set node %s note = %s' % (nodename, note))

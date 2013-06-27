@@ -5,7 +5,7 @@ tools. The cluster uses SLURM as resource manager. A simple MPI
 program is included to test the functionality. of teh virtual cluster.
 """
 
-from setuptools import setup
+from setuptools import setup, find_packages
 import sys, os
 
 version = '0.3'
@@ -54,24 +54,24 @@ setup(
     author_email='kj.tanaka@gmail.com',
     url='https://github.com/cloudmesh/teefaa',
     license='Apache 2.0',
-    package_dir = {'teefaa': 'src/teefaa'},
-    packages = ['teefaa'],
-    #package_dir = {'teefaa': 'src/teefaa'},
-    #packages = find_packages(exclude=[
-	    #'ez_setup',
-	    #'examples', 
-	    #'tests', 
-	    #'fabfile', 
-	    #'ymlfile', 
-	    #'private', 
-	    #'share',
-	    #]),
-    
+    package_dir = {'': 'src'},
+    packages = find_packages(exclude=[
+	    'ez_setup',
+	    'examples', 
+	    'tests', 
+	    'fabfile', 
+	    'ymlfile', 
+	    'private', 
+	    'share',
+	    ]),
     install_requires = [
-             'setuptools',
-             'pip',
-             'fabric',
-             'cuisine',
-	     'PyYAML',
-             ],
-    )
+            'setuptools',
+            'pip',
+            'fabric',
+            'cuisine',
+	    'PyYAML',
+            ],
+    entry_points="""
+    [console_scripts]
+    teefaa = teefaa.baremetal_provisioning:main
+    """,)

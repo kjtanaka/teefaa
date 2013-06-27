@@ -50,7 +50,7 @@ def bootstrap(hostname, imagename):
     bp.install_bootloader()
 
 @task
-def osprovisioning(hostname, imagename):
+def provisioning(hostname, imagename):
     ''':hostname,imagename | Provisioning'''
     env.disable_known_hosts = True
     pxeboot(hostname, 'netboot')

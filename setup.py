@@ -8,7 +8,7 @@ program is included to test the functionality. of teh virtual cluster.
 from setuptools import setup, find_packages
 import sys, os
 
-version = '0.1'
+version = '0.3'
 
 # due to a bug we are not including VERION.py yet
 # execfile('VERSION.py)
@@ -47,15 +47,23 @@ setup(
     description = doclines[0],
     classifiers = filter(None, classifiers.split("\n")),
     long_description = "\n".join(doclines[2:]),
-    keywords='FutureGrid teefa',
+    keywords='Cloudmesh Teefaa',
     maintainer='Koji Tanaka, Javier Diaz, Gregor von Laszewski',
     maintainer_email="kj.tanaka@gmail.com",
     author='Koji Tanaka',
     author_email='kj.tanaka@gmail.com',
-    url='https://github.com/futuregrid/teefaa',
+    url='https://github.com/cloudmesh/teefaa',
     license='Apache 2.0',
-    package_dir = {'': 'src'},
-    packages = find_packages(exclude=['ez_setup', 'examples', 'tests']),
+    package_dir = {'src': 'teefaa'},
+    packages = find_packages(exclude=[
+	    'ez_setup',
+	    'examples', 
+	    'tests', 
+	    'fabfile', 
+	    'ymlfile', 
+	    'private', 
+	    'share',
+	    ]),
     
     #include_package_data=True,
     #zip_safe=True,
@@ -74,5 +82,6 @@ setup(
              'pip',
              'fabric',
              'cuisine',
+	     'PyYAML',
              ],
     )

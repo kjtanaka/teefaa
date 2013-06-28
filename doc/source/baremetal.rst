@@ -18,5 +18,5 @@ Command::
     fab baremetal.provisioning:<host>,<image>
 
 This will install the <image> on the <host>. To make it work,
-you have to set the <host> on [ymlfile/baremetal/hosts.yml]<https://github.com/cloudmesh/teefaa/blob/master/ymlfile/baremetal/hosts.yml-example>, and 
+you have to set the <host> on :ref:`ymlfile/baremetal/hosts.yml <https://github.com/cloudmesh/teefaa/blob/master/ymlfile/baremetal/hosts.yml-example>`, and 
 the <image> on ymlfile/baremetal/images.yml .

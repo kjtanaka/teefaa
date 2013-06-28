@@ -24,7 +24,11 @@ Welcome to Cloudmesh Teefaa!
 Cloudmesh Teefaa is a set of deployment scripts for System Provisioning(includes 
 Baremetal Provisioning). Which is designed as simple, flexible, programable and 
 collaboratable so that users/developers can build, test and appreciate new Open 
-Source Technologies as quickly as possible.
+Source Technologies as quickly as possible. So we hope that will happen to you soon.
+
+
+Requirements
+------------
 
 FG Teefaa requires(/thanks to):
 
@@ -39,15 +43,14 @@ FG Teefaa requires(/thanks to):
 * Bittorrent Sync (for high-speed multiple Baremetal Provisioning)
 * Torque Resource Manager (for scheduing Baremetal Provisioning)
 
-The goal of FG Teefaa is to provide the scripts and methods to easily provision Destributed
-System on baremetal/virtual hosts on multiple sites.
 
-Design
-------
+Simple Design
+-------------
 
-* Scripts are written in Fabric
-* Configuration files are written in YAML.
-* Each scripts has three types of directories as shown below. ::
+* Scripts for handling Shell commands are written in Fabric and Cuisine.
+* Configuration files are written in YAML format. One of the goals of Teefaa 
+  is to make it understandable by reading the YAML files.
+* Each scripts has four types of directories as shown below. ::
 
     |-- fabfile/EXAMPLE.py
     |-- ymlfile/EXAMPLE

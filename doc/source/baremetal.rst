@@ -7,7 +7,7 @@
     alt="Fork me on GitHub"></a>
 
 
-Baremetal provisioning tool
+Baremetal
 ==============================
 
 baremetal.provisioning

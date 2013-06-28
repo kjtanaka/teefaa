@@ -29,7 +29,7 @@ gregor:
 	git config --global user.email laszewski@gmail.com
 
 git-ssh:
-	git remote set-url origin git@github.com:futuregrid/$(BASENAME).git
+	git remote set-url origin git@github.com:cloudmesh/$(BASENAME).git
 
 
 ######################################################################

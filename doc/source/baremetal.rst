@@ -19,4 +19,4 @@ Command::
 
 This will install the <image> on the <host>. To make it work,
 you have to set the <host> on ymlfile/baremetal/hosts.yml, and 
-the <image> on ymlfile/baremetal/images.yml .
+the <image> on ymlfile/baremetal/images.yml . test.

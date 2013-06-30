@@ -34,7 +34,10 @@ def bootstrap(hostname, imagename):
 
     if image['os'] == 'centos6' or \
             image['os'] == 'redhat6':
-        bp = BaremetalProvisioningRedHat(host, image)
+        bp = BaremetalProvisioningRedHat6(host, image)
+    elif image['os'] == 'centos5' or \
+            image['os'] == 'redhat5':
+        bp = BaremetalProvisioningRedHat5(host, image)
     elif image['os'] == 'ubuntu12' or \
             image['os'] == 'ubuntu13':
         bp = BaremetalProvisioningUbuntu(host, image)
@@ -114,9 +117,21 @@ class BaremetalProvisioning:
         package_ensure('xfsprogs')
         run('mkswap %s%s' % (self.device, pnum))
         pnum += 1
-        run('mkfs.%s %s%s' % (self.system['type'], self.device, pnum))
+        if self.system['type'] == 'ext3' or \
+                self.system['type'] == 'ext4':
+            run('mkfs.%s %s%s' % (self.system['type'], self.device, pnum))
+        else:
+            print "%s is not supported for system partition" % self.system['type']
+            exit(1)
         pnum += 1
-        run('mkfs.%s -f %s%s' % (self.data['type'], self.device, pnum))
+        if self.data['type'] == 'ext3' or \
+                self.system['type'] == 'ext4':
+            run('mkfs.%s %s%s' % (self.data['type'], self.device, pnum))
+        elif self.data['type'] == 'xfs':
+            run('mkfs.%s -f %s%s' % (self.data['type'], self.device, pnum))
+        else:
+            print "%s is not supported for data partition" % self.data['type']
+            exit(1)
 
     def mountfs(self):
         '''Mount Filesystem'''
@@ -190,7 +205,7 @@ class BaremetalProvisioning:
         #files.sed('/BTsync/btsync.conf', 'DEVNAME', self.host)
         run('/BTsync/btsync --config /BTsync/btsync.conf')
 
-class BaremetalProvisioningRedHat(BaremetalProvisioning):
+class BaremetalProvisioningRedHat6(BaremetalProvisioning):
     
     def __init__(self, host, image):
         BaremetalProvisioning.__init__(self, host, image)
@@ -221,6 +236,9 @@ class BaremetalProvisioningRedHat(BaremetalProvisioning):
                 files.sed('/mnt/boot/grub/grub.conf', 'DEVICE%s' % b, 'DEVICE%s' % a)
         files.sed('/mnt/etc/fstab', 'DEVICE', self.device)
         files.sed('/mnt/etc/mtab', 'DEVICE', self.device)
+        if self.image['fstab_append']:
+            for item in self.image['fstab_append_list']:
+                files.append('/mnt/etc/fstab', item)
         put(share_dir() + '/etc/selinux/config', '/mnt/etc/selinux/config')
         run('rm -f /mnt/etc/udev/rules.d/70-persistent-net.rules')
         run('rm -f /mnt/etc/sysconfig/network-scripts/ifcfg-eth*')
@@ -285,7 +303,25 @@ class BaremetalProvisioningRedHat(BaremetalProvisioning):
         run('sync')
         run('reboot')
 
-    
+class BaremetalProvisioningRedHat5(BaremetalProvisioningRedHat6):
+
+    def __init__(self, host, image):
+        BaremetalProvisioning.__init__(self, host, image)
+
+    def install_bootloader(self):
+        '''Install Grub'''
+        run('mount -t proc proc /mnt/proc')
+        run('mount -t sysfs sys /mnt/sys')
+        run('mount -o bind /dev /mnt/dev')
+        if self.image['rootpass'] == "reset":
+            run('chroot /mnt usermod -p \'\' root')
+            run('chroot /mnt chage -d 0 root')
+        elif self.image['rootpass'] == "delete":
+            run('chroot /mnt passwd --delete root')
+        run('grub-install --root-directory=/mnt %s' % self.device)
+        run('sync')
+        run('reboot')
+
 class BaremetalProvisioningUbuntu(BaremetalProvisioning):
 
     def __init__(self, host, image):
@@ -315,6 +351,9 @@ class BaremetalProvisioningUbuntu(BaremetalProvisioning):
                 files.sed('/mnt/etc/mtab', 'DEVICE%s' % b, 'DEVICE%s' % a)
         files.sed('/mnt/etc/fstab', 'DEVICE', self.device)
         files.sed('/mnt/etc/mtab', 'DEVICE', self.device)
+        if self.image['fstab_append']:
+            for item in self.image['fstab_append_list']:
+                files.append('/mnt/etc/fstab', item)
         run('rm -f /mnt/etc/udev/rules.d/70-persistent-net.rules')
         # Disable ssh password login
         files.sed('/mnt/etc/ssh/sshd_config', 'PasswordAuthentication yes', 'PasswordAuthentication no')

@@ -71,12 +71,12 @@ class BaremetalProvisioning:
     def __init__(self, host, image):
         self.host = host
         self.image = image
-        self.device = host['disk']['device']
-        self.swap = host['disk']['partitions']['swap']
-        self.system = host['disk']['partitions']['system']
-        self.data = host['disk']['partitions']['data']
+        self.device = image['disk']['device']
+        self.swap = image['disk']['partitions']['swap']
+        self.system = image['disk']['partitions']['system']
+        self.data = image['disk']['partitions']['data']
         self.scheme = image['partition_scheme']
-        self.bootloader = image['bootloader']
+        self.bootloader = image['boot']['bootloader']
     
     def partitioning(self):
         '''partitioning'''
@@ -125,7 +125,7 @@ class BaremetalProvisioning:
             exit(1)
         pnum += 1
         if self.data['type'] == 'ext3' or \
-                self.system['type'] == 'ext4':
+                self.data['type'] == 'ext4':
             run('mkfs.%s %s%s' % (self.data['type'], self.device, pnum))
         elif self.data['type'] == 'xfs':
             run('mkfs.%s -f %s%s' % (self.data['type'], self.device, pnum))
@@ -215,8 +215,15 @@ class BaremetalProvisioningRedHat6(BaremetalProvisioning):
         # Update fstab, mtab, selinux and udev/rules
         put(share_dir() + '/etc/fstab.' + self.image['os'], '/mnt/etc/fstab')
         put(share_dir() + '/etc/mtab.' + self.image['os'], '/mnt/etc/mtab')
-        put(share_dir() + '/boot/grub/grub.conf.' + self.image['os'], '/mnt/boot/grub/grub.conf')
-        data = self.host['disk']['partitions']['data']
+        if self.image['boot']['kernel_type'] == 'kernel':
+            put(share_dir() + '/boot/grub/grub.conf.' + self.image['os'], '/mnt/boot/grub/grub.conf')
+        elif self.image['boot']['kernel_type'] == 'kernel-xen':
+            put(share_dir() + '/boot/grub/grub.conf.' + self.image['os'] + '.xen', '/mnt/boot/grub/grub.conf')
+            files.sed('/mnt/boot/grub/grub.conf', 'MODULE', self.image['boot']['module'])
+        else:
+            print "ERROR: kernel_type %s is not supported."
+            exit(1)
+        data = self.data
         if data['mount']:
             if data['type'] == 'xfs':
                 files.append('/mnt/etc/fstab', \
@@ -247,8 +254,8 @@ class BaremetalProvisioningRedHat6(BaremetalProvisioning):
         files.sed('/mnt/etc/ssh/sshd_config', 'PasswordAuthentication yes', 'PasswordAuthentication no')
         files.uncomment('/mnt/etc/ssh/sshd_config', 'PasswordAuthentication no')
         # Update Grub Configuration
-        files.sed('/mnt/boot/grub/grub.conf', 'KERNEL', self.image['kernel'])
-        files.sed('/mnt/boot/grub/grub.conf', 'RAMDISK', self.image['ramdisk'])
+        files.sed('/mnt/boot/grub/grub.conf', 'KERNEL', self.image['boot']['kernel'])
+        files.sed('/mnt/boot/grub/grub.conf', 'RAMDISK', self.image['boot']['ramdisk'])
         files.sed('/mnt/boot/grub/grub.conf', 'OSNAME', self.image['os'])
         files.sed('/mnt/boot/grub/grub.conf', 'DEVICE', self.device)
         # Update Hostname
@@ -332,7 +339,7 @@ class BaremetalProvisioningUbuntu(BaremetalProvisioning):
         # Update fstab, mtab, selinux and udev/rules
         put(share_dir() + '/etc/fstab.' + self.image['os'], '/mnt/etc/fstab')
         put(share_dir() + '/etc/mtab.' + self.image['os'], '/mnt/etc/mtab')
-        data = self.host['disk']['partitions']['data']
+        data = self.data
         if data['mount']:
             if data['type'] == 'xfs':
                 files.append('/mnt/etc/fstab', \
@@ -545,13 +552,13 @@ def hello():
     run('ls -la')
 
 @task
-def imagelist():
-    '''| Show Image List'''
-    images = read_ymlfile('images.yml')
+def list(item):
+    ''':[hosts/images]| Show Image List'''
+    cfg = read_ymlfile(item + '.yml')
     
     no = 1
-    for image in images:
-        print "%s. %s" % (no, image)
+    for i in cfg:
+        print "%s. %s" % (no, i)
         no += 1
 
 @task

@@ -26,11 +26,8 @@ def bootstrap(hostname, imagename):
         print 'So add the option \"--user root\"'
         exit(1)
 
-    hosts = read_ymlfile('hosts.yml')
-    images = read_ymlfile('images.yml')
-
-    image = images[imagename]
-    host = hosts[env.host_string]
+    host = read_ymlfile('hosts/%s.yml' % hostname)
+    image = read_ymlfile('images/%s.yml' % imagename)
 
     if image['os'] == 'centos6' or \
             image['os'] == 'redhat6':

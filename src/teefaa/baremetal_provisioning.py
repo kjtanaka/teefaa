@@ -26,7 +26,7 @@ import time
 import ConfigParser
 import argparse
 import string
-from fabric.api import execute
+from fabric.api import *
 from fabric.contrib import *
 
 def baremetal_provisioning(hostname, imagename):

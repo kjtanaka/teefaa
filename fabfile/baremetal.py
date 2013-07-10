@@ -191,6 +191,10 @@ class BaremetalProvisioning:
                 print "Extension %s is not supported." % self.image['extension']
                 exit(1)
             run('rm -f %s' % local)
+
+    def file_sed(self, filename, old, new):
+
+        file_update(filename, lambda x: text_replace_line(x, old, new)[0])
     
     def make_btsync_seed(self):
         ''':hostname,btcfg,btsync | Make a seed of Bittorrent Sync'''
@@ -199,7 +203,7 @@ class BaremetalProvisioning:
             run('mkdir -p /BTsync/image')
         put(btcfg, '/BTsync/btsync.conf')
         put(btsync, '/BTsync/btsync', mode=755)
-        #files.sed('/BTsync/btsync.conf', 'DEVNAME', self.host)
+        #self.file_sed('/BTsync/btsync.conf', 'DEVNAME', self.host)
         run('/BTsync/btsync --config /BTsync/btsync.conf')
 
 class BaremetalProvisioningRedHat6(BaremetalProvisioning):
@@ -216,7 +220,7 @@ class BaremetalProvisioningRedHat6(BaremetalProvisioning):
             put(share_dir() + '/boot/grub/grub.conf.' + self.image['os'], '/mnt/boot/grub/grub.conf')
         elif self.image['boot']['kernel_type'] == 'kernel-xen':
             put(share_dir() + '/boot/grub/grub.conf.' + self.image['os'] + '.xen', '/mnt/boot/grub/grub.conf')
-            files.sed('/mnt/boot/grub/grub.conf', 'MODULE', self.image['boot']['module'])
+            self.file_sed('/mnt/boot/grub/grub.conf', 'MODULE', self.image['boot']['module'])
         else:
             print "ERROR: kernel_type %s is not supported."
             exit(1)
@@ -235,11 +239,11 @@ class BaremetalProvisioningRedHat6(BaremetalProvisioning):
         if self.scheme == 'gpt':
             for a in 4,3,2:
                 b = a - 1
-                files.sed('/mnt/etc/fstab', 'DEVICE%s' % b, 'DEVICE%s' % a)
-                files.sed('/mnt/etc/mtab', 'DEVICE%s' % b, 'DEVICE%s' % a)
-                files.sed('/mnt/boot/grub/grub.conf', 'DEVICE%s' % b, 'DEVICE%s' % a)
-        files.sed('/mnt/etc/fstab', 'DEVICE', self.device)
-        files.sed('/mnt/etc/mtab', 'DEVICE', self.device)
+                self.file_sed('/mnt/etc/fstab', 'DEVICE%s' % b, 'DEVICE%s' % a)
+                self.file_sed('/mnt/etc/mtab', 'DEVICE%s' % b, 'DEVICE%s' % a)
+                self.file_sed('/mnt/boot/grub/grub.conf', 'DEVICE%s' % b, 'DEVICE%s' % a)
+        self.file_sed('/mnt/etc/fstab', 'DEVICE', self.device)
+        self.file_sed('/mnt/etc/mtab', 'DEVICE', self.device)
         if self.image['fstab_append']:
             for item in self.image['fstab_append_list']:
                 file_append('/mnt/etc/fstab', item)
@@ -248,13 +252,13 @@ class BaremetalProvisioningRedHat6(BaremetalProvisioning):
         run('rm -f /mnt/etc/sysconfig/network-scripts/ifcfg-eth*')
         run('rm -f /mnt/etc/sysconfig/network-scripts/ifcfg-ib*')
         # Disable ssh password login
-        files.sed('/mnt/etc/ssh/sshd_config', 'PasswordAuthentication yes', 'PasswordAuthentication no')
-        files.uncomment('/mnt/etc/ssh/sshd_config', 'PasswordAuthentication no')
+        self.file_sed('/mnt/etc/ssh/sshd_config', 'PasswordAuthentication yes', 'PasswordAuthentication no')
+        self.file_sed('/mnt/etc/ssh/sshd_config', '#PasswordAuthentication no', 'PasswordAuthentication no')
         # Update Grub Configuration
-        files.sed('/mnt/boot/grub/grub.conf', 'KERNEL', self.image['boot']['kernel'])
-        files.sed('/mnt/boot/grub/grub.conf', 'RAMDISK', self.image['boot']['ramdisk'])
-        files.sed('/mnt/boot/grub/grub.conf', 'OSNAME', self.image['os'])
-        files.sed('/mnt/boot/grub/grub.conf', 'DEVICE', self.device)
+        self.file_sed('/mnt/boot/grub/grub.conf', 'KERNEL', self.image['boot']['kernel'])
+        self.file_sed('/mnt/boot/grub/grub.conf', 'RAMDISK', self.image['boot']['ramdisk'])
+        self.file_sed('/mnt/boot/grub/grub.conf', 'OSNAME', self.image['os'])
+        self.file_sed('/mnt/boot/grub/grub.conf', 'DEVICE', self.device)
         # Update Hostname
         file = '/mnt/etc/sysconfig/network'
         run('rm -f %s' % file)
@@ -351,17 +355,17 @@ class BaremetalProvisioningUbuntu(BaremetalProvisioning):
         if self.scheme == 'gpt':
             for a in 4,3,2:
                 b = a - 1
-                files.sed('/mnt/etc/fstab', 'DEVICE%s' % b, 'DEVICE%s' % a)
-                files.sed('/mnt/etc/mtab', 'DEVICE%s' % b, 'DEVICE%s' % a)
-        files.sed('/mnt/etc/fstab', 'DEVICE', self.device)
-        files.sed('/mnt/etc/mtab', 'DEVICE', self.device)
+                self.file_sed('/mnt/etc/fstab', 'DEVICE%s' % b, 'DEVICE%s' % a)
+                self.file_sed('/mnt/etc/mtab', 'DEVICE%s' % b, 'DEVICE%s' % a)
+        self.file_sed('/mnt/etc/fstab', 'DEVICE', self.device)
+        self.file_sed('/mnt/etc/mtab', 'DEVICE', self.device)
         if self.image['fstab_append']:
             for item in self.image['fstab_append_list']:
                 file_append('/mnt/etc/fstab', item)
         run('rm -f /mnt/etc/udev/rules.d/70-persistent-net.rules')
         # Disable ssh password login
-        files.sed('/mnt/etc/ssh/sshd_config', 'PasswordAuthentication yes', 'PasswordAuthentication no')
-        files.uncomment('/mnt/etc/ssh/sshd_config', 'PasswordAuthentication no')
+        self.file_sed('/mnt/etc/ssh/sshd_config', 'PasswordAuthentication yes', 'PasswordAuthentication no')
+        self.file_sed('/mnt/etc/ssh/sshd_config', '#PasswordAuthentication no', 'PasswordAuthentication no')
         # Disable cloud-init
         for file in [
                 '/mnt/etc/init/cloud-config.conf',
@@ -434,7 +438,7 @@ def make_btsync_seed(hostname, btcfg, btsync):
         run('mkdir -p /BTsync/image')
     put(btcfg, '/BTsync/btsync.conf')
     put(btsync, '/BTsync/btsync', mode=755)
-    files.sed('/BTsync/btsync.conf', 'DEVNAME', hostname)
+    self.file_sed('/BTsync/btsync.conf', 'DEVNAME', hostname)
     run('/BTsync/btsync --config /BTsync/btsync.conf')
 
 @task
@@ -508,9 +512,9 @@ def make_pxeimage(pxename):
                 % (expdir, pxename, tftpdir, pxename))
     pxefile = '%s/%s' % (prefix['pxelinux_cfg'], pxename)
     put('live/pxefile', pxefile)
-    files.sed(pxefile, 'PXENAME', pxename)
-    files.sed(pxefile, 'EXPDIR', expdir)
-    files.sed(pxefile, 'PXESERVER', pxecfg['nfs_ip'])
+    self.file_sed(pxefile, 'PXENAME', pxename)
+    self.file_sed(pxefile, 'EXPDIR', expdir)
+    self.file_sed(pxefile, 'PXESERVER', pxecfg['nfs_ip'])
 
 @task
 def mksnapshot(name, saveto):

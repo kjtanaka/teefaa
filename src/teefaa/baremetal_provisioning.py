@@ -33,7 +33,10 @@ def call_fabfile_baremetal_provisioning(hostname, imagename):
     cfg = ConfigParser.SafeConfigParser()
     cfg.read(os.path.expanduser(cfgfile))
 
-    print cfg.get('fabric', 'path_to_fabfile')
+    sys.path.append(cfg.get('fabric', 'path_to_fabfile'))
+    import baremetal
+
+    execute('baremetal.hello', hosts=['i2'])
 
 def main():
     call_fabfile_baremetal_provisioning('host1', 'image1')

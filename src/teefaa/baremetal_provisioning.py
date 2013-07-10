@@ -26,7 +26,7 @@ import time
 import ConfigParser
 import argparse
 import string
-
+from fabric.api import execute
 
 def call_fabfile_baremetal_provisioning(hostname, imagename):
     cfgfile = '~/.teefaa/teefaa.conf'

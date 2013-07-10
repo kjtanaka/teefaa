@@ -138,7 +138,7 @@ class BaremetalProvisioning:
         run('swapon %s%s' % (self.device, pnum))
         pnum += 1
         run('mount %s%s /mnt' % (self.device, pnum))
-        if not files.exists('/mnt%s' % self.data['mount']):
+        if not file_exists('/mnt%s' % self.data['mount']):
             run('mkdir -p /mnt%s' % self.data['mount'])
         pnum += 1
         run('mount %s%s /mnt%s' % (self.device, pnum, self.data['mount']))
@@ -164,7 +164,7 @@ class BaremetalProvisioning:
             run("ln -s /mnt/BTsync /BTsync")
             self.make_btsync_seed()
             count = 0
-            while not files.exists(self.image['osimage']):
+            while not file_exists(self.image['osimage']):
                 time.sleep(30)
                 print "Waiting for the image to be ready... %s/20" % count
                 count += 1
@@ -177,7 +177,7 @@ class BaremetalProvisioning:
             exit(1)
     
         if not method == "rsync":
-            if not files.exists(mount):
+            if not file_exists(mount):
                 run('mkdir -p %s' % mount)
             if self.image['extension'] == "tar.gz":
                 run('tar zxvf %s -C /mnt' % local)
@@ -284,7 +284,7 @@ class BaremetalProvisioningRedHat6(BaremetalProvisioning):
     
         # Update Authorized Keys
         if self.host['update_keys']:
-            if not files.exists('/mnt/root/.ssh'):
+            if not file_exists('/mnt/root/.ssh'):
                 run('mkdir -p /mnt/root/.ssh')
                 run('chmod 700 /mnt/root/.ssh')
             file = '/mnt/root/.ssh/authorized_keys'
@@ -402,7 +402,7 @@ class BaremetalProvisioningUbuntu(BaremetalProvisioning):
         run('ssh-keygen -t rsa -N "" -f /mnt/etc/ssh/ssh_host_rsa_key')
         # Update authorized_keys.
         if self.host['update_keys']:
-            if not files.exists('/mnt/root/.ssh'):
+            if not file_exists('/mnt/root/.ssh'):
                 run('mkdir -p /mnt/root/.ssh')
                 run('chmod 700 /mnt/root/.ssh')
             file = '/mnt/root/.ssh/authorized_keys'

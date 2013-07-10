@@ -27,6 +27,7 @@ import ConfigParser
 import argparse
 import string
 from fabric.api import execute
+from fabric.contrib import *
 
 def baremetal_provisioning(hostname, imagename):
     cfgfile = '~/.teefaa/teefaa.conf'

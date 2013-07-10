@@ -12,6 +12,7 @@ import datetime
 from platform import dist
 from fabric.api import *
 from fabric.contrib import *
+from fabric.contrib.files import *
 from cuisine import *
 from system import power, pxeboot, wait_till_ping, wait_till_ssh
 
@@ -203,7 +204,7 @@ class BaremetalProvisioning:
             run('mkdir -p /BTsync/image')
         put(btcfg, '/BTsync/btsync.conf')
         put(btsync, '/BTsync/btsync', mode=755)
-        #self.file_sed('/BTsync/btsync.conf', 'DEVNAME', self.host)
+        #sed('/BTsync/btsync.conf', 'DEVNAME', self.host)
         run('/BTsync/btsync --config /BTsync/btsync.conf')
 
 class BaremetalProvisioningRedHat6(BaremetalProvisioning):
@@ -220,7 +221,7 @@ class BaremetalProvisioningRedHat6(BaremetalProvisioning):
             put(share_dir() + '/boot/grub/grub.conf.' + self.image['os'], '/mnt/boot/grub/grub.conf')
         elif self.image['boot']['kernel_type'] == 'kernel-xen':
             put(share_dir() + '/boot/grub/grub.conf.' + self.image['os'] + '.xen', '/mnt/boot/grub/grub.conf')
-            self.file_sed('/mnt/boot/grub/grub.conf', 'MODULE', self.image['boot']['module'])
+            sed('/mnt/boot/grub/grub.conf', 'MODULE', self.image['boot']['module'])
         else:
             print "ERROR: kernel_type %s is not supported."
             exit(1)
@@ -239,11 +240,11 @@ class BaremetalProvisioningRedHat6(BaremetalProvisioning):
         if self.scheme == 'gpt':
             for a in 4,3,2:
                 b = a - 1
-                self.file_sed('/mnt/etc/fstab', 'DEVICE%s' % b, 'DEVICE%s' % a)
-                self.file_sed('/mnt/etc/mtab', 'DEVICE%s' % b, 'DEVICE%s' % a)
-                self.file_sed('/mnt/boot/grub/grub.conf', 'DEVICE%s' % b, 'DEVICE%s' % a)
-        self.file_sed('/mnt/etc/fstab', 'DEVICE', self.device)
-        self.file_sed('/mnt/etc/mtab', 'DEVICE', self.device)
+                sed('/mnt/etc/fstab', 'DEVICE%s' % b, 'DEVICE%s' % a)
+                sed('/mnt/etc/mtab', 'DEVICE%s' % b, 'DEVICE%s' % a)
+                sed('/mnt/boot/grub/grub.conf', 'DEVICE%s' % b, 'DEVICE%s' % a)
+        sed('/mnt/etc/fstab', 'DEVICE', self.device)
+        sed('/mnt/etc/mtab', 'DEVICE', self.device)
         if self.image['fstab_append']:
             for item in self.image['fstab_append_list']:
                 file_append('/mnt/etc/fstab', item)
@@ -252,13 +253,13 @@ class BaremetalProvisioningRedHat6(BaremetalProvisioning):
         run('rm -f /mnt/etc/sysconfig/network-scripts/ifcfg-eth*')
         run('rm -f /mnt/etc/sysconfig/network-scripts/ifcfg-ib*')
         # Disable ssh password login
-        self.file_sed('/mnt/etc/ssh/sshd_config', 'PasswordAuthentication yes', 'PasswordAuthentication no')
-        self.file_sed('/mnt/etc/ssh/sshd_config', '#PasswordAuthentication no', 'PasswordAuthentication no')
+        sed('/mnt/etc/ssh/sshd_config', 'PasswordAuthentication yes', 'PasswordAuthentication no')
+        sed('/mnt/etc/ssh/sshd_config', '#PasswordAuthentication no', 'PasswordAuthentication no')
         # Update Grub Configuration
-        self.file_sed('/mnt/boot/grub/grub.conf', 'KERNEL', self.image['boot']['kernel'])
-        self.file_sed('/mnt/boot/grub/grub.conf', 'RAMDISK', self.image['boot']['ramdisk'])
-        self.file_sed('/mnt/boot/grub/grub.conf', 'OSNAME', self.image['os'])
-        self.file_sed('/mnt/boot/grub/grub.conf', 'DEVICE', self.device)
+        sed('/mnt/boot/grub/grub.conf', 'KERNEL', self.image['boot']['kernel'])
+        sed('/mnt/boot/grub/grub.conf', 'RAMDISK', self.image['boot']['ramdisk'])
+        sed('/mnt/boot/grub/grub.conf', 'OSNAME', self.image['os'])
+        sed('/mnt/boot/grub/grub.conf', 'DEVICE', self.device)
         # Update Hostname
         file = '/mnt/etc/sysconfig/network'
         run('rm -f %s' % file)
@@ -355,17 +356,17 @@ class BaremetalProvisioningUbuntu(BaremetalProvisioning):
         if self.scheme == 'gpt':
             for a in 4,3,2:
                 b = a - 1
-                self.file_sed('/mnt/etc/fstab', 'DEVICE%s' % b, 'DEVICE%s' % a)
-                self.file_sed('/mnt/etc/mtab', 'DEVICE%s' % b, 'DEVICE%s' % a)
-        self.file_sed('/mnt/etc/fstab', 'DEVICE', self.device)
-        self.file_sed('/mnt/etc/mtab', 'DEVICE', self.device)
+                sed('/mnt/etc/fstab', 'DEVICE%s' % b, 'DEVICE%s' % a)
+                sed('/mnt/etc/mtab', 'DEVICE%s' % b, 'DEVICE%s' % a)
+        sed('/mnt/etc/fstab', 'DEVICE', self.device)
+        sed('/mnt/etc/mtab', 'DEVICE', self.device)
         if self.image['fstab_append']:
             for item in self.image['fstab_append_list']:
                 file_append('/mnt/etc/fstab', item)
         run('rm -f /mnt/etc/udev/rules.d/70-persistent-net.rules')
         # Disable ssh password login
-        self.file_sed('/mnt/etc/ssh/sshd_config', 'PasswordAuthentication yes', 'PasswordAuthentication no')
-        self.file_sed('/mnt/etc/ssh/sshd_config', '#PasswordAuthentication no', 'PasswordAuthentication no')
+        sed('/mnt/etc/ssh/sshd_config', 'PasswordAuthentication yes', 'PasswordAuthentication no')
+        sed('/mnt/etc/ssh/sshd_config', '#PasswordAuthentication no', 'PasswordAuthentication no')
         # Disable cloud-init
         for file in [
                 '/mnt/etc/init/cloud-config.conf',
@@ -438,7 +439,7 @@ def make_btsync_seed(hostname, btcfg, btsync):
         run('mkdir -p /BTsync/image')
     put(btcfg, '/BTsync/btsync.conf')
     put(btsync, '/BTsync/btsync', mode=755)
-    self.file_sed('/BTsync/btsync.conf', 'DEVNAME', hostname)
+    sed('/BTsync/btsync.conf', 'DEVNAME', hostname)
     run('/BTsync/btsync --config /BTsync/btsync.conf')
 
 @task
@@ -512,9 +513,9 @@ def make_pxeimage(pxename):
                 % (expdir, pxename, tftpdir, pxename))
     pxefile = '%s/%s' % (prefix['pxelinux_cfg'], pxename)
     put('live/pxefile', pxefile)
-    self.file_sed(pxefile, 'PXENAME', pxename)
-    self.file_sed(pxefile, 'EXPDIR', expdir)
-    self.file_sed(pxefile, 'PXESERVER', pxecfg['nfs_ip'])
+    sed(pxefile, 'PXENAME', pxename)
+    sed(pxefile, 'EXPDIR', expdir)
+    sed(pxefile, 'PXESERVER', pxecfg['nfs_ip'])
 
 @task
 def mksnapshot(name, saveto):

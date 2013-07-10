@@ -223,11 +223,11 @@ class BaremetalProvisioningRedHat6(BaremetalProvisioning):
         data = self.data
         if data['mount']:
             if data['type'] == 'xfs':
-                files.append('/mnt/etc/fstab', \
+                file_append('/mnt/etc/fstab', \
                         'DEVICE3 %s xfs defaults,noatime 0 0' % data['mount'])
             elif data['type'] == 'ext4' or \
                     data['type'] == 'ext3':
-                files.append('/mnt/etc/fstab', \
+                file_append('/mnt/etc/fstab', \
                         'DEVICE3 %s %s defaults 0 0' % (data['mount'], data['type']))
             else:
                 print "ERROR: system type %s is not supported." % data['type']
@@ -242,7 +242,7 @@ class BaremetalProvisioningRedHat6(BaremetalProvisioning):
         files.sed('/mnt/etc/mtab', 'DEVICE', self.device)
         if self.image['fstab_append']:
             for item in self.image['fstab_append_list']:
-                files.append('/mnt/etc/fstab', item)
+                file_append('/mnt/etc/fstab', item)
         put(share_dir() + '/etc/selinux/config', '/mnt/etc/selinux/config')
         run('rm -f /mnt/etc/udev/rules.d/70-persistent-net.rules')
         run('rm -f /mnt/etc/sysconfig/network-scripts/ifcfg-eth*')
@@ -258,24 +258,24 @@ class BaremetalProvisioningRedHat6(BaremetalProvisioning):
         # Update Hostname
         file = '/mnt/etc/sysconfig/network'
         run('rm -f %s' % file)
-        files.append(file, 'HOSTNAME=%s' % self.host['hostname'])
-        files.append(file, 'NETWORKING=yes')
+        file_append(file, 'HOSTNAME=%s' % self.host['hostname'])
+        file_append(file, 'NETWORKING=yes')
         # Update Network Interfaces
         for iface in self.host['network']:
             iface_conf = self.host['network'][iface]
             file = '/mnt/etc/sysconfig/network-scripts/ifcfg-%s' % iface
             #run('rm -f %s' % file)
-            files.append(file, 'DEVICE=%s' % iface)
-            files.append(file, 'BOOTPROTO=%s' % iface_conf['bootproto'])
-            files.append(file, 'ONBOOT=%s' % iface_conf['onboot'])
+            file_append(file, 'DEVICE=%s' % iface)
+            file_append(file, 'BOOTPROTO=%s' % iface_conf['bootproto'])
+            file_append(file, 'ONBOOT=%s' % iface_conf['onboot'])
             if iface_conf['bootproto'] == 'dhcp':
                 pass
             elif iface_conf['bootproto'] == 'static' or \
                     iface_conf['bootproto'] == 'none':
-                files.append(file, 'IPADDR=%s' % iface_conf['ipaddr'])
-                files.append(file, 'NETMASK=%s' % iface_conf['netmask'])
+                file_append(file, 'IPADDR=%s' % iface_conf['ipaddr'])
+                file_append(file, 'NETMASK=%s' % iface_conf['netmask'])
                 if iface_conf['gateway']:
-                    files.append(file, 'GATEWAY=%s' % iface_conf['gateway'])
+                    file_append(file, 'GATEWAY=%s' % iface_conf['gateway'])
             else:
                 print "ERROR: bootproto = %s is not supported."
                 exit(1)
@@ -290,7 +290,7 @@ class BaremetalProvisioningRedHat6(BaremetalProvisioning):
             file = '/mnt/root/.ssh/authorized_keys'
             run('rm -f %s' % file)
             for key in self.host['pubkeys']:
-                files.append(file, '%s' % self.host['pubkeys'][key])
+                file_append(file, '%s' % self.host['pubkeys'][key])
             run('chmod 640 %s' % file)
 
     def install_bootloader(self):
@@ -339,11 +339,11 @@ class BaremetalProvisioningUbuntu(BaremetalProvisioning):
         data = self.data
         if data['mount']:
             if data['type'] == 'xfs':
-                files.append('/mnt/etc/fstab', \
+                file_append('/mnt/etc/fstab', \
                         'DEVICE3 %s xfs defaults,noatime 0 0' % data['mount'])
             elif data['type'] == 'ext4' or \
                     data['type'] == 'ext3':
-                files.append('/mnt/etc/fstab', \
+                file_append('/mnt/etc/fstab', \
                         'DEVICE3 %s %s defaults 0 0' % (data['mount'], data['type']))
             else:
                 print "ERROR: system type %s is not supported." % data['type']
@@ -357,7 +357,7 @@ class BaremetalProvisioningUbuntu(BaremetalProvisioning):
         files.sed('/mnt/etc/mtab', 'DEVICE', self.device)
         if self.image['fstab_append']:
             for item in self.image['fstab_append_list']:
-                files.append('/mnt/etc/fstab', item)
+                file_append('/mnt/etc/fstab', item)
         run('rm -f /mnt/etc/udev/rules.d/70-persistent-net.rules')
         # Disable ssh password login
         files.sed('/mnt/etc/ssh/sshd_config', 'PasswordAuthentication yes', 'PasswordAuthentication no')
@@ -377,26 +377,26 @@ class BaremetalProvisioningUbuntu(BaremetalProvisioning):
         # Update hostname
         file = '/mnt/etc/hostname'
         run('rm -f %s' % file)
-        files.append(file, '%s' % self.host['hostname'])
+        file_append(file, '%s' % self.host['hostname'])
         # Update network interface
         file = '/mnt/etc/network/interfaces'
         run('rm -f %s' % file)
-        files.append(file, 'auto lo')
-        files.append(file, 'iface lo inet loopback')
+        file_append(file, 'auto lo')
+        file_append(file, 'iface lo inet loopback')
         for iface in self.host['network']:
             iface_conf = self.host['network'][iface]
-            files.append(file, '# Interface %s' % iface)
-            files.append(file, 'auto %s' % iface)
-            files.append(file, 'iface %s inet %s' % (iface, iface_conf['bootproto']))
+            file_append(file, '# Interface %s' % iface)
+            file_append(file, 'auto %s' % iface)
+            file_append(file, 'iface %s inet %s' % (iface, iface_conf['bootproto']))
             if iface_conf['bootproto'] == 'dhcp':
                 pass
             elif iface_conf['bootproto'] == 'static':
-                files.append(file, 'address %s' % iface_conf['ipaddr'])
-                files.append(file, 'netmask %s' % iface_conf['netmask'])
+                file_append(file, 'address %s' % iface_conf['ipaddr'])
+                file_append(file, 'netmask %s' % iface_conf['netmask'])
                 if iface_conf['gateway']:
-                    files.append(file, 'gateway %s' % iface_conf['gateway'])
+                    file_append(file, 'gateway %s' % iface_conf['gateway'])
                 if iface_conf['nameserver']:
-                    files.append(file, 'dns-nameservers %s' % iface_conf['nameserver'])
+                    file_append(file, 'dns-nameservers %s' % iface_conf['nameserver'])
         # Generate ssh host key if it doesn't exist.
         run('rm -f /mnt/etc/ssh/ssh_host_*')    
         run('ssh-keygen -t rsa -N "" -f /mnt/etc/ssh/ssh_host_rsa_key')
@@ -408,7 +408,7 @@ class BaremetalProvisioningUbuntu(BaremetalProvisioning):
             file = '/mnt/root/.ssh/authorized_keys'
             run('rm -f %s' % file)
             for key in self.host['pubkeys']:
-                files.append(file, '%s' % self.host['pubkeys'][key])
+                file_append(file, '%s' % self.host['pubkeys'][key])
             run('chmod 640 %s' % file)
     
     def install_bootloader(self):
@@ -469,7 +469,7 @@ def make_livecd(livecd_name, livecd_cfg='ymlfile/scratch/livecd.yml'):
     run('chroot /tmp/rootimg ssh-keygen -t dsa -N "" -C "ssh_host_dsa_key" -f /etc/ssh/ssh_host_dsa_key')
     file = '/tmp/rootimg/root/.ssh/authorized_keys'
     for key in livecd['pubkeys']:
-        files.append(file, '%s' % livecd['pubkeys'][key])
+        file_append(file, '%s' % livecd['pubkeys'][key])
     run('chmod 640 %s' % file)
     run('umount /tmp/rootimg/proc /tmp/rootimg/sys /tmp/rootimg/dev')
     run('mksquashfs /tmp/rootimg /tmp/imgdir/live/filesystem.squashfs -noappend')

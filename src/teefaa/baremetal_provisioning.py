@@ -36,11 +36,11 @@ def baremetal_provisioning(hostname, imagename):
     sys.path.append(cfg.get('fabric', 'path_to_fabfile'))
     import baremetal
 
-    execute(baremetal.hello, hostname)
+    execute(baremetal.provisioning, hostname, imagename)
     print imagename
 
 def main():
-    baremetal_provisioning('i2', 'image1')
+    baremetal_provisioning('i2', 'india_openstack_v1')
 
 if __name__ == "__main__":
     main()

@@ -31,8 +31,9 @@ import string
 def call_fabfile_baremetal_provisioning(hostname, imagename):
     cfgfile = '~/.teefaa/teefaa.conf'
     cfg = ConfigParser.SafeConfigParser()
-    print os.path.expanduser(cfgfile)
-    #cfg.read(os.path.expanduser(cfgfile))
+    cfg.read(os.path.expanduser(cfgfile))
+
+    print cfg.get('fabric', 'path_to_fabfile')
 
 def main():
     call_fabfile_baremetal_provisioning('host1', 'image1')

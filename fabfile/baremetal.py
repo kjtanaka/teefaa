@@ -543,8 +543,9 @@ def mksnapshot(name, saveto):
     run('rm -f /tmp/%s-%s.squashfs' % (name, today()))
 
 @task
-def hello():
+def hello(hostname):
     '''-  Check if remote hosts are reachable.'''
+    env.host_string = hostname
     run('hostname')
     run('ls -la')
 

@@ -36,7 +36,7 @@ def baremetal_provisioning(hostname, imagename):
     sys.path.append(cfg.get('fabric', 'path_to_fabfile'))
     import baremetal
 
-    execute(baremetal.hello, hosts=['i2'])
+    execute(baremetal.hello, 'i2')
 
 def main():
     baremetal_provisioning('host1', 'image1')

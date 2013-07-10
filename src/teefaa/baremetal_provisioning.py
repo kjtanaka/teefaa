@@ -27,10 +27,12 @@ import ConfigParser
 import argparse
 import string
 
-defaultconfigfile = "teefaa.conf"
 
 def call_fabfile_baremetal_provisioning(hostname, imagename):
-    print 'this is a test'
+    cfgfile = '~/.teefaa/teefaa.conf'
+    cfg = ConfigParser.SafeConfigParser()
+    print os.path.expanduser(cfgfile)
+    #cfg.read(os.path.expanduser(cfgfile))
 
 def main():
     call_fabfile_baremetal_provisioning('host1', 'image1')

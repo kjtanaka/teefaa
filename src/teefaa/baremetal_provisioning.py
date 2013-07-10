@@ -28,7 +28,7 @@ import argparse
 import string
 from fabric.api import execute
 
-def call_fabfile_baremetal_provisioning(hostname, imagename):
+def baremetal_provisioning(hostname, imagename):
     cfgfile = '~/.teefaa/teefaa.conf'
     cfg = ConfigParser.SafeConfigParser()
     cfg.read(os.path.expanduser(cfgfile))
@@ -39,7 +39,7 @@ def call_fabfile_baremetal_provisioning(hostname, imagename):
     execute(baremetal.hello, hosts=['i2'])
 
 def main():
-    call_fabfile_baremetal_provisioning('host1', 'image1')
+    baremetal_provisioning('host1', 'image1')
 
 if __name__ == "__main__":
     main()

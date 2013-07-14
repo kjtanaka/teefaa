@@ -73,5 +73,5 @@ setup(
             ],
     entry_points="""
     [console_scripts]
-    teefaa = teefaa.baremetal_provisioning:main
+    teefaa = teefaa.api:main
     """,)

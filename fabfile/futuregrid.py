@@ -19,11 +19,12 @@ def check_state(node_prefix, start, end):
     for node in nodes:
         state[node] = {}
     execute(_check_each_state, state, hosts=nodes)
-    for node in nodes:
-        print node + ":"
-        print "    state: " + state[node]['state']
-        print "    partition: " + state[node]['partition']
+    #for node in nodes:
+    #    print node + ":"
+    #    print "    state: " + state[node]['state']
+    #    print "    partition: " + state[node]['partition']
 
+@parallel
 def _check_each_state(state):
 
     env.warn_only = True

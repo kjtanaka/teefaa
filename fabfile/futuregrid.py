@@ -32,11 +32,8 @@ def _check_each_state(state):
         state[env.host]['state'] = 'Down'
         state[env.host]['partition'] = 'Unknown'
     else:
-        with settings(parallel = True):
-            state[env.host]['state'] = 'Up'
-            if file_exists('/etc/fg-release'):
-                state[env.host]['partition'] = run('cat /etc/fg-release')
-            else:
-                state[env.host]['partition'] = run('echo UNKNOWN')
-
-    return state
+        state[env.host]['state'] = 'Up'
+        if file_exists('/etc/init.d/eucalyptus-nc'):
+            state[env.host]['partition'] = 'Eucalyptus'
+        else:
+            state[env.host]['partition'] = 'Unknown'

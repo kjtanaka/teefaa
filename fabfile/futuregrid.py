@@ -18,6 +18,8 @@ def _check_each_state():
 
     run('hostname')
     if file_exists('/etc/fg-release'):
-        run('cat /etc/fg-release')
+        fg_release = run('cat /etc/fg-release')
     else:
-        run('echo unknown partition')
+        fg_release = run('echo unknown partition')
+
+    print "fg-release: %s" % fg_release

@@ -27,6 +27,7 @@ def check_state(node_prefix, start, end):
 
 def _check_each_state(state):
 
+    env.disable_known_hosts = True
     env.warn_only = True
     if local("ping -c 1 -W 1 %s" % env.host).failed:
         state[env.host]['state'] = 'Down'

@@ -12,7 +12,7 @@ from cuisine import *
 def check_state(node_prefix, start, end):
 
     nodes = []
-    for a in range(start, end):
+    for a in range(int(start), int(end)):
         nodes.append(node_prefix + a)
     print nodes
     #state = {}

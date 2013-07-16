@@ -18,11 +18,15 @@ def check_state(nodes):
     execute(_check_each_state, state, hosts=nodes)
     for node in nodes:
         print node + ":"
+        print "    state: " + state[node]['state']
         print "    partition: " + state[node]['partition']
 
 def _check_each_state(state):
 
-    run('hostname')
+    if local("ping -c 1 -W 1 %s" % env.host).failed:
+        state[env.host]['state'] = 'Down'
+    else:
+        state[env.host]['state'] = 'Up'
     if file_exists('/etc/fg-release'):
         state[env.host]['partition'] = run('cat /etc/fg-release')
     else:

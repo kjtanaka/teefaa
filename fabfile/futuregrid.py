@@ -7,6 +7,7 @@
 from fabric.api import *
 from fabric.contrib import *
 from cuisine import *
+import yaml
 
 @task
 def check_state(node_prefix, start, end):
@@ -19,11 +20,8 @@ def check_state(node_prefix, start, end):
     for node in nodes:
         state[node] = {}
     execute(_check_each_state, state, hosts=nodes)
-    print state
-    for node in nodes:
-        print node + ":"
-        print "    state: " + state[node]['state']
-        print "    partition: " + state[node]['partition']
+    ymlfile = file('private/futuregrid/nodes.yml', 'w')
+    yaml.dump(state, ymlfile)
 
 def _check_each_state(state):
 

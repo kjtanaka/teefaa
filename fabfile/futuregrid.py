@@ -6,8 +6,10 @@
 
 from fabric.api import *
 from fabric.contrib import *
+from cuisine import *
 
 @task
 def check_state(nodes):
 
-    print nodes.strip().split('/')
+    nodes = nodes.strip().split('/')
+    execute(run, 'hostname', hosts=nodes)

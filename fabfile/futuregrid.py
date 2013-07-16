@@ -13,7 +13,7 @@ import yaml
 def check_state(node_prefix, start, end):
 
     nodes = []
-    for a in range(int(start), int(end)+1 ):
+    for a in range(int(start), int(end)+1):
         nodes.append(node_prefix + str(a))
     print nodes
     state = {}
@@ -21,7 +21,7 @@ def check_state(node_prefix, start, end):
         state[node] = {}
     execute(_check_each_state, state, hosts=nodes)
     ymlfile = file('private/futuregrid/nodes.yml', 'w')
-    yaml.dump(state, ymlfile)
+    yaml.dump(state, ymlfile, default_flow_style=False)
 
 def _check_each_state(state):
 

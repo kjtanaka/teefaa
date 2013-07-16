@@ -15,14 +15,14 @@ def check_state(node_prefix, start, end):
     for a in range(int(start), int(end)+1 ):
         nodes.append(node_prefix + str(a))
     print nodes
-    #state = {}
-    #for node in nodes:
-    #    state[node] = {}
-    #execute(_check_each_state, state, hosts=nodes)
-    #for node in nodes:
-    #    print node + ":"
-    #    print "    state: " + state[node]['state']
-    #    print "    partition: " + state[node]['partition']
+    state = {}
+    for node in nodes:
+        state[node] = {}
+    execute(_check_each_state, state, hosts=nodes)
+    for node in nodes:
+        print node + ":"
+        print "    state: " + state[node]['state']
+        print "    partition: " + state[node]['partition']
 
 def _check_each_state(state):
 

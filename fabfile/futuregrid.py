@@ -13,6 +13,8 @@ def check_state(nodes):
 
     nodes = nodes.strip().split('/')
     state = {}
+    for node in nodes:
+        state[node] = {}
     execute(_check_each_state, state, hosts=nodes)
     for node in nodes:
         print node + ":"
@@ -24,6 +26,4 @@ def _check_each_state(state):
     if file_exists('/etc/fg-release'):
         state[env.host]['partition'] = run('cat /etc/fg-release')
     else:
-        state[env.host]['partition'] = run('echo unknown partition')
-
-    print "fg-release: %s" % fg_release
+        state[env.host]['partition'] = run('echo UNKNOWN')

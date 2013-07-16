@@ -10,4 +10,4 @@ from fabric.contrib import *
 @task
 def check_state(nodes):
 
-    print nodes
+    print nodes.strip().split('/')

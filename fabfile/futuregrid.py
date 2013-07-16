@@ -21,6 +21,7 @@ def check_state(nodes):
     #    print "    state: " + state[node]['state']
     #    print "    partition: " + state[node]['partition']
 
+@parallel
 def _check_each_state(state):
 
     env.warn_only = True

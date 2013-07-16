@@ -12,4 +12,12 @@ from cuisine import *
 def check_state(nodes):
 
     nodes = nodes.strip().split('/')
-    execute(run, 'hostname', hosts=nodes)
+    execute(_check_each_state, hosts=nodes)
+
+def _check_each_state():
+
+    run('hostname')
+    if file_exists('/etc/fg-release'):
+        local('cat /etc/fg-release')
+    else:
+        local('echo unknown partition')

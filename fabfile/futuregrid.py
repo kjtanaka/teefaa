@@ -21,7 +21,6 @@ def check_state(nodes):
         print "    state: " + state[node]['state']
         print "    partition: " + state[node]['partition']
 
-@parallel
 def _check_each_state(state):
 
     env.warn_only = True
@@ -29,8 +28,9 @@ def _check_each_state(state):
         state[env.host]['state'] = 'Down'
         state[env.host]['partition'] = 'Unknown'
     else:
-        state[env.host]['state'] = 'Up'
-        if file_exists('/etc/fg-release'):
-            state[env.host]['partition'] = run('cat /etc/fg-release')
-        else:
-            state[env.host]['partition'] = run('echo UNKNOWN')
+        with settings(parallel = True):
+            state[env.host]['state'] = 'Up'
+            if file_exists('/etc/fg-release'):
+                state[env.host]['partition'] = run('cat /etc/fg-release')
+            else:
+                state[env.host]['partition'] = run('echo UNKNOWN')

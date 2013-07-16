@@ -18,7 +18,8 @@ def check_state(node_prefix, start, end):
     state = {}
     for node in nodes:
         state[node] = {}
-    execute(_check_each_state, state, hosts=nodes)
+    state = execute(_check_each_state, state, hosts=nodes)
+    print state
     #for node in nodes:
     #    print node + ":"
     #    print "    state: " + state[node]['state']
@@ -38,3 +39,5 @@ def _check_each_state(state):
                 state[env.host]['partition'] = run('cat /etc/fg-release')
             else:
                 state[env.host]['partition'] = run('echo UNKNOWN')
+
+    return state

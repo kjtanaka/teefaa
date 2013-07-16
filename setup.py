@@ -1,77 +1,23 @@
-"""FutureGrid: Creating a SLURM virtual Cluster via euca2tools
+#!/usr/bin/env python
+# -------------------------------------------------------------------------- #
+# Copyright 2010-2011, Indiana University                                    #
+#                                                                            #
+# Licensed under the Apache License, Version 2.0 (the "License"); you may    #
+# not use this file except in compliance with the License. You may obtain    #
+# a copy of the License at                                                   #
+#                                                                            #
+# http://www.apache.org/licenses/LICENSE-2.0                                 #
+#                                                                            #
+# Unless required by applicable law or agreed to in writing, software        #
+# distributed under the License is distributed on an "AS IS" BASIS,          #
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.   #
+# See the License for the specific language governing permissions and        #
+# limitations under the License.                                             #
+# -------------------------------------------------------------------------- #
+import setuptools
 
-This project creates a virtual cluster with the help of euca
-tools. The cluster uses SLURM as resource manager. A simple MPI
-program is included to test the functionality. of teh virtual cluster.
-"""
+setuptools.setup(
+    setup_requires=['d2to1', 'pbr>=0.5,<0.6'],
+    d2to1=True)
 
-from setuptools import setup, find_packages
-import sys, os
-
-version = '0.3'
-
-# due to a bug we are not including VERION.py yet
-# execfile('VERSION.py)
-
-classifiers = """\
-Intended Audience :: Developers
-Intended Audience :: Education
-Intended Audience :: Science/Research
-Development Status :: 4 - Beta
-Intended Audience :: Developers
-License :: OSI Approved :: Apache Software License
-Programming Language :: Python
-Topic :: Database
-Topic :: Software Development :: Libraries :: Python Modules
-Operating System :: POSIX :: Linux
-Programming Language :: Python :: 2.7
-Operating System :: MacOS :: MacOS X
-Topic :: Scientific/Engineering
-Topic :: System :: Clustering
-Topic :: System :: Distributed Computing
-"""
-
-if sys.version_info < (2, 7):
-    _setup = setup
-    def setup(**kwargs):
-        if kwargs.has_key("classifiers"):
-            del kwargs["classifiers"]
-        _setup(**kwargs)
-
-doclines = __doc__.split("\n")
-
-
-setup(
-    name='teefaa',
-    version=version,
-    description = doclines[0],
-    classifiers = filter(None, classifiers.split("\n")),
-    long_description = "\n".join(doclines[2:]),
-    keywords='Cloudmesh Teefaa',
-    maintainer='Koji Tanaka, Javier Diaz, Gregor von Laszewski',
-    maintainer_email="kj.tanaka@gmail.com",
-    author='Koji Tanaka',
-    author_email='kj.tanaka@gmail.com',
-    url='https://github.com/cloudmesh/teefaa',
-    license='Apache 2.0',
-    package_dir = {'': 'src'},
-    packages = find_packages(exclude=[
-	    'ez_setup',
-	    'examples', 
-	    'tests', 
-	    'fabfile', 
-	    'ymlfile', 
-	    'private', 
-	    'share',
-	    ]),
-    install_requires = [
-            'setuptools',
-            'pip',
-            'fabric',
-            'cuisine',
-	    'PyYAML',
-            ],
-    entry_points="""
-    [console_scripts]
-    teefaa = teefaa.api:main
-    """,)
+    #    version='#:')

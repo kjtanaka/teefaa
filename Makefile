@@ -38,9 +38,9 @@ git-ssh:
 dist:
 	make -f Makefile pip
 
-pip:
+sdist:
 	make -f Makefile clean
-	python setup.py sdist
+	python setup.py sdist --format=bztar
 
 
 force:

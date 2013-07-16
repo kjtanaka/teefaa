@@ -18,7 +18,7 @@ def check_state(node_prefix, start, end):
     state = {}
     for node in nodes:
         state[node] = {}
-    state = execute(_check_each_state, state, hosts=nodes)
+    execute(_check_each_state, state, hosts=nodes)
     print state
     #for node in nodes:
     #    print node + ":"

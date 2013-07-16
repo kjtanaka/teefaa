@@ -25,9 +25,10 @@ def _check_each_state(state):
 
     if local("ping -c 1 -W 1 %s" % env.host).failed:
         state[env.host]['state'] = 'Down'
+        state[env.host]['partition'] = 'Unknown'
     else:
         state[env.host]['state'] = 'Up'
-    if file_exists('/etc/fg-release'):
-        state[env.host]['partition'] = run('cat /etc/fg-release')
-    else:
-        state[env.host]['partition'] = run('echo UNKNOWN')
+        if file_exists('/etc/fg-release'):
+            state[env.host]['partition'] = run('cat /etc/fg-release')
+        else:
+            state[env.host]['partition'] = run('echo UNKNOWN')

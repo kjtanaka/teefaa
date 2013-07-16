@@ -8,20 +8,22 @@ from fabric.api import *
 from fabric.contrib import *
 from cuisine import *
 import yaml
+from hostlist import expand_hostlist
 
 @task
-def check_state(node_prefix, start, end):
+def check_state(noderegex):
 
-    nodes = []
-    for a in range(int(start), int(end)+1):
-        nodes.append(node_prefix + str(a))
-    print nodes
-    state = {}
-    for node in nodes:
-        state[node] = {}
-    execute(_check_each_state, state, hosts=nodes)
-    ymlfile = file('private/futuregrid/nodes.yml', 'w')
-    yaml.dump(state, ymlfile, default_flow_style=False)
+    # tricks from gregor
+    
+    filename = 'private/futuregrid/nodes.yml'
+    names = expand_hostlist(noderegex)
+
+    state = dict.fromkeys(names, {})
+
+    print state
+    #execute(_check_each_state, state, hosts=nodes)
+    #ymlfile = fil(filename, 'w')
+    #yaml.dump(state, ymlfile, default_flow_style=False)
 
 def _check_each_state(state):
 

@@ -34,6 +34,10 @@ def _check_each_state(state):
     else:
         state[env.host]['state'] = 'Up'
         if file_exists('/etc/init.d/eucalyptus-nc'):
-            state[env.host]['partition'] = 'Eucalyptus'
+            state[env.host]['partition'] = 'euca-nc'
+        elif file_exists('/etc/init.d/pbs_mom'):
+            state[env.host]['partition'] = 'hpc-compute'
+        elif file_exists('/etc/init.d/nova-compute'):
+            state[env.host]['partition'] = 'nova-compute'
         else:
             state[env.host]['partition'] = 'Unknown'

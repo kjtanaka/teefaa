@@ -18,6 +18,6 @@ def _check_each_state():
 
     run('hostname')
     if file_exists('/etc/fg-release'):
-        local('cat /etc/fg-release')
+        run('cat /etc/fg-release')
     else:
-        local('echo unknown partition')
+        run('echo unknown partition')

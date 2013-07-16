@@ -9,17 +9,20 @@ from fabric.contrib import *
 from cuisine import *
 
 @task
-def check_state(nodes):
+def check_state(node_prefix, start, end):
 
-    nodes = nodes.strip().split('/')
-    state = {}
-    for node in nodes:
-        state[node] = {}
-    execute(_check_each_state, state, hosts=nodes)
-    for node in nodes:
-        print node + ":"
-        print "    state: " + state[node]['state']
-        print "    partition: " + state[node]['partition']
+    nodes = []
+    for a in range(start, end):
+        nodes.append(node_prefix + a)
+    print nodes
+    #state = {}
+    #for node in nodes:
+    #    state[node] = {}
+    #execute(_check_each_state, state, hosts=nodes)
+    #for node in nodes:
+    #    print node + ":"
+    #    print "    state: " + state[node]['state']
+    #    print "    partition: " + state[node]['partition']
 
 def _check_each_state(state):
 

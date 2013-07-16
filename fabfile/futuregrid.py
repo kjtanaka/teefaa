@@ -24,6 +24,7 @@ def check_state(nodes):
 def _check_each_state(state):
 
     env.warn_only = True
+    env.parallel = True
     if local("ping -c 1 -W 1 %s" % env.host).failed:
         state[env.host]['state'] = 'Down'
         state[env.host]['partition'] = 'Unknown'

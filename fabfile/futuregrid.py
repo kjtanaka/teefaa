@@ -13,7 +13,7 @@ def check_state(node_prefix, start, end):
 
     nodes = []
     for a in range(int(start), int(end)):
-        nodes.append(node_prefix + a)
+        nodes.append(node_prefix + str(a))
     print nodes
     #state = {}
     #for node in nodes:

@@ -20,10 +20,10 @@ def check_state(node_prefix, start, end):
         state[node] = {}
     execute(_check_each_state, state, hosts=nodes)
     print state
-    #for node in nodes:
-    #    print node + ":"
-    #    print "    state: " + state[node]['state']
-    #    print "    partition: " + state[node]['partition']
+    for node in nodes:
+        print node + ":"
+        print "    state: " + state[node]['state']
+        print "    partition: " + state[node]['partition']
 
 def _check_each_state(state):
 

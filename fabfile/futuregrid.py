@@ -12,18 +12,30 @@ from hostlist import expand_hostlist
 
 @task
 def check_state(noderegex):
+    '''
+    call this with 
+    fab -f futuregrid.py check_state:i[0-10]
+    
+    and it creates a whole bunch of checks for each of the specified machines
+    :param noderegex:
+    '''
 
     # tricks from gregor
+    
+    #todo: in general inventory is better as it maintains the inventory in
+    #mongodb and contains a gui, commandline and API
     
     filename = 'private/futuregrid/nodes.yml'
     names = expand_hostlist(noderegex)
 
+    # end tricks from gregor
+    
     state = dict.fromkeys(names, {})
-
-    print state
-    #execute(_check_each_state, state, hosts=nodes)
-    #ymlfile = fil(filename, 'w')
-    #yaml.dump(state, ymlfile, default_flow_style=False)
+    execute(_check_each_state, state, hosts=nodes)
+    ymlfile = fil(filename, 'w')
+    yaml.dump(state, ymlfile, default_flow_style=False)
+    # this could eb better managed with the cloudmesh.inventory
+    
 
 def _check_each_state(state):
 

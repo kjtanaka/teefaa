@@ -27,22 +27,22 @@ def bootstrap(hostname, imagename):
         print 'So add the option \"--user root\"'
         exit(1)
 
-    host = read_ymlfile('hosts/%s.yml' % hostname)
-    image = read_ymlfile('images/%s.yml' % imagename)
+    host = read_ymlfile('hosts/{0}.yml'.format(hostname))
+    image = read_ymlfile('images/{0}.yml'.format(imagename))
 
-    if image['os'] == 'centos6' or \
-            image['os'] == 'redhat6':
-        bp = BaremetalProvisioningRedHat6(host, image)
-    elif image['os'] == 'centos5' or \
-            image['os'] == 'redhat5':
-        bp = BaremetalProvisioningRedHat5(host, image)
-    elif image['os'] == 'ubuntu12' or \
-            image['os'] == 'ubuntu13':
-        bp = BaremetalProvisioningUbuntu(host, image)
+    # some trick from gregor 
+    if image['os'] in ['centos6', 'redhat6']:
+        provisioner = BaremetalProvisioningRedHat6
+    elif image['os'] in ['centos5','redhat5']:
+        provisioner = BaremetalProvisioningRedHat5
+    elif image['os'] in ['ubuntu12','ubuntu13']:
+        provisioner = BaremetalProvisioningUbuntu
     else:
         print "ERROR: %s is not supported yet."
         exit(1)
+    # this allows us to use a function in the next line of code
 
+    bp = provisioner(host, image)
     bp.partitioning()
     bp.makefs()
     bp.mountfs()

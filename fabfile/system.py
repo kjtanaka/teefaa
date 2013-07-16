@@ -86,6 +86,7 @@ def backup_list():
     cfg = read_ymlfile('backup.yml')
 
     print 'Backup List:'
+    # TODO: see if code is duplicated in other fabfile
     n = 1
     for item in cfg:
         if n == 1:

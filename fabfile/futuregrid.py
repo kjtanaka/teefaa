@@ -32,7 +32,7 @@ def check_state(noderegex):
     
     state = {}
     for node in names:
-        node_state[node] = {}
+        state[node] = {}
     execute(_check_each_state, state, hosts=nodes)
     ymlfile = file(filename, 'w')
     yaml.dump(state, ymlfile, default_flow_style=False)

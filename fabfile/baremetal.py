@@ -38,7 +38,7 @@ def bootstrap(hostname, imagename):
     elif image['os'] in ['ubuntu12','ubuntu13']:
         provisioner = BaremetalProvisioningUbuntu
     else:
-        print "ERROR: %s is not supported yet."
+        print "ERROR: {0} is not supported yet.".format(image['os'])
         exit(1)
     # this allows us to use a function in the next line of code
 

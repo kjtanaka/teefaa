@@ -30,9 +30,11 @@ def check_state(noderegex):
 
     # end tricks from gregor
     
-    state = dict.fromkeys(names, {})
+    state = {}
+    for node in names:
+        node_state[node] = {}
     execute(_check_each_state, state, hosts=nodes)
-    ymlfile = fil(filename, 'w')
+    ymlfile = file(filename, 'w')
     yaml.dump(state, ymlfile, default_flow_style=False)
     # this could eb better managed with the cloudmesh.inventory
     

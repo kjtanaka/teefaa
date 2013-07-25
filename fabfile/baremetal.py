@@ -435,12 +435,12 @@ class BaremetalProvisioningUbuntu(BaremetalProvisioning):
 def make_btsync_seed(hostname, btcfg, btsync):
     ''':hostname,btcfg,btsync | Make a seed of Bittorrent Sync'''
     env.host_string = hostname
-    if not file_is_dir('/BTsync/image'):
-        run('mkdir -p /BTsync/image')
-    put(btcfg, '/BTsync/btsync.conf')
-    put(btsync, '/BTsync/btsync', mode=755)
-    sed('/BTsync/btsync.conf', 'DEVNAME', hostname)
-    run('/BTsync/btsync --config /BTsync/btsync.conf')
+    if not file_exists('/BTsync/image'):
+        sudo('mkdir -p /BTsync/image')
+    put(btcfg, '/BTsync/btsync.conf', use_sudo=True)
+    put(btsync, '/BTsync/btsync', use_sudo=True, mode=755)
+    sed('/BTsync/btsync.conf', 'DEVNAME', hostname, use_sudo=True)
+    sudo('/BTsync/btsync --config /BTsync/btsync.conf', use_sudo=True)
 
 @task
 def make_livecd(livecd_name, livecd_cfg='ymlfile/scratch/livecd.yml'):

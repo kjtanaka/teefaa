@@ -8,7 +8,7 @@ from fabric.api import *
 from fabric.contrib import *
 from cuisine import *
 import yaml
-from hostlist import expand_hostlist
+#from hostlist import expand_hostlist
 
 @task
 def check_state(noderegex):

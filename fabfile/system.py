@@ -31,6 +31,18 @@ def users_force_resetpass(group):
             run('chage -d 0 %s' % user)
 
 @task
+def users_en_sudo(group):
+    ''':group | enable sudo'''
+    users = read_ymlfile('users.yml')[group]
+
+    file_name = '/etc/sudoers'
+    file_ensure(file_name, mode=640)
+    for user in users:
+        with mode_sudo():
+            file_append('/etc/sudoers', '{0}    ALL=(ALL:ALL) ALL'.format(user))
+    file_ensure(file_name, mode=440)
+
+@task
 def users_ensure(group):
     ''':group=XXXXX | Ensure Users exists'''
     users = read_ymlfile('users.yml')[group]

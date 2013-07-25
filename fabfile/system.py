@@ -39,7 +39,7 @@ def users_en_sudo(group):
     file_ensure(file_name, mode=640)
     for user in users:
         with mode_sudo():
-            file_append('/etc/sudoers', '{0}    ALL=(ALL:ALL) ALL'.format(user))
+            file_append('/etc/sudoers', '{0}    ALL=(ALL:ALL) ALL\n'.format(user))
     file_ensure(file_name, mode=440)
 
 @task

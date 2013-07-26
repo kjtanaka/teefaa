@@ -78,8 +78,8 @@ class BaremetalProvisioning:
     
     def partitioning(self):
         '''partitioning'''
-        run('aptitude update')
-        package_ensure('parted')
+        #run('aptitude update')
+        #package_ensure('parted')
         if self.scheme == 'mbr':
             run('parted %s --script -- mklabel msdos' % self.device)
             run('parted %s --script -- unit MB' % self.device)
@@ -112,7 +112,7 @@ class BaremetalProvisioning:
         pnum = 1
         if self.scheme == 'gpt':
             pnum += 1
-        package_ensure('xfsprogs')
+        #package_ensure('xfsprogs')
         run('mkswap %s%s' % (self.device, pnum))
         pnum += 1
         if self.system['type'] == 'ext3' or \

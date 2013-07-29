@@ -148,7 +148,7 @@ def _backup_squashfs(cfg, item):
 @task
 def pxeboot(hostname, boottype):
     ''':hostname,[localboot/netboot/show/list] - utility for pxeboot'''
-    pxecfg = read_ymlfile('{}.yml'.format(hostname))
+    pxecfg = read_ymlfile('{}.yml'.format(hostname))['pxe']
     env.host_string = pxecfg['ssh_server']
     env.user = pxecfg['ssh_user']
 

@@ -148,15 +148,15 @@ def _backup_squashfs(cfg, item):
 @task
 def pxeboot(hostname, boottype):
     ''':hostname,[localboot/netboot/show/list] - utility for pxeboot'''
-    pxecfg = read_ymlfile('pxecfg.yml')[hostname]
-    env.host_string = pxecfg['server']
-    env.user = pxecfg['user']
+    pxecfg = read_ymlfile('{}.yml'.format(hostname))
+    env.host_string = pxecfg['ssh_server']
+    env.user = pxecfg['ssh_user']
 
-    hostcfg = '%s/%s' % (pxecfg['pxeprefix'], hostname)
+    hostcfg = '%s/%s' % (pxecfg['pxe_prefix'], hostname)
 
     with hide('running', 'stdout'):
         test = file_exists(hostcfg)
-    if not test:
+    if not file_exists(hostcfg):
         print ''
         print ' ERROR: %s does not exist.' % hostcfg
         print ''
@@ -174,13 +174,13 @@ def pxeboot(hostname, boottype):
 
     if boottype == 'list':
         with hide('running', 'stdout'):
-            output = run('ls -1 %s| grep -v 01-' % pxecfg['pxeprefix'])
+            output = run('ls -1 %s| grep -v 01-' % pxecfg['pxe_prefix'])
         print ''
         print output
         print ''
         exit(0)
 
-    bootcfg = '%s/%s' % (pxecfg['pxeprefix'], boottype)
+    bootcfg = '%s/%s' % (pxecfg['pxe_prefix'], boottype)
     with hide('running', 'stdout'):
         test = file_exists(bootcfg)
     if not test:

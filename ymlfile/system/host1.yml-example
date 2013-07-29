@@ -1,0 +1,19 @@
+host1:
+    ipmi:
+        bmcaddr: '192.168.10.1'
+        user: 'username'
+        server: '192.168.1.1'
+        password: 'badpassword'
+    pxe:
+        pxeprefix: '/tftpboot/pxelinux.cfg'
+        server: '172.29.200.132'
+    backup:
+        src: 'host1:/'
+        dest: '/backups/host1/rootimg'
+        one-file-system: True
+        delete: True
+        exclude: True
+        exclude-list:
+            - 'tmp/*'
+        mksquashfs: True
+        dir_squashfs: '/backups/snapshots'

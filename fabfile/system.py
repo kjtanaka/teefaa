@@ -150,6 +150,7 @@ def pxeboot(hostname, boottype):
     ''':hostname,[localboot/netboot/show/list] - utility for pxeboot'''
     pxecfg = read_ymlfile('pxecfg.yml')[hostname]
     env.host_string = pxecfg['server']
+    env.user = pxecfg['user']
 
     hostcfg = '%s/%s' % (pxecfg['pxeprefix'], hostname)
 
@@ -198,6 +199,7 @@ def power(hostname,action):
     password = ipmicfg['password']
     bmcaddr = ipmicfg['bmcaddr']
     env.host_string = ipmicfg['server']
+    env.user = ipmicfg
 
     with hide('running', 'stdout'):
         if action == 'wait_till_on':

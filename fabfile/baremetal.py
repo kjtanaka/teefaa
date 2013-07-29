@@ -22,10 +22,11 @@ def bootstrap(hostname, imagename):
 
     env.host_string = hostname
     env.disable_known_hosts = True
-    if not env.user == 'root':
-        print 'You need to login as root for bootstrap.'
-        print 'So add the option \"--user root\"'
-        exit(1)
+    env.user = 'root'
+    #if not env.user == 'root':
+    #    print 'You need to login as root for bootstrap.'
+    #    print 'So add the option \"--user root\"'
+    #    exit(1)
 
     host = read_ymlfile('hosts/{0}.yml'.format(hostname))
     image = read_ymlfile('images/{0}.yml'.format(imagename))

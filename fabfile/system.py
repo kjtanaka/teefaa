@@ -81,9 +81,9 @@ def users_ensure(group):
                 ssh_authorize(user, key)
 
 @task
-def backup(item):
+def backup(hostname):
     ''':item=XXXXX | Backup System'''
-    cfg = read_ymlfile('backup.yml')[item]
+    cfg = read_ymlfile('{}.yml'.format(hostname))['backup']
 
     if not os.getenv('USER') == 'root':
         print 'You have to be root.'
@@ -91,20 +91,6 @@ def backup(item):
 
     _backup_rsync(cfg)
     _backup_squashfs(cfg, item)
-
-@task
-def backup_list():
-    ''':item=XXXXX | Show the list of backup'''
-    cfg = read_ymlfile('backup.yml')
-
-    print 'Backup List:'
-    # TODO: see if code is duplicated in other fabfile
-    n = 1
-    for item in cfg:
-        if n == 1:
-            print ''
-        print "    %s.  %s" % (n, item)
-        n += 1
 
 def _backup_rsync(cfg):
     '''Execute rsync'''

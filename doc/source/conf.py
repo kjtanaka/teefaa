@@ -52,7 +52,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'FutureGrid teefaa'
+project = u'Cloudmesh Teefaa'
 copyright = u'2012, Developed as part of FutureGrid by Koji Tanaka, Gregor von Laszewski, Fugang Wang, Javier Diaz'
 
 # The version info for the project you're documenting, acts as replacement for

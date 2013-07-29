@@ -18,5 +18,5 @@ The code can be downloaded from
 
 The release version can be installed via::
 
-    pip install futuregird-teefa
+    pip install futuregird-teefaa
 

@@ -194,12 +194,12 @@ def pxeboot(hostname, boottype):
 @task
 def power(hostname,action):
     ''':hostname,[on/off/status]'''
-    ipmicfg = read_ymlfile('ipmitool.yml')[hostname]
-    user = ipmicfg['user']
-    password = ipmicfg['password']
-    bmcaddr = ipmicfg['bmcaddr']
-    env.host_string = ipmicfg['server']
-    env.user = ipmicfg
+    ipmicfg = read_ymlfile('{}.yml'.format(hostname))['ipmi']
+    user = ipmicfg['ipmi_user']
+    password = ipmicfg['ipmi_pass']
+    bmcaddr = ipmicfg['bmc_addr']
+    env.host_string = ipmicfg['ssh_server']
+    env.user = ipmicfg['ssh_user']
 
     with hide('running', 'stdout'):
         if action == 'wait_till_on':
@@ -259,6 +259,7 @@ def wait_till_ping(hostname,limit=10):
 def wait_till_ssh(hostname,limit=10):
     ''':hostname,limit=10'''
     env.host_string = hostname
+    env.user = 'root'
     with settings(warn_only = True):
         counter = 0
         loop = True
@@ -279,11 +280,12 @@ def wait_till_ssh(hostname,limit=10):
 @task
 def temperature(hostname):
     ''':hostname'''
-    ipmicfg = read_ymlfile('ipmitool.yml')[hostname]
-    user = ipmicfg['user']
-    password = ipmicfg['password']
-    bmcaddr = ipmicfg['bmcaddr']
-    env.host_string = ipmicfg['server']
+    ipmicfg = read_ymlfile('{}.yml'.format(hostname))['ipmi']
+    user = ipmicfg['ipmi_user']
+    password = ipmicfg['ipmi_pass']
+    bmcaddr = ipmicfg['bmc_addr']
+    env.host_string = ipmicfg['ssh_server']
+    env.user = ipmicfg['ssh_user']
 
     with hide('running', 'stdout'):
         output = run('ipmitool -I lanplus -U %s -P %s -E -H %s sdr type temperature'

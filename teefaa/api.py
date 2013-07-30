@@ -37,8 +37,10 @@ def baremetal_provisioning(hostname, imagename):
     sys.path.append(cfg.get('fabric', 'path_to_fabfile'))
     import baremetal
 
-    execute(baremetal.provisioning, hostname, imagename)
-    print imagename
+    status = execute(baremetal.provisioning, hostname, imagename)
+    print status
+
+    return 'OK'
 
 def main():
     '''This is just a test for now.'''

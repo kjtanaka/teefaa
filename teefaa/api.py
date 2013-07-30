@@ -44,7 +44,8 @@ def baremetal_provisioning(hostname, imagename):
 
 def main():
     '''This is just a test for now.'''
-    baremetal_provisioning('i2', 'india_openstack_v1')
+    #baremetal_provisioning('i2', 'india_openstack_v1')
+    print 'just test'
 
 if __name__ == "__main__":
  main()

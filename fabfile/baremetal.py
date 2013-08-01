@@ -12,59 +12,69 @@ import datetime
 from platform import dist
 from fabric.api import *
 from fabric.contrib import *
+from fabric.contrib.files import *
 from cuisine import *
+from system import power, pxeboot, wait_till_ping, wait_till_ssh
 
 @task
-def bootstrap(host, imagename):
-    ''':host,imagename  -  Bootstrap OS'''
+def bootstrap(hostname, imagename):
+    ''':hostname,imagename  -  Bootstrap OS'''
 
-    env.host_string = host
-    if not env.user == 'root':
-        print 'You need to login as root for bootstrap.'
-        print 'So add the option \"--user root\"'
-        exit(1)
+    env.host_string = hostname
+    env.disable_known_hosts = True
+    env.user = 'root'
 
-    hosts = read_ymlfile('hosts.yml')
-    images = read_ymlfile('images.yml')
+    host = read_ymlfile('hosts/{0}.yml'.format(hostname))
+    image = read_ymlfile('images/{0}.yml'.format(imagename))
 
-    image = images[imagename]
-    host = hosts[env.host_string]
-
-    if image['os'] == 'centos6' or \
-            image['os'] == 'redhat6':
-        condition_redhat6(host, image, device, scheme)
-        bp = BaremetalProvisioningRedHat(host, image)
-    elif image['os'] == 'ubuntu12' or \
-            image['os'] == 'ubuntu13':
-        bp = BaremetalProvisioningUbuntu(host, image)
+    if image['os'] in ['centos6', 'redhat6']:
+        provisioner = BaremetalProvisioningRedHat6
+    elif image['os'] in ['centos5','redhat5']:
+        provisioner = BaremetalProvisioningRedHat5
+    elif image['os'] in ['ubuntu12','ubuntu13']:
+        provisioner = BaremetalProvisioningUbuntu
     else:
-        print "ERROR: %s is not supported yet."
+        print "ERROR: {0} is not supported yet.".format(image['os'])
         exit(1)
 
-    #bp.partitioning()
-    #bp.makefs()
-    #bp.mountfs()
-    #bp.copyimg()
-    #bp.condition()
+    bp = provisioner(host, image)
+    bp.partitioning()
+    bp.makefs()
+    bp.mountfs()
+    bp.copyimg()
+    bp.condition()
     bp.install_bootloader()
 
+@task
+def provisioning(hostname, imagename):
+    ''':hostname,imagename | Provisioning'''
+    env.disable_known_hosts = True
+    pxeboot(hostname, 'netboot')
+    power(hostname, 'off')
+    power(hostname, 'wait_till_off')
+    power(hostname, 'on')
+    power(hostname, 'wait_till_on')
+    wait_till_ping(hostname, '100')
+    wait_till_ssh(hostname, '100')
+    bootstrap(hostname, imagename)
+    pxeboot(hostname, 'localboot')
+    
 class BaremetalProvisioning:
 
     def __init__(self, host, image):
         self.host = host
         self.image = image
-        self.device = host['disk']['device']
-        self.swap = host['disk']['partitions']['swap']
-        self.system = host['disk']['partitions']['system']
-        self.data = host['disk']['partitions']['data']
+        self.device = image['disk']['device']
+        self.swap = image['disk']['partitions']['swap']
+        self.system = image['disk']['partitions']['system']
+        self.data = image['disk']['partitions']['data']
         self.scheme = image['partition_scheme']
-        self.bootloader = image['bootloader']
-
+        self.bootloader = image['boot']['bootloader']
+    
     def partitioning(self):
-        '''mbr scheme partitioning'''
-
-        run('aptitude update')
-        package_ensure('parted')
+        '''partitioning'''
+        #run('aptitude update')
+        #package_ensure('parted')
         if self.scheme == 'mbr':
             run('parted %s --script -- mklabel msdos' % self.device)
             run('parted %s --script -- unit MB' % self.device)
@@ -94,28 +104,37 @@ class BaremetalProvisioning:
 
     def makefs(self):
         '''Make Filesytem'''
-    
-        # Initialize partition number as;
         pnum = 1
         if self.scheme == 'gpt':
             pnum += 1
-        package_ensure('xfsprogs')
+        #package_ensure('xfsprogs')
         run('mkswap %s%s' % (self.device, pnum))
         pnum += 1
-        run('mkfs.%s %s%s' % (self.system['type'], self.device, pnum))
+        if self.system['type'] == 'ext3' or \
+                self.system['type'] == 'ext4':
+            run('mkfs.%s %s%s' % (self.system['type'], self.device, pnum))
+        else:
+            print "%s is not supported for system partition" % self.system['type']
+            exit(1)
         pnum += 1
-        run('mkfs.%s -f %s%s' % (self.data['type'], self.device, pnum))
+        if self.data['type'] == 'ext3' or \
+                self.data['type'] == 'ext4':
+            run('mkfs.%s %s%s' % (self.data['type'], self.device, pnum))
+        elif self.data['type'] == 'xfs':
+            run('mkfs.%s -f %s%s' % (self.data['type'], self.device, pnum))
+        else:
+            print "%s is not supported for data partition" % self.data['type']
+            exit(1)
 
     def mountfs(self):
         '''Mount Filesystem'''
-        # Initialize partition number as;
         pnum = 1
         if self.scheme == 'gpt':
             pnum += 1
         run('swapon %s%s' % (self.device, pnum))
         pnum += 1
         run('mount %s%s /mnt' % (self.device, pnum))
-        if not files.exists('/mnt%s' % self.data['mount']):
+        if not file_exists('/mnt%s' % self.data['mount']):
             run('mkdir -p /mnt%s' % self.data['mount'])
         pnum += 1
         run('mount %s%s /mnt%s' % (self.device, pnum, self.data['mount']))
@@ -139,9 +158,9 @@ class BaremetalProvisioning:
         elif method == "btsync":
             run("mkdir -p /mnt/BTsync")
             run("ln -s /mnt/BTsync /BTsync")
-            mkbtseed(self.image['btcfg'], self.image['btbin'])
+            self.make_btsync_seed()
             count = 0
-            while not files.exists(self.image['osimage']):
+            while not file_exists(self.image['osimage']):
                 time.sleep(30)
                 print "Waiting for the image to be ready... %s/20" % count
                 count += 1
@@ -154,7 +173,7 @@ class BaremetalProvisioning:
             exit(1)
     
         if not method == "rsync":
-            if not files.exists(mount):
+            if not file_exists(mount):
                 run('mkdir -p %s' % mount)
             if self.image['extension'] == "tar.gz":
                 run('tar zxvf %s -C /mnt' % local)
@@ -168,8 +187,22 @@ class BaremetalProvisioning:
                 print "Extension %s is not supported." % self.image['extension']
                 exit(1)
             run('rm -f %s' % local)
+
+    def file_sed(self, filename, old, new):
+
+        file_update(filename, lambda x: text_replace_line(x, old, new)[0])
     
-class BaremetalProvisioningRedHat(BaremetalProvisioning):
+    def make_btsync_seed(self):
+        ''':hostname,btcfg,btsync | Make a seed of Bittorrent Sync'''
+        btcfg, btsync = self.image['btcfg'], self.image['btbin']
+        if not file_is_dir('/BTsync/image'):
+            run('mkdir -p /BTsync/image')
+        put(btcfg, '/BTsync/btsync.conf')
+        put(btsync, '/BTsync/btsync', mode=755)
+        #sed('/BTsync/btsync.conf', 'DEVNAME', self.host)
+        run('/BTsync/btsync --config /BTsync/btsync.conf')
+
+class BaremetalProvisioningRedHat6(BaremetalProvisioning):
     
     def __init__(self, host, image):
         BaremetalProvisioning.__init__(self, host, image)
@@ -179,15 +212,22 @@ class BaremetalProvisioningRedHat(BaremetalProvisioning):
         # Update fstab, mtab, selinux and udev/rules
         put(share_dir() + '/etc/fstab.' + self.image['os'], '/mnt/etc/fstab')
         put(share_dir() + '/etc/mtab.' + self.image['os'], '/mnt/etc/mtab')
-        put(share_dir() + '/boot/grub/grub.conf.' + self.image['os'], '/mnt/boot/grub/grub.conf')
-        data = self.host['disk']['partitions']['data']
+        if self.image['boot']['kernel_type'] == 'kernel':
+            put(share_dir() + '/boot/grub/grub.conf.' + self.image['os'], '/mnt/boot/grub/grub.conf')
+        elif self.image['boot']['kernel_type'] == 'kernel-xen':
+            put(share_dir() + '/boot/grub/grub.conf.' + self.image['os'] + '.xen', '/mnt/boot/grub/grub.conf')
+            sed('/mnt/boot/grub/grub.conf', 'MODULE', self.image['boot']['module'])
+        else:
+            print "ERROR: kernel_type %s is not supported."
+            exit(1)
+        data = self.data
         if data['mount']:
             if data['type'] == 'xfs':
-                files.append('/mnt/etc/fstab', \
+                append('/mnt/etc/fstab', \
                         'DEVICE3 %s xfs defaults,noatime 0 0' % data['mount'])
             elif data['type'] == 'ext4' or \
                     data['type'] == 'ext3':
-                files.append('/mnt/etc/fstab', \
+                append('/mnt/etc/fstab', \
                         'DEVICE3 %s %s defaults 0 0' % (data['mount'], data['type']))
             else:
                 print "ERROR: system type %s is not supported." % data['type']
@@ -195,44 +235,47 @@ class BaremetalProvisioningRedHat(BaremetalProvisioning):
         if self.scheme == 'gpt':
             for a in 4,3,2:
                 b = a - 1
-                files.sed('/mnt/etc/fstab', 'DEVICE%s' % b, 'DEVICE%s' % a)
-                files.sed('/mnt/etc/mtab', 'DEVICE%s' % b, 'DEVICE%s' % a)
-                files.sed('/mnt/boot/grub/grub.conf', 'DEVICE%s' % b, 'DEVICE%s' % a)
-        files.sed('/mnt/etc/fstab', 'DEVICE', self.device)
-        files.sed('/mnt/etc/mtab', 'DEVICE', self.device)
+                sed('/mnt/etc/fstab', 'DEVICE%s' % b, 'DEVICE%s' % a)
+                sed('/mnt/etc/mtab', 'DEVICE%s' % b, 'DEVICE%s' % a)
+                sed('/mnt/boot/grub/grub.conf', 'DEVICE%s' % b, 'DEVICE%s' % a)
+        sed('/mnt/etc/fstab', 'DEVICE', self.device)
+        sed('/mnt/etc/mtab', 'DEVICE', self.device)
+        if self.image['fstab_append']:
+            for item in self.image['fstab_append_list']:
+                append('/mnt/etc/fstab', item)
         put(share_dir() + '/etc/selinux/config', '/mnt/etc/selinux/config')
         run('rm -f /mnt/etc/udev/rules.d/70-persistent-net.rules')
         run('rm -f /mnt/etc/sysconfig/network-scripts/ifcfg-eth*')
         run('rm -f /mnt/etc/sysconfig/network-scripts/ifcfg-ib*')
         # Disable ssh password login
-        files.sed('/mnt/etc/ssh/sshd_config', 'PasswordAuthentication yes', 'PasswordAuthentication no')
-        files.uncomment('/mnt/etc/ssh/sshd_config', 'PasswordAuthentication no')
+        sed('/mnt/etc/ssh/sshd_config', 'PasswordAuthentication yes', 'PasswordAuthentication no')
+        sed('/mnt/etc/ssh/sshd_config', '#PasswordAuthentication no', 'PasswordAuthentication no')
         # Update Grub Configuration
-        files.sed('/mnt/boot/grub/grub.conf', 'KERNEL', self.image['kernel'])
-        files.sed('/mnt/boot/grub/grub.conf', 'RAMDISK', self.image['ramdisk'])
-        files.sed('/mnt/boot/grub/grub.conf', 'OSNAME', self.image['os'])
-        files.sed('/mnt/boot/grub/grub.conf', 'DEVICE', self.device)
+        sed('/mnt/boot/grub/grub.conf', 'KERNEL', self.image['boot']['kernel'])
+        sed('/mnt/boot/grub/grub.conf', 'RAMDISK', self.image['boot']['ramdisk'])
+        sed('/mnt/boot/grub/grub.conf', 'OSNAME', self.image['os'])
+        sed('/mnt/boot/grub/grub.conf', 'DEVICE', self.device)
         # Update Hostname
         file = '/mnt/etc/sysconfig/network'
         run('rm -f %s' % file)
-        files.append(file, 'HOSTNAME=%s' % self.host['hostname'])
-        files.append(file, 'NETWORKING=yes')
+        append(file, 'HOSTNAME=%s' % self.host['hostname'])
+        append(file, 'NETWORKING=yes')
         # Update Network Interfaces
         for iface in self.host['network']:
             iface_conf = self.host['network'][iface]
             file = '/mnt/etc/sysconfig/network-scripts/ifcfg-%s' % iface
             #run('rm -f %s' % file)
-            files.append(file, 'DEVICE=%s' % iface)
-            files.append(file, 'BOOTPROTO=%s' % iface_conf['bootproto'])
-            files.append(file, 'ONBOOT=%s' % iface_conf['onboot'])
+            append(file, 'DEVICE=%s' % iface)
+            append(file, 'BOOTPROTO=%s' % iface_conf['bootproto'])
+            append(file, 'ONBOOT=%s' % iface_conf['onboot'])
             if iface_conf['bootproto'] == 'dhcp':
                 pass
             elif iface_conf['bootproto'] == 'static' or \
                     iface_conf['bootproto'] == 'none':
-                files.append(file, 'IPADDR=%s' % iface_conf['ipaddr'])
-                files.append(file, 'NETMASK=%s' % iface_conf['netmask'])
+                append(file, 'IPADDR=%s' % iface_conf['ipaddr'])
+                append(file, 'NETMASK=%s' % iface_conf['netmask'])
                 if iface_conf['gateway']:
-                    files.append(file, 'GATEWAY=%s' % iface_conf['gateway'])
+                    append(file, 'GATEWAY=%s' % iface_conf['gateway'])
             else:
                 print "ERROR: bootproto = %s is not supported."
                 exit(1)
@@ -241,13 +284,13 @@ class BaremetalProvisioningRedHat(BaremetalProvisioning):
     
         # Update Authorized Keys
         if self.host['update_keys']:
-            if not files.exists('/mnt/root/.ssh'):
+            if not file_exists('/mnt/root/.ssh'):
                 run('mkdir -p /mnt/root/.ssh')
                 run('chmod 700 /mnt/root/.ssh')
             file = '/mnt/root/.ssh/authorized_keys'
             run('rm -f %s' % file)
             for key in self.host['pubkeys']:
-                files.append(file, '%s' % self.host['pubkeys'][key])
+                append(file, '%s' % self.host['pubkeys'][key])
             run('chmod 640 %s' % file)
 
     def install_bootloader(self):
@@ -264,7 +307,25 @@ class BaremetalProvisioningRedHat(BaremetalProvisioning):
         run('sync')
         run('reboot')
 
-    
+class BaremetalProvisioningRedHat5(BaremetalProvisioningRedHat6):
+
+    def __init__(self, host, image):
+        BaremetalProvisioning.__init__(self, host, image)
+
+    def install_bootloader(self):
+        '''Install Grub'''
+        run('mount -t proc proc /mnt/proc')
+        run('mount -t sysfs sys /mnt/sys')
+        run('mount -o bind /dev /mnt/dev')
+        if self.image['rootpass'] == "reset":
+            run('chroot /mnt usermod -p \'\' root')
+            run('chroot /mnt chage -d 0 root')
+        elif self.image['rootpass'] == "delete":
+            run('chroot /mnt passwd --delete root')
+        run('grub-install --root-directory=/mnt %s' % self.device)
+        run('sync')
+        run('reboot')
+
 class BaremetalProvisioningUbuntu(BaremetalProvisioning):
 
     def __init__(self, host, image):
@@ -275,14 +336,14 @@ class BaremetalProvisioningUbuntu(BaremetalProvisioning):
         # Update fstab, mtab, selinux and udev/rules
         put(share_dir() + '/etc/fstab.' + self.image['os'], '/mnt/etc/fstab')
         put(share_dir() + '/etc/mtab.' + self.image['os'], '/mnt/etc/mtab')
-        data = self.host['disk']['partitions']['data']
+        data = self.data
         if data['mount']:
             if data['type'] == 'xfs':
-                files.append('/mnt/etc/fstab', \
+                append('/mnt/etc/fstab', \
                         'DEVICE3 %s xfs defaults,noatime 0 0' % data['mount'])
             elif data['type'] == 'ext4' or \
                     data['type'] == 'ext3':
-                files.append('/mnt/etc/fstab', \
+                append('/mnt/etc/fstab', \
                         'DEVICE3 %s %s defaults 0 0' % (data['mount'], data['type']))
             else:
                 print "ERROR: system type %s is not supported." % data['type']
@@ -290,14 +351,17 @@ class BaremetalProvisioningUbuntu(BaremetalProvisioning):
         if self.scheme == 'gpt':
             for a in 4,3,2:
                 b = a - 1
-                files.sed('/mnt/etc/fstab', 'DEVICE%s' % b, 'DEVICE%s' % a)
-                files.sed('/mnt/etc/mtab', 'DEVICE%s' % b, 'DEVICE%s' % a)
-        files.sed('/mnt/etc/fstab', 'DEVICE', self.device)
-        files.sed('/mnt/etc/mtab', 'DEVICE', self.device)
+                sed('/mnt/etc/fstab', 'DEVICE%s' % b, 'DEVICE%s' % a)
+                sed('/mnt/etc/mtab', 'DEVICE%s' % b, 'DEVICE%s' % a)
+        sed('/mnt/etc/fstab', 'DEVICE', self.device)
+        sed('/mnt/etc/mtab', 'DEVICE', self.device)
+        if self.image['fstab_append']:
+            for item in self.image['fstab_append_list']:
+                append('/mnt/etc/fstab', item)
         run('rm -f /mnt/etc/udev/rules.d/70-persistent-net.rules')
         # Disable ssh password login
-        files.sed('/mnt/etc/ssh/sshd_config', 'PasswordAuthentication yes', 'PasswordAuthentication no')
-        files.uncomment('/mnt/etc/ssh/sshd_config', 'PasswordAuthentication no')
+        sed('/mnt/etc/ssh/sshd_config', 'PasswordAuthentication yes', 'PasswordAuthentication no')
+        sed('/mnt/etc/ssh/sshd_config', '#PasswordAuthentication no', 'PasswordAuthentication no')
         # Disable cloud-init
         for file in [
                 '/mnt/etc/init/cloud-config.conf',
@@ -313,38 +377,38 @@ class BaremetalProvisioningUbuntu(BaremetalProvisioning):
         # Update hostname
         file = '/mnt/etc/hostname'
         run('rm -f %s' % file)
-        files.append(file, '%s' % self.host['hostname'])
+        append(file, '%s' % self.host['hostname'])
         # Update network interface
         file = '/mnt/etc/network/interfaces'
         run('rm -f %s' % file)
-        files.append(file, 'auto lo')
-        files.append(file, 'iface lo inet loopback')
+        append(file, 'auto lo')
+        append(file, 'iface lo inet loopback')
         for iface in self.host['network']:
             iface_conf = self.host['network'][iface]
-            files.append(file, '# Interface %s' % iface)
-            files.append(file, 'auto %s' % iface)
-            files.append(file, 'iface %s inet %s' % (iface, iface_conf['bootproto']))
+            append(file, '# Interface %s' % iface)
+            append(file, 'auto %s' % iface)
+            append(file, 'iface %s inet %s' % (iface, iface_conf['bootproto']))
             if iface_conf['bootproto'] == 'dhcp':
                 pass
             elif iface_conf['bootproto'] == 'static':
-                files.append(file, 'address %s' % iface_conf['ipaddr'])
-                files.append(file, 'netmask %s' % iface_conf['netmask'])
+                append(file, 'address %s' % iface_conf['ipaddr'])
+                append(file, 'netmask %s' % iface_conf['netmask'])
                 if iface_conf['gateway']:
-                    files.append(file, 'gateway %s' % iface_conf['gateway'])
+                    append(file, 'gateway %s' % iface_conf['gateway'])
                 if iface_conf['nameserver']:
-                    files.append(file, 'dns-nameservers %s' % iface_conf['nameserver'])
+                    append(file, 'dns-nameservers %s' % iface_conf['nameserver'])
         # Generate ssh host key if it doesn't exist.
         run('rm -f /mnt/etc/ssh/ssh_host_*')    
         run('ssh-keygen -t rsa -N "" -f /mnt/etc/ssh/ssh_host_rsa_key')
         # Update authorized_keys.
         if self.host['update_keys']:
-            if not files.exists('/mnt/root/.ssh'):
+            if not file_exists('/mnt/root/.ssh'):
                 run('mkdir -p /mnt/root/.ssh')
                 run('chmod 700 /mnt/root/.ssh')
             file = '/mnt/root/.ssh/authorized_keys'
             run('rm -f %s' % file)
             for key in self.host['pubkeys']:
-                files.append(file, '%s' % self.host['pubkeys'][key])
+                append(file, '%s' % self.host['pubkeys'][key])
             run('chmod 640 %s' % file)
     
     def install_bootloader(self):
@@ -363,18 +427,19 @@ class BaremetalProvisioningUbuntu(BaremetalProvisioning):
         run('reboot')
 
 @task
-def mkbtseed(btcfg, btbin):
-    ''':btsync_conf,btsync_bin | Make a seed of Bittorrent Sync'''
-    if not files.exists('/BTsync/image'):
-        run('mkdir -p /BTsync/image')
-    put(btcfg, '/BTsync/btsync.conf')
-    put(btbin, '/BTsync/btsync', mode=755)
-    files.sed('/BTsync/btsync.conf', 'DEVNAME', env.host)
-    run('/BTsync/btsync --config /BTsync/btsync.conf')
+def make_btsync_seed(hostname, btcfg, btsync):
+    ''':hostname,btcfg,btsync | Make a seed of Bittorrent Sync'''
+    env.host_string = hostname
+    if not file_exists('/BTsync/image'):
+        sudo('mkdir -p /BTsync/image')
+    put(btcfg, '/BTsync/btsync.conf', use_sudo=True)
+    put(btsync, '/BTsync/btsync', use_sudo=True, mode=755)
+    sed('/BTsync/btsync.conf', 'DEVNAME', hostname, use_sudo=True)
+    sudo('/BTsync/btsync --config /BTsync/btsync.conf', use_sudo=True)
 
 @task
 def make_livecd(livecd_name, livecd_cfg='ymlfile/scratch/livecd.yml'):
-    ''':livecd_name=XXXXX,livecd_cfg=cfg/livecd.yaml | Make LiveCD'''
+    ''':livecd_name,livecd_cfg=ymlfile/scratch/livecd.yml | Make LiveCD'''
     livecd = read_ymlfile('livecd.yml')[livecd_name]
 
     packages = [
@@ -404,7 +469,7 @@ def make_livecd(livecd_name, livecd_cfg='ymlfile/scratch/livecd.yml'):
     run('chroot /tmp/rootimg ssh-keygen -t dsa -N "" -C "ssh_host_dsa_key" -f /etc/ssh/ssh_host_dsa_key')
     file = '/tmp/rootimg/root/.ssh/authorized_keys'
     for key in livecd['pubkeys']:
-        files.append(file, '%s' % livecd['pubkeys'][key])
+        append(file, '%s' % livecd['pubkeys'][key])
     run('chmod 640 %s' % file)
     run('umount /tmp/rootimg/proc /tmp/rootimg/sys /tmp/rootimg/dev')
     run('mksquashfs /tmp/rootimg /tmp/imgdir/live/filesystem.squashfs -noappend')
@@ -443,9 +508,9 @@ def make_pxeimage(pxename):
                 % (expdir, pxename, tftpdir, pxename))
     pxefile = '%s/%s' % (prefix['pxelinux_cfg'], pxename)
     put('live/pxefile', pxefile)
-    files.sed(pxefile, 'PXENAME', pxename)
-    files.sed(pxefile, 'EXPDIR', expdir)
-    files.sed(pxefile, 'PXESERVER', pxecfg['nfs_ip'])
+    sed(pxefile, 'PXENAME', pxename)
+    sed(pxefile, 'EXPDIR', expdir)
+    sed(pxefile, 'PXESERVER', pxecfg['nfs_ip'])
 
 @task
 def mksnapshot(name, saveto):
@@ -478,19 +543,20 @@ def mksnapshot(name, saveto):
     run('rm -f /tmp/%s-%s.squashfs' % (name, today()))
 
 @task
-def hello():
-    '''-  Check if remote hosts are reachable.'''
+def hello(hostname):
+    ''':hostname | Check if remote hosts are reachable.'''
+    env.host_string = hostname
     run('hostname')
     run('ls -la')
 
 @task
-def imagelist():
-    '''| Show Image List'''
-    images = read_ymlfile('images.yml')
+def list(item):
+    ''':[hosts/images]| Show Image List'''
+    cfg = read_ymlfile(item + '.yml')
     
     no = 1
-    for image in images:
-        print "%s. %s" % (no, image)
+    for i in cfg:
+        print "%s. %s" % (no, i)
         no += 1
 
 @task

@@ -29,7 +29,7 @@ gregor:
 	git config --global user.email laszewski@gmail.com
 
 git-ssh:
-	git remote set-url origin git@github.com:futuregrid/$(BASENAME).git
+	git remote set-url origin git@github.com:cloudmesh/$(BASENAME).git
 
 
 ######################################################################
@@ -38,9 +38,9 @@ git-ssh:
 dist:
 	make -f Makefile pip
 
-pip:
+sdist:
 	make -f Makefile clean
-	python setup.py sdist
+	python setup.py sdist --format=bztar
 
 
 force:
@@ -143,7 +143,7 @@ pages: ghphtml ghpgit
 ghphtml:
 	cd /tmp
 	rm -rf $(DIR)
-	cd /tmp; git clone git://github.com/futuregrid/$(PROJECT).git
+	cd /tmp; git clone git://github.com/cloudmesh/$(PROJECT).git
 	cp $(DIR)/Makefile .
 	cd $(DOC); ls; make html
 	rm -fr _static

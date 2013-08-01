@@ -7,7 +7,7 @@
     alt="Fork me on GitHub"></a>
 
 
-Welcome to FutureGrid Teefaa!
+Welcome to Cloudmesh Teefaa!
 ====================
 
 .. sidebar:: Table of Contents
@@ -21,32 +21,62 @@ Welcome to FutureGrid Teefaa!
    license
 
 
-FutureGrid Teefaa is a set of scripts for Bare-metal Provisioning 
-which consists of Snapshot, Cloudimg, Bootstrap and Torque Plugin.
+Cloudmesh Teefaa is a set of deployment scripts for System Provisioning(includes 
+Baremetal Provisioning). Which is designed as simple, flexible, programable and 
+collaboratable so that users/developers can build, test and appreciate new Open 
+Source Technologies as quickly as possible. So we hope that will happen to you soon.
 
-* Snapshot - Makes a snapshot of an OS and compresses it.
-* Cloudimg - Makes a cloud image from a snapshot.
-* Bootstrap - Installs a system on Bare-metal/VM from a snapshot, a running system 
-  or a running instance.
-* Torque Plugin - Provides cluster users to provision OS images on compute nodes.
 
-The goal of FG Teefaa is to provide the scripts and methods to easily provision multiple 
-Operation Systems at user's local enviromnent(Desktop, Laptop, VMs), at Cloud as instances and at 
-Bare-metal Cluster as bare-metal hosts. 
+Requirements
+------------
 
-The picture of FG Teefaa is like this. Users can start system development on 
-a Desktop/Laptop/VM and make a snapshot for backup, then make cloud image for 
-running the image on multiple instances, and then run it on bare-metal nodes.
- 
+FG Teefaa requires(/thanks to):
+
+* Python, version 2.7
+* Python Modules
+
+  - Fabric, version 1.6
+  - Cuisine, version 0.6
+  - PyYAML, version 3.10
+
+* Squashfs-tools (for creating snapshots of Operating System)
+* Bittorrent Sync (for high-speed multiple Baremetal Provisioning)
+* Torque Resource Manager (for scheduing Baremetal Provisioning)
+
+
+Simple Design
+-------------
+
+* Scripts for handling Shell commands are written in Fabric and Cuisine.
+* Configuration files are written in YAML format. One of the goals of Teefaa 
+  is to make it understandable by reading the YAML files.
+* Each scripts has four types of directories as shown below. ::
+
+    |-- fabfile/EXAMPLE.py
+    |-- ymlfile/EXAMPLE
+    |           |-- config1.yml
+    |           `-- config2.yml
+    |-- private/EXAMPLE
+    |           `-- dir1
+    |               |-- file1
+    |               `-- file2
+    `-- share/EXAMPLE
+              `-- dir1
+                  |-- file1
+                  `-- file2
+
+This stracture enables a simplified separation among concurrent developments, which allows 
+people to work on multile projects and multiple versions in a simple fashion. For example, 
+while one person is developing EXAMPLE, another person can start developing EXAMPLE2.
+
 Support
-=======
+-------
 
-If you run into problems when using the framework, please use our 
+If you run into problems when using this framework, please use our 
 help form at `https://portal.futuregrid.org/help <https://portal.futuregrid.org/help>`_.
-
  
 Indices and tables
-==================
+------------------
 
 * :ref:`genindex`
 * :ref:`modindex`

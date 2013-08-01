@@ -8,10 +8,17 @@ import os
 import re
 import sys
 import yaml
+import time
 import datetime
 from fabric.api import *
 from fabric.contrib import *
 from cuisine import *
+
+fabname = 'system'
+@task
+def print_fabname():
+    print fabname
+
 
 @task
 def users_force_resetpass(group):
@@ -22,6 +29,18 @@ def users_force_resetpass(group):
         with mode_sudo():
             run('usermod -p \'\' %s' % user)
             run('chage -d 0 %s' % user)
+
+@task
+def users_en_sudo(group):
+    ''':group | enable sudo'''
+    users = read_ymlfile('users.yml')[group]
+
+    file_name = '/etc/sudoers'
+    file_ensure(file_name, mode=640)
+    for user in users:
+        with mode_sudo():
+            file_append('/etc/sudoers', '{0}    ALL=(ALL:ALL) ALL\n'.format(user))
+    file_ensure(file_name, mode=440)
 
 @task
 def users_ensure(group):
@@ -62,9 +81,9 @@ def users_ensure(group):
                 ssh_authorize(user, key)
 
 @task
-def backup(item):
+def backup(hostname):
     ''':item=XXXXX | Backup System'''
-    cfg = read_ymlfile('backup.yml')[item]
+    cfg = read_ymlfile('{}.yml'.format(hostname))['backup']
 
     if not os.getenv('USER') == 'root':
         print 'You have to be root.'
@@ -72,19 +91,6 @@ def backup(item):
 
     _backup_rsync(cfg)
     _backup_squashfs(cfg, item)
-
-@task
-def backup_list():
-    ''':item=XXXXX | Show the list of backup'''
-    cfg = read_ymlfile('backup.yml')
-
-    print 'Backup List:'
-    n = 1
-    for item in cfg:
-        if n == 1:
-            print ''
-        print "    %s.  %s" % (n, item)
-        n += 1
 
 def _backup_rsync(cfg):
     '''Execute rsync'''
@@ -128,14 +134,15 @@ def _backup_squashfs(cfg, item):
 @task
 def pxeboot(hostname, boottype):
     ''':hostname,[localboot/netboot/show/list] - utility for pxeboot'''
-    pxecfg = read_ymlfile('pxecfg.yml')[hostname]
-    env.host_string = pxecfg['server']
+    pxecfg = read_ymlfile('{}.yml'.format(hostname))['pxe']
+    env.host_string = pxecfg['ssh_server']
+    env.user = pxecfg['ssh_user']
 
-    hostcfg = '%s/%s' % (pxecfg['pxeprefix'], hostname)
+    hostcfg = '%s/%s' % (pxecfg['pxe_prefix'], hostname)
 
     with hide('running', 'stdout'):
         test = file_exists(hostcfg)
-    if not test:
+    if not file_exists(hostcfg):
         print ''
         print ' ERROR: %s does not exist.' % hostcfg
         print ''
@@ -153,13 +160,13 @@ def pxeboot(hostname, boottype):
 
     if boottype == 'list':
         with hide('running', 'stdout'):
-            output = run('ls -1 %s| grep -v 01-' % pxecfg['pxeprefix'])
+            output = run('ls -1 %s| grep -v 01-' % pxecfg['pxe_prefix'])
         print ''
         print output
         print ''
         exit(0)
 
-    bootcfg = '%s/%s' % (pxecfg['pxeprefix'], boottype)
+    bootcfg = '%s/%s' % (pxecfg['pxe_prefix'], boottype)
     with hide('running', 'stdout'):
         test = file_exists(bootcfg)
     if not test:
@@ -173,28 +180,98 @@ def pxeboot(hostname, boottype):
 @task
 def power(hostname,action):
     ''':hostname,[on/off/status]'''
-    ipmicfg = read_ymlfile('ipmitool.yml')[hostname]
-    user = ipmicfg['user']
-    password = ipmicfg['password']
-    bmcaddr = ipmicfg['bmcaddr']
-    env.host_string = ipmicfg['server']
+    ipmicfg = read_ymlfile('{}.yml'.format(hostname))['ipmi']
+    user = ipmicfg['ipmi_user']
+    password = ipmicfg['ipmi_pass']
+    bmcaddr = ipmicfg['bmc_addr']
+    env.host_string = ipmicfg['ssh_server']
+    env.user = ipmicfg['ssh_user']
 
     with hide('running', 'stdout'):
-        output = run('ipmitool -I lanplus -U %s -P %s -E -H %s power %s' 
+        if action == 'wait_till_on':
+            keywords = 'Power is on'
+            _power_wait(keywords, user, password, bmcaddr)
+        elif action == 'wait_till_off':
+            keywords = 'Power is off'
+            _power_wait(keywords, user, password, bmcaddr)
+        elif action == 'on' or \
+                action == 'off' or \
+                action == 'status':
+            output = run('ipmitool -I lanplus -U %s -P %s -E -H %s power %s' 
                          % (user, password, bmcaddr, action))
-    print ''
-    print '[%s]' % hostname
-    print '-------------------------------------------------'
-    print output
+            print ''
+            print '[%s]' % hostname
+            print '-------------------------------------------------'
+            print output
+        else:
+            print 'action \'%s\' is not supported.' % action
+            exit(1)
+
+def _power_wait(keywords, user, password, bmcaddr):
+    output = ''
+    counter = 0
+    while output.find(keywords) == -1:
+        output = run('ipmitool -I lanplus -U %s -P %s -E -H %s power status'
+                     % (user, password, bmcaddr))
+        counter += 1
+        limit = 10
+        print '[%s/%s]\n%s' % (counter, limit, output)
+        if counter == limit:
+            print 'Give it up'
+            exit(1)
+        time.sleep(5)
+    return True
+
+@task
+def wait_till_ping(hostname,limit=10):
+    ''':hostname,limit=10'''
+    with settings(warn_only = True):
+        counter = 0
+        loop = True
+        while loop:
+            output = local('ping -c 3 %s' % hostname)
+            counter += 1
+            if output.return_code == 0:
+                print "Tried ping and succeeded [%s/%s]" % (counter, limit)
+                break
+            else:
+                print "Tried ping and no answer [%s/%s]" % (counter, limit)
+            if counter > limit:
+                print "Give up"
+                exit(1)
+                time.sleep(5)
+
+@task
+def wait_till_ssh(hostname,limit=10):
+    ''':hostname,limit=10'''
+    env.host_string = hostname
+    env.user = 'root'
+    with settings(warn_only = True):
+        counter = 0
+        loop = True
+        while loop:
+            counter += 1
+            try:
+                run('hostname')
+                break
+            except fabric.exceptions.NetworkError:
+                print "Tried ssh and no answer [%s/%s]" % (counter, limit)
+                if counter > limit:
+                    print "Give up"
+                    exit(1)
+                time.sleep(5)
+                pass
+        print "Tried ssh and succeeded [%s/%s]" % (counter, limit)
 
 @task
 def temperature(hostname):
     ''':hostname'''
-    ipmicfg = read_ymlfile('ipmitool.yml')[hostname]
-    user = ipmicfg['user']
-    password = ipmicfg['password']
-    bmcaddr = ipmicfg['bmcaddr']
-    env.host_string = ipmicfg['server']
+    ipmicfg = read_ymlfile('{}.yml'.format(hostname))['ipmi']
+    user = ipmicfg['ipmi_user']
+    password = ipmicfg['ipmi_pass']
+    bmcaddr = ipmicfg['bmc_addr']
+    env.host_string = ipmicfg['ssh_server']
+    env.user = ipmicfg['ssh_user']
 
     with hide('running', 'stdout'):
         output = run('ipmitool -I lanplus -U %s -P %s -E -H %s sdr type temperature'

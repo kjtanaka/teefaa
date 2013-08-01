@@ -1,0 +1,20 @@
+# host1
+hostname: 'host1'
+network:
+    eth0:
+        bootproto: "dhcp"
+        onboot: 'yes'
+        macaddr: 'xx:xx:xx:xx:xx:xx'
+    eth1:
+        ipaddr: "192.168.1.1"
+        macaddr: "xx:xx:xx:xx:xx:xx"
+        bootproto: "static"
+        onboot: "yes"
+        netmask: "255.255.255.0"
+        gateway: "192.168.1.254"
+        nameserver: "192.168.1.254"
+del_keypair: True
+update_keys: True
+pubkeys:
+    mgmt1: 'ssh-rsa AAAA---------------- root@mgmt1'
+    mgmt2: 'ssh-rsa AAAA---------------- root@mgmt2'

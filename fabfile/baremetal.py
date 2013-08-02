@@ -111,37 +111,54 @@ class BaremetalProvisioning:
         pnum = 1
         if self.scheme == 'gpt':
             pnum += 1
+        device = self._check_if_hp_raid_controller()
         #package_ensure('xfsprogs')
-        run('mkswap %s%s' % (self.device, pnum))
+        run('mkswap %s%s' % (device, pnum))
         pnum += 1
         if self.system['type'] == 'ext3' or \
                 self.system['type'] == 'ext4':
-            run('mkfs.%s %s%s' % (self.system['type'], self.device, pnum))
+            run('mkfs.%s %s%s' % (self.system['type'], device, pnum))
         else:
             print "%s is not supported for system partition" % self.system['type']
             exit(1)
         pnum += 1
         if self.data['type'] == 'ext3' or \
                 self.data['type'] == 'ext4':
-            run('mkfs.%s %s%s' % (self.data['type'], self.device, pnum))
+            run('mkfs.%s %s%s' % (self.data['type'], device, pnum))
         elif self.data['type'] == 'xfs':
-            run('mkfs.%s -f %s%s' % (self.data['type'], self.device, pnum))
+            run('mkfs.%s -f %s%s' % (self.data['type'], device, pnum))
         else:
             print "%s is not supported for data partition" % self.data['type']
             exit(1)
+
+    def _check_if_hp_raid_controller(self):
+        '''Check if it's HP RAID Controller'''
+        device = self.device
+        if not file_exists(device):
+            num = 0
+            if device == '/dev/sda':
+                device == '/dev/cciss/s0p0'
+            else:
+                print "ERROR: Device {} for HP Raid Controller is not supported yet.".format(device)
+                exit(1)
+
+        return device
 
     def mountfs(self):
         '''Mount Filesystem'''
         pnum = 1
         if self.scheme == 'gpt':
             pnum += 1
-        run('swapon %s%s' % (self.device, pnum))
+        device = self._check_if_hp_raid_controller()
+        if not device == self.device:
+            device = device + 'n'
+        run('swapon %s%s' % (device, pnum))
         pnum += 1
-        run('mount %s%s /mnt' % (self.device, pnum))
+        run('mount %s%s /mnt' % (device, pnum))
         if not file_exists('/mnt%s' % self.data['mount']):
             run('mkdir -p /mnt%s' % self.data['mount'])
         pnum += 1
-        run('mount %s%s /mnt%s' % (self.device, pnum, self.data['mount']))
+        run('mount %s%s /mnt%s' % (device, pnum, self.data['mount']))
 
     def copyimg(self):
         '''Copy image'''

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # vim: tabstop=8 expandtab shiftwidth=4 softtabstop=4
 #
-# scratch.py - is a collection of scripts for bootstrapping baremetal/virtual machines.
+# baremetal.py - is a collection of scripts for bootstrapping baremetal/virtual machines.
 # 
 
 import os
@@ -19,13 +19,17 @@ from system import power, pxeboot, wait_till_ping, wait_till_ssh
 @task
 def bootstrap(hostname, imagename):
     ''':hostname,imagename  -  Bootstrap OS'''
-
     env.host_string = hostname
     env.disable_known_hosts = True
     env.user = 'root'
 
     host = read_ymlfile('hosts/{0}.yml'.format(hostname))
     image = read_ymlfile('images/{0}.yml'.format(imagename))
+    excluded_hosts = read_ymlfile('config.yml')['excluded_hosts']
+
+    if host in excluded_hosts:
+        print "ERROR: {0} is excluded.".format(host)
+        exit(1)
 
     if image['os'] in ['centos6', 'redhat6']:
         provisioner = BaremetalProvisioningRedHat6

@@ -53,6 +53,12 @@ def bootstrap(hostname, imagename):
 def provisioning(hostname, imagename):
     ''':hostname,imagename | Provisioning'''
     env.disable_known_hosts = True
+    excluded_hosts = read_ymlfile('config.yml')['excluded_hosts']
+
+    if hostname in excluded_hosts:
+        print "ERROR: {0} is excluded.".format(hostname)
+        exit(1)
+
     pxeboot(hostname, 'netboot')
     power(hostname, 'off')
     power(hostname, 'wait_till_off')

@@ -1,0 +1,4 @@
+exclude_hosts:
+    - host1
+    - host5
+    - hostN

@@ -27,8 +27,8 @@ def bootstrap(hostname, imagename):
     image = read_ymlfile('images/{0}.yml'.format(imagename))
     excluded_hosts = read_ymlfile('config.yml')['excluded_hosts']
 
-    if host in excluded_hosts:
-        print "ERROR: {0} is excluded.".format(host)
+    if hostname in excluded_hosts:
+        print "ERROR: {0} is excluded.".format(hostname)
         exit(1)
 
     if image['os'] in ['centos6', 'redhat6']:

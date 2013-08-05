@@ -143,17 +143,13 @@ class BaremetalProvisioning:
     def _check_if_hp_raid_controller(self):
         '''Check if it's HP RAID Controller'''
         device = self.device
-        print '1--- ' + device
         if not file_exists(device):
-            print '2--- ' + device
             if device == '/dev/sda':
                 device = '/dev/cciss/c0d0'
-                print '3--- ' + device
             else:
                 print "ERROR: Device {} for HP Raid Controller is not supported yet.".format(device)
                 exit(1)
 
-        print '4--- ' + device
         return device
 
     def mountfs(self):
@@ -336,9 +332,14 @@ class BaremetalProvisioningRedHat6(BaremetalProvisioning):
             run('chroot /mnt chage -d 0 root')
         elif self.image['rootpass'] == "delete":
             run('chroot /mnt passwd --delete root')
-        run('chroot /mnt grub-install %s --recheck' % self.device)
-        run('sync')
-        run('reboot')
+        device = _check_if_hp_raid_controller()
+        if device == self.device:
+            run('chroot /mnt grub-install %s --recheck' % device)
+            run('sync')
+            run('reboot')
+        elif not device == self.device and \
+                self.device == '/dev/sda':
+            run('echo -e \'root (hd0,1)\nsetup (hd0)\' | chroot /mnt grub %s'.format(device))
 
 class BaremetalProvisioningRedHat5(BaremetalProvisioningRedHat6):
 

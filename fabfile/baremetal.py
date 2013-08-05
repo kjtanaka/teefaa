@@ -141,9 +141,8 @@ class BaremetalProvisioning:
         '''Check if it's HP RAID Controller'''
         device = self.device
         if not file_exists(device):
-            num = 0
             if device == '/dev/sda':
-                device == '/dev/cciss/c0d0'
+                device = '/dev/cciss/c0d0'
             else:
                 print "ERROR: Device {} for HP Raid Controller is not supported yet.".format(device)
                 exit(1)

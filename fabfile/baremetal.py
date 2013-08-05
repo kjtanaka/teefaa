@@ -140,13 +140,17 @@ class BaremetalProvisioning:
     def _check_if_hp_raid_controller(self):
         '''Check if it's HP RAID Controller'''
         device = self.device
+        print '1--- ' + device
         if not file_exists(device):
+            print '2--- ' + device
             if device == '/dev/sda':
                 device = '/dev/cciss/c0d0'
+                print '3--- ' + device
             else:
                 print "ERROR: Device {} for HP Raid Controller is not supported yet.".format(device)
                 exit(1)
 
+        print '4--- ' + device
         return device
 
     def mountfs(self):

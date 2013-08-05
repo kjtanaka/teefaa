@@ -118,7 +118,7 @@ class BaremetalProvisioning:
         pnum = 1
         if self.scheme == 'gpt':
             pnum += 1
-        device = self._check_if_hp_raid_controller()
+        device = self._check_if_hp_raid_controller() + 'p'
         #package_ensure('xfsprogs')
         run('mkswap %s%s' % (device, pnum))
         pnum += 1

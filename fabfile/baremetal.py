@@ -118,7 +118,9 @@ class BaremetalProvisioning:
         pnum = 1
         if self.scheme == 'gpt':
             pnum += 1
-        device = self._check_if_hp_raid_controller() + 'p'
+        device = self._check_if_hp_raid_controller()
+        if not device == self.device:
+            device = device + 'p'
         #package_ensure('xfsprogs')
         run('mkswap %s%s' % (device, pnum))
         pnum += 1
@@ -161,7 +163,7 @@ class BaremetalProvisioning:
             pnum += 1
         device = self._check_if_hp_raid_controller()
         if not device == self.device:
-            device = device + 'n'
+            device = device + 'p'
         run('swapon %s%s' % (device, pnum))
         pnum += 1
         run('mount %s%s /mnt' % (device, pnum))

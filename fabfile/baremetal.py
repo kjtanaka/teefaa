@@ -85,32 +85,33 @@ class BaremetalProvisioning:
         '''partitioning'''
         #run('aptitude update')
         #package_ensure('parted')
+        device = self._check_if_hp_raid_controller()
         if self.scheme == 'mbr':
-            run('parted %s --script -- mklabel msdos' % self.device)
-            run('parted %s --script -- unit MB' % self.device)
+            run('parted %s --script -- mklabel msdos' % device)
+            run('parted %s --script -- unit MB' % device)
             a, b = 1, int(self.swap['size']) * 1000
-            run('parted %s --script -- mkpart primary linux-swap %s %s' % (self.device, a, b))
+            run('parted %s --script -- mkpart primary linux-swap %s %s' % (device, a, b))
             bootid = 2
         elif self.scheme == 'gpt':
-            run('parted %s --script -- mklabel gpt' % self.device)
-            run('parted %s --script -- unit MB' % self.device)
-            run('parted %s --script -- mkpart non-fs 1 3' % self.device)
+            run('parted %s --script -- mklabel gpt' % device)
+            run('parted %s --script -- unit MB' % device)
+            run('parted %s --script -- mkpart non-fs 1 3' % device)
             a, b = 3, int(self.swap['size']) * 1000
-            run('parted %s --script -- mkpart swap linux-swap %s %s' % (self.device, a, b))
-            run('parted %s --script -- set 1 bios_grub on' % self.device)
+            run('parted %s --script -- mkpart swap linux-swap %s %s' % (device, a, b))
+            run('parted %s --script -- set 1 bios_grub on' % device)
             bootid = 3
         else: 
             print 'ERROR: scheme %s is not supported.' % self.scheme
             exit(1)
         a, b = b, b + int(self.system['size']) * 1000
-        run('parted %s --script -- mkpart primary %s %s' % (self.device, a, b))
+        run('parted %s --script -- mkpart primary %s %s' % (device, a, b))
         if self.data['size'] == '-1':
             a, b = b, -1
         else:
             a, b = b, b + int(self.data['size']) * 1000
-        run('parted %s --script -- mkpart primary %s %s' % (self.device, a, b))
-        run('parted %s --script -- set %s boot on' % (self.device, bootid))
-        run ('parted %s --script -- print' % self.device)
+        run('parted %s --script -- mkpart primary %s %s' % (device, a, b))
+        run('parted %s --script -- set %s boot on' % (device, bootid))
+        run ('parted %s --script -- print' % device)
 
     def makefs(self):
         '''Make Filesytem'''

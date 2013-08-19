@@ -340,6 +340,7 @@ class BaremetalProvisioningRedHat6(BaremetalProvisioning):
         elif not device == self.device and \
                 self.device == '/dev/sda':
             run('echo -e \'root (hd0,1)\nsetup (hd0)\' | chroot /mnt grub %s'.format(device))
+            run('reboot')
 
 class BaremetalProvisioningRedHat5(BaremetalProvisioningRedHat6):
 

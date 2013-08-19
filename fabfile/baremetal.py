@@ -42,11 +42,11 @@ def bootstrap(hostname, imagename):
         exit(1)
 
     bp = provisioner(host, image)
-    bp.partitioning()
-    bp.makefs()
-    bp.mountfs()
-    bp.copyimg()
-    bp.condition()
+    #bp.partitioning()
+    #bp.makefs()
+    #bp.mountfs()
+    #bp.copyimg()
+    #bp.condition()
     bp.install_bootloader()
 
 @task
@@ -332,7 +332,7 @@ class BaremetalProvisioningRedHat6(BaremetalProvisioning):
             run('chroot /mnt chage -d 0 root')
         elif self.image['rootpass'] == "delete":
             run('chroot /mnt passwd --delete root')
-        device = _check_if_hp_raid_controller()
+        device = self._check_if_hp_raid_controller()
         if device == self.device:
             run('chroot /mnt grub-install %s --recheck' % device)
             run('sync')

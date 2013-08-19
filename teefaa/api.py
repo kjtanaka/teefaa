@@ -34,7 +34,24 @@ def baremetal_provisioning(hostname, imagename):
     cfg = ConfigParser.SafeConfigParser()
     cfg.read(os.path.expanduser(cfgfile))
 
-    sys.path.append(cfg.get('fabric', 'path_to_fabfile'))
+    fab_path = cfg.get('fabric', 'path_to_fabfile')
+
+    sys.path.append(fab_path)
+    import baremetal
+
+    status = execute(baremetal.provisioning, hostname, imagename)
+    print status
+
+    return 'OK'
+
+def baremetal_provisioning_dev(hostname, imagename):
+    cfgfile = '~/.teefaa/teefaa.yml'
+    cfg = ConfigParser.SafeConfigParser()
+    cfg.read(os.path.expanduser(cfgfile))
+
+    fab_path = cfg.get('fabric', 'path_to_fabfile')
+
+    sys.path.append(fab_path)
     import baremetal
 
     status = execute(baremetal.provisioning, hostname, imagename)

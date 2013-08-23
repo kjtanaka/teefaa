@@ -16,6 +16,10 @@ from fabric.contrib.files import *
 from cuisine import *
 from system import power, pxeboot, wait_till_ping, wait_till_ssh
 
+def STATUS(msg):
+    print "CM STATUS:", msg
+    sys.stdout.flush()
+
 @task
 def bootstrap(hostname, imagename):
     ''':hostname,imagename  -  Bootstrap OS'''
@@ -58,7 +62,8 @@ def provisioning(hostname, imagename):
     if hostname in excluded_hosts:
         print "ERROR: {0} is excluded.".format(hostname)
         exit(1)
-
+    """
+    old code to be deleted
     pxeboot(hostname, 'netboot')
     power(hostname, 'off')
     power(hostname, 'wait_till_off')
@@ -68,6 +73,38 @@ def provisioning(hostname, imagename):
     wait_till_ssh(hostname, '100')
     bootstrap(hostname, imagename)
     pxeboot(hostname, 'localboot')
+    """
+    
+    STATUS("NETBOOT START")
+    pxeboot(hostname, 'netboot')
+    STATUS("NETBOOT OK")
+
+    STATUS("POWER-OFF START")
+    power(hostname, 'off')
+    power(hostname, 'wait_till_off')
+    STATUS("POWER-OFF OK")
+
+    STATUS("POWER-ON START")
+    power(hostname, 'on')
+    power(hostname, 'wait_till_on')
+    STATUS("POWER-ON OK")
+
+    STATUS("PING START")
+    wait_till_ping(hostname, '100')
+    STATUS("PING OK")
+
+    STATUS("SSH START")
+    wait_till_ssh(hostname, '100')
+    STATUS("SSH OK")
+
+    STATUS("BOOTSTRAP START")
+    bootstrap(hostname, imagename)
+    STATUS("BOOTSTRAP OK")
+
+    STATUS("LOCALBOOT START")
+    pxeboot(hostname, 'localboot')
+    STATUS("LOCALBOOT OK")
+
     
 class BaremetalProvisioning:
 

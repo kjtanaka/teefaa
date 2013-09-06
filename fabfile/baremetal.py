@@ -15,6 +15,7 @@ from fabric.contrib import *
 from fabric.contrib.files import *
 from cuisine import *
 from system import power, pxeboot, wait_till_ping, wait_till_ssh
+from cloudmesh.inventory import Inventory
 
 def STATUS(msg):
     print "CM STATUS:", msg
@@ -52,6 +53,17 @@ def bootstrap(hostname, imagename):
     bp.copyimg()
     bp.condition()
     bp.install_bootloader()
+
+@task
+def cm_bootstrap(hostname, imagename):
+    ''':hostname,imagename  -  Bootstrap OS'''
+    env.host_string = hostname
+    env.disable_known_hosts = True
+    env.user = 'root'
+
+    inventory = Inventory()
+    host = inventory.host(hostname)
+    print host
 
 @task
 def provisioning(hostname, imagename):

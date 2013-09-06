@@ -371,7 +371,7 @@ class BaremetalProvisioningRedHat6(BaremetalProvisioning):
                 iface_conf = self.host['network'][iface]
                 file = '/mnt/etc/sysconfig/network-scripts/ifcfg-%s' % iface
                 #run('rm -f %s' % file)
-                print iface
+                print self.host['network'][iface]
                 append(file, 'DEVICE=%s' % iface)
                 append(file, 'BOOTPROTO=%s' % iface_conf['bootproto'])
                 append(file, 'ONBOOT=%s' % iface_conf['onboot'])

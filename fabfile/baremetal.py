@@ -365,7 +365,7 @@ class BaremetalProvisioningRedHat6(BaremetalProvisioning):
         append(file, 'NETWORKING=yes')
         # Update Network Interfaces
         for iface in self.host['network']:
-            if self.host['network'][iface] in ['bmc','pxe']:
+            if self.host['network'][iface]['name'] in ['bmc','pxe']:
                 pass
             else:
                 iface_conf = self.host['network'][iface]

@@ -64,6 +64,7 @@ def cm_bootstrap(hostname, imagename):
     inventory = Inventory()
     host = inventory.host(hostname)
     host['hostname'] = host['cm_id']
+    host['eth1']['nameserver'] = host['nameserver']
     image = read_ymlfile('images/{0}.yml'.format(imagename))
     excluded_hosts = read_ymlfile('config.yml')['excluded_hosts']
 
@@ -81,11 +82,11 @@ def cm_bootstrap(hostname, imagename):
         print "ERROR: {0} is not supported yet.".format(image['os'])
         exit(1)
 
-    bp = provisioner(host, image)
-    bp.partitioning()
-    bp.makefs()
-    bp.mountfs()
-    bp.copyimg()
+    #bp = provisioner(host, image)
+    #bp.partitioning()
+    #bp.makefs()
+    #bp.mountfs()
+    #bp.copyimg()
     bp.condition()
     bp.install_bootloader()
 

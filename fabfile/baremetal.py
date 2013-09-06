@@ -63,7 +63,30 @@ def cm_bootstrap(hostname, imagename):
 
     inventory = Inventory()
     host = inventory.host(hostname)
-    print host
+    image = read_ymlfile('images/{0}.yml'.format(imagename))
+    excluded_hosts = read_ymlfile('config.yml')['excluded_hosts']
+
+    if hostname in excluded_hosts:
+        print "ERROR: {0} is excluded.".format(hostname)
+        exit(1)
+
+    if image['os'] in ['centos6', 'redhat6']:
+        provisioner = BaremetalProvisioningRedHat6
+    elif image['os'] in ['centos5','redhat5']:
+        provisioner = BaremetalProvisioningRedHat5
+    elif image['os'] in ['ubuntu12','ubuntu13']:
+        provisioner = BaremetalProvisioningUbuntu
+    else:
+        print "ERROR: {0} is not supported yet.".format(image['os'])
+        exit(1)
+
+    bp = provisioner(host, image)
+    bp.partitioning()
+    bp.makefs()
+    bp.mountfs()
+    bp.copyimg()
+    bp.condition()
+    bp.install_bootloader()
 
 @task
 def provisioning(hostname, imagename):

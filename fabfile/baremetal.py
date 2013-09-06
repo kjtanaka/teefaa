@@ -64,7 +64,7 @@ def cm_bootstrap(hostname, imagename):
     inventory = Inventory()
     host = inventory.host(hostname)
     host['hostname'] = host['cm_id']
-    host['eth1']['nameserver'] = host['nameserver']
+    host['eth1']['nameserver'] = '129.79.1.1'
     image = read_ymlfile('images/{0}.yml'.format(imagename))
     excluded_hosts = read_ymlfile('config.yml')['excluded_hosts']
 
@@ -365,23 +365,26 @@ class BaremetalProvisioningRedHat6(BaremetalProvisioning):
         append(file, 'NETWORKING=yes')
         # Update Network Interfaces
         for iface in self.host['network']:
-            iface_conf = self.host['network'][iface]
-            file = '/mnt/etc/sysconfig/network-scripts/ifcfg-%s' % iface
-            #run('rm -f %s' % file)
-            append(file, 'DEVICE=%s' % iface)
-            append(file, 'BOOTPROTO=%s' % iface_conf['bootproto'])
-            append(file, 'ONBOOT=%s' % iface_conf['onboot'])
-            if iface_conf['bootproto'] == 'dhcp':
+            if self.host['network'][iface] in ['bmc','pxe']:
                 pass
-            elif iface_conf['bootproto'] == 'static' or \
-                    iface_conf['bootproto'] == 'none':
-                append(file, 'IPADDR=%s' % iface_conf['ipaddr'])
-                append(file, 'NETMASK=%s' % iface_conf['netmask'])
-                if iface_conf['gateway']:
-                    append(file, 'GATEWAY=%s' % iface_conf['gateway'])
             else:
-                print "ERROR: bootproto = %s is not supported."
-                exit(1)
+                iface_conf = self.host['network'][iface]
+                file = '/mnt/etc/sysconfig/network-scripts/ifcfg-%s' % iface
+                #run('rm -f %s' % file)
+                append(file, 'DEVICE=%s' % iface)
+                append(file, 'BOOTPROTO=%s' % iface_conf['bootproto'])
+                append(file, 'ONBOOT=%s' % iface_conf['onboot'])
+                if iface_conf['bootproto'] == 'dhcp':
+                    pass
+                elif iface_conf['bootproto'] == 'static' or \
+                        iface_conf['bootproto'] == 'none':
+                    append(file, 'IPADDR=%s' % iface_conf['ipaddr'])
+                    append(file, 'NETMASK=%s' % iface_conf['netmask'])
+                    if iface_conf['gateway']:
+                        append(file, 'GATEWAY=%s' % iface_conf['gateway'])
+                else:
+                    print "ERROR: bootproto = %s is not supported."
+                    exit(1)
         # Delete key pair
         #if host['del_keypair']:
     

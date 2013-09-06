@@ -63,6 +63,7 @@ def cm_bootstrap(hostname, imagename):
 
     inventory = Inventory()
     host = inventory.host(hostname)
+    host['hostname'] = host['cm_id']
     image = read_ymlfile('images/{0}.yml'.format(imagename))
     excluded_hosts = read_ymlfile('config.yml')['excluded_hosts']
 

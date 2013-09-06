@@ -82,7 +82,7 @@ def cm_bootstrap(hostname, imagename):
         print "ERROR: {0} is not supported yet.".format(image['os'])
         exit(1)
 
-    #bp = provisioner(host, image)
+    bp = provisioner(host, image)
     #bp.partitioning()
     #bp.makefs()
     #bp.mountfs()

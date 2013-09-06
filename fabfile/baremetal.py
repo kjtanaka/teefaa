@@ -371,7 +371,6 @@ class BaremetalProvisioningRedHat6(BaremetalProvisioning):
                 iface_conf = self.host['network'][iface]
                 file = '/mnt/etc/sysconfig/network-scripts/ifcfg-%s' % iface
                 #run('rm -f %s' % file)
-                print self.host['network'][iface]
                 append(file, 'DEVICE=%s' % iface)
                 append(file, 'BOOTPROTO=%s' % iface_conf['bootproto'])
                 append(file, 'ONBOOT=%s' % iface_conf['onboot'])
@@ -390,14 +389,14 @@ class BaremetalProvisioningRedHat6(BaremetalProvisioning):
         #if host['del_keypair']:
     
         # Update Authorized Keys
-        if self.host['update_keys']:
+        if self.image['update_keys']:
             if not file_exists('/mnt/root/.ssh'):
                 run('mkdir -p /mnt/root/.ssh')
                 run('chmod 700 /mnt/root/.ssh')
             file = '/mnt/root/.ssh/authorized_keys'
             run('rm -f %s' % file)
-            for key in self.host['pubkeys']:
-                append(file, '%s' % self.host['pubkeys'][key])
+            for key in self.image['pubkeys']:
+                append(file, '%s' % self.image['pubkeys'][key])
             run('chmod 640 %s' % file)
 
     def install_bootloader(self):

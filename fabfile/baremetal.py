@@ -64,7 +64,7 @@ def cm_bootstrap(hostname, imagename):
     inventory = Inventory()
     host = inventory.host(hostname)
     host['hostname'] = host['cm_id']
-    host['eth1']['nameserver'] = '129.79.1.1'
+    host['network']['eth1']['nameserver'] = '129.79.1.1'
     image = read_ymlfile('images/{0}.yml'.format(imagename))
     excluded_hosts = read_ymlfile('config.yml')['excluded_hosts']
 

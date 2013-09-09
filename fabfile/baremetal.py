@@ -84,10 +84,10 @@ def cm_bootstrap(hostname, imagename):
         exit(1)
 
     bp = provisioner(host, image)
-    #bp.partitioning()
-    #bp.makefs()
-    #bp.mountfs()
-    #bp.copyimg()
+    bp.partitioning()
+    bp.makefs()
+    bp.mountfs()
+    bp.copyimg()
     bp.condition()
     bp.install_bootloader()
 

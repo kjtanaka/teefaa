@@ -365,10 +365,11 @@ class BaremetalProvisioningRedHat6(BaremetalProvisioning):
         append(file, 'HOSTNAME=%s' % self.host['hostname'])
         append(file, 'NETWORKING=yes')
         # Update Network Interfaces
-        for iface in self.host['network']:
-            #if self.host['network'][iface]['name'] in ['bmc','pxe']:
-            #    pass
-            #else:
+        for iface in self.host['network'].keys():
+            print "IFACE",iface
+            if iface['name'] in ['bmc','pxe']:
+                pass
+            else:
                 iface_conf = self.host['network'][iface]
                 file = '/mnt/etc/sysconfig/network-scripts/ifcfg-%s' % iface
                 #run('rm -f %s' % file)

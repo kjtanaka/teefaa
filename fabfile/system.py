@@ -12,6 +12,7 @@ import time
 import datetime
 from fabric.api import *
 from fabric.contrib import *
+from fabric.contrib.files import *
 from cuisine import *
 
 fabname = 'system'
@@ -318,26 +319,26 @@ def make_livecd(livecd_name):
             'genisoimage',
             'squashfs-tools'
             ]
-    for package in packages:
-        package_ensure(package)
-    run('wget %s -O /tmp/livecd.iso' % livecd['isoimage'])
-    if not file_is_dir('/mnt/tfmnt'):
-        run('mkdir /mnt/tfmnt')
-    run('mount /tmp/livecd.iso /mnt/tfmnt -o loop')
-    run('rsync -a --stats /mnt/tfmnt/ /tmp/imgdir')
-    run('umount /mnt/tfmnt')
-    run('mount -o loop /tmp/imgdir/live/filesystem.squashfs /mnt/tfmnt')
-    run('rsync -a --stats /mnt/tfmnt/ /tmp/rootimg')
-    run('umount /mnt/tfmnt')
-    run('cat /etc/resolv.conf > /tmp/rootimg/etc/resolv.conf')
-    run('mount -t proc proc /tmp/rootimg/proc')
-    run('mount -t sysfs sys /tmp/rootimg/sys')
-    run('mount -o bind /dev /tmp/rootimg/dev')
-    run('chroot /tmp/rootimg aptitude update')
-    run('chroot /tmp/rootimg aptitude -y install openssh-server vim squashfs-tools tree xfsprogs parted')
-    run('chroot /tmp/rootimg ssh-keygen -N "" -C "root@teefaa" -f /root/.ssh/id_rsa')
-    run('chroot /tmp/rootimg ssh-keygen -t rsa1 -N "" -C "ssh_host_rsa_key" -f /etc/ssh/ssh_host_rsa_key')
-    run('chroot /tmp/rootimg ssh-keygen -t dsa -N "" -C "ssh_host_dsa_key" -f /etc/ssh/ssh_host_dsa_key')
+    #for package in packages:
+    #    package_ensure(package)
+    #run('wget %s -O /tmp/livecd.iso' % livecd['isoimage'])
+    #if not file_is_dir('/mnt/tfmnt'):
+        #run('mkdir /mnt/tfmnt')
+    #run('mount /tmp/livecd.iso /mnt/tfmnt -o loop')
+    #run('rsync -a --stats /mnt/tfmnt/ /tmp/imgdir')
+    #run('umount /mnt/tfmnt')
+    #run('mount -o loop /tmp/imgdir/live/filesystem.squashfs /mnt/tfmnt')
+    #run('rsync -a --stats /mnt/tfmnt/ /tmp/rootimg')
+    #run('umount /mnt/tfmnt')
+    #run('cat /etc/resolv.conf > /tmp/rootimg/etc/resolv.conf')
+    #run('mount -t proc proc /tmp/rootimg/proc')
+    #run('mount -t sysfs sys /tmp/rootimg/sys')
+    #run('mount -o bind /dev /tmp/rootimg/dev')
+    #run('chroot /tmp/rootimg aptitude update')
+    #run('chroot /tmp/rootimg aptitude -y install openssh-server vim squashfs-tools tree xfsprogs parted')
+    #run('chroot /tmp/rootimg ssh-keygen -N "" -C "root@teefaa" -f /root/.ssh/id_rsa')
+    #run('chroot /tmp/rootimg ssh-keygen -t rsa1 -N "" -C "ssh_host_rsa_key" -f /etc/ssh/ssh_host_rsa_key')
+    #run('chroot /tmp/rootimg ssh-keygen -t dsa -N "" -C "ssh_host_dsa_key" -f /etc/ssh/ssh_host_dsa_key')
     file = '/tmp/rootimg/root/.ssh/authorized_keys'
     for key in livecd['pubkeys']:
         append(file, '%s' % livecd['pubkeys'][key])

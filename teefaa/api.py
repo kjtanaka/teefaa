@@ -26,11 +26,12 @@ import time
 import ConfigParser
 import argparse
 import string
+import envoy
 from fabric.api import *
 from fabric.contrib import *
 
 def baremetal_provisioning(hostname, imagename):
-    cfgfile = '~/.teefaa/teefaa.conf'
+    cfgfile = os.environ['TEEFAA_CONF_DIR']
     cfg = ConfigParser.SafeConfigParser()
     cfg.read(os.path.expanduser(cfgfile))
 
@@ -62,7 +63,9 @@ def baremetal_provisioning_dev(hostname, imagename):
 def main():
     '''This is just a test for now.'''
     #baremetal_provisioning('i2', 'india_openstack_v1')
-    print 'just test'
+    envoy.run('cd {0}'.format(os.environ['TEEFAA_DIR']))
+    r = envoy.run('pwd')
+    print r.std_out
 
 if __name__ == "__main__":
  main()

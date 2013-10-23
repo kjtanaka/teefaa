@@ -313,9 +313,6 @@ def check_distro():
 def make_livecd(livecd_name):
     ''':livecd_name | Make LiveCD'''
     livecd = read_ymlfile('livecd.yml')[livecd_name]
-    print livecd
-    exit(1)
-
     packages = [
             'wget',
             'genisoimage',

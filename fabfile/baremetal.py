@@ -125,29 +125,40 @@ class BaremetalProvisioning:
         device = self._check_if_hp_raid_controller()
         if self.scheme == 'mbr':
             run('parted %s --script -- mklabel msdos' % device)
+            time.sleep(1)
             run('parted %s --script -- unit MB' % device)
+            time.sleep(1)
             a, b = 1, int(self.swap['size']) * 1000
             run('parted %s --script -- mkpart primary linux-swap %s %s' % (device, a, b))
+            time.sleep(1)
             bootid = 2
         elif self.scheme == 'gpt':
             run('parted %s --script -- mklabel gpt' % device)
+            time.sleep(1)
             run('parted %s --script -- unit MB' % device)
+            time.sleep(1)
             run('parted %s --script -- mkpart non-fs 1 3' % device)
+            time.sleep(1)
             a, b = 3, int(self.swap['size']) * 1000
             run('parted %s --script -- mkpart swap linux-swap %s %s' % (device, a, b))
+            time.sleep(1)
             run('parted %s --script -- set 1 bios_grub on' % device)
+            time.sleep(1)
             bootid = 3
         else: 
             print 'ERROR: scheme %s is not supported.' % self.scheme
             exit(1)
         a, b = b, b + int(self.system['size']) * 1000
         run('parted %s --script -- mkpart primary %s %s' % (device, a, b))
+        time.sleep(1)
         if self.data['size'] == '-1':
             a, b = b, -1
         else:
             a, b = b, b + int(self.data['size']) * 1000
         run('parted %s --script -- mkpart primary %s %s' % (device, a, b))
+        time.sleep(1)
         run('parted %s --script -- set %s boot on' % (device, bootid))
+        time.sleep(1)
         run ('parted %s --script -- print' % device)
 
     def makefs(self):

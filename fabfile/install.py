@@ -4,15 +4,15 @@
 # tfutils - installs utilities.
 #
 
-from fabric.api import \
-        task
-from cuisine import select_package, package_ensure, file_update, text_strip_margin
+from fabric.api import task
+from cuisine import select_package, package_ensure, file_update, text_strip_margin,\
+        file_append
 
 @task
 def pxeserver():
     """Install PXE server"""
     select_package('apt')
-    package_ensure('tftpd-hpa syslinux')
+    package_ensure("tftpd-hpa syslinux")
     file_update('/etc/default/tftpd-hpa', _update_tftpd_conf)
 
 def _update_tftpd_conf(conf):
@@ -26,5 +26,13 @@ def _update_tftpd_conf(conf):
     return new_conf
 
 @task
-def nfsserver():
+def nfsserver(allowed_subnet):
     """Install NFS server"""
+    select_package('apt')
+    package_ensure("nfs-kernel-server")
+    file_update(
+            '/etc/exports',
+            lambda _:text_ensure_line(_,
+                "/nfsroot  {0}(rw,no_root_squash,async,insecure)".format(allowed_subnet),
+                "# just test"
+            ))

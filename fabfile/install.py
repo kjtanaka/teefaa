@@ -10,13 +10,13 @@ from cuisine import select_package, package_ensure, file_update, text_strip_marg
 
 @task
 def pxeserver():
-
+    """Install PXE server"""
     select_package('apt')
-    package_ensure('tftpd-hpa syslinux')
+    package_ensure('tftpd-hpa', 'syslinux')
     file_update('/etc/default/tftpd-hpa', _update_tftpd_conf)
 
 def _update_tftpd_conf(conf):
-
+    """Update /etc/default/tftpd-hpa"""
     new_conf = text_strip_margin(
             """
             |# Defaults for tftpd-hpa",
@@ -24,3 +24,7 @@ def _update_tftpd_conf(conf):
             |OPTIONS=\"-l -s /tftpboot\"
             |""")
     return new_conf
+
+@task
+def nfsserver():
+    """Install NFS server"""

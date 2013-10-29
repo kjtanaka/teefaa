@@ -377,7 +377,7 @@ def _update_menu_cfg(conf):
 def make_pxeimage(pxename):
     ''':pxename'''
     config = read_ymlfile('pxe.yml')[pxename]
-    prefix = pxecfg['prefix']
+    prefix = config['prefix']
 
     put(config['livecd'], '/tmp/livecd.iso')
     if not file_is_dir('/mnt/tfmnt'):

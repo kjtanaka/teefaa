@@ -4,6 +4,7 @@
 # tfutils - installs utilities.
 #
 
+from fabric.api import task
 from cuisine import select_package, \
         package_ensure
 

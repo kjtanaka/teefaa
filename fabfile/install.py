@@ -5,7 +5,7 @@
 #
 
 from fabric.api import task
-from fabric.operations import local
+from fabric.operations import local, run
 from cuisine import select_package, package_ensure, file_update, text_strip_margin,\
         file_append, text_ensure_line
 

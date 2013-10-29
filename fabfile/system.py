@@ -372,3 +372,45 @@ def _update_menu_cfg(conf):
             |    append initrd=/live/initrd.img boot=live config   quiet
             |""")
     return new_conf
+
+@task
+def make_pxeimage(pxename):
+    ''':pxename'''
+    config = read_ymlfile('pxe.yml')[pxename]
+    prefix = pxecfg['prefix']
+
+    put(config['livecd'], '/tmp/livecd.iso')
+    if not file_is_dir('/mnt/tfmnt'):
+        run('mkdir /mnt/tfmnt')
+    run('mount /tmp/livecd.iso /mnt/tfmnt -o loop')
+    expdir = prefix['export']
+    if not file_is_dir(expdir):
+        run('mkdir -p %s' % expdir)
+    run('rsync -a --stats /mnt/tfmnt/ %s/%s' % (expdir, pxename))
+    run('umount /mnt/tfmnt')
+    tftpdir = prefix['tftpdir']
+    if not file_is_dir('%s/%s' % (tftpdir, pxename)):
+        run('mkdir -p %s/%s' % (tftpdir, pxename))
+    run('cp %s/%s/live/initrd.img %s/%s/initrd.img' \
+                % (expdir, pxename, tftpdir, pxename))
+    run('cp %s/%s/live/vmlinuz %s/%s/vmlinuz' \
+                % (expdir, pxename, tftpdir, pxename))
+    pxefile = '%s/%s' % (prefix['pxelinux_cfg'], pxename)
+    file_update(pxefile, _update_pxefile)
+    sed(pxefile, 'PXENAME', pxename)
+    sed(pxefile, 'EXPDIR', expdir)
+    sed(pxefile, 'PXESERVER', config['nfs_ip'])
+
+def _update_pxefile(conf):
+    """Update pxecfg"""
+    new_conf = text_strip_margin(
+            """
+            |default PXENAME
+            |prompt 1
+            |timeout 30
+            |
+            |label PXENAME
+            |  kernel PXENAME/amd64/vmlinuz-2.6.32-5-amd64
+            |  append initrd=PXENAME/amd64/initrd.img-2.6.32-5-amd64 boot=live netboot=nfs nfsroot=PXESERVER:EXPDIR console=tty0 console=ttyS0,115200n8r text --
+            |"""
+    return new_conf

@@ -396,14 +396,7 @@ def make_pxeimage(pxename):
     run('cp %s/%s/live/vmlinuz %s/%s/vmlinuz' \
                 % (expdir, pxename, tftpdir, pxename))
     pxefile = '%s/%s' % (prefix['pxelinux_cfg'], pxename)
-    file_update(pxefile, _update_pxefile)
-    sed(pxefile, 'PXENAME', pxename)
-    sed(pxefile, 'EXPDIR', expdir)
-    sed(pxefile, 'PXESERVER', config['nfs_ip'])
-
-def _update_pxefile(conf):
-    """Update pxecfg"""
-    new_conf = text_strip_margin(
+    pxe_config = text_strip_margin(
             """
             |default PXENAME
             |prompt 1
@@ -412,5 +405,5 @@ def _update_pxefile(conf):
             |label PXENAME
             |  kernel PXENAME/amd64/vmlinuz-2.6.32-5-amd64
             |  append initrd=PXENAME/amd64/initrd.img-2.6.32-5-amd64 boot=live netboot=nfs nfsroot=PXESERVER:EXPDIR console=tty0 console=ttyS0,115200n8r text --
-            |""")
-    return new_conf
+            |""".format(pxename, expdir, config['nfs_ip']))
+    file_write(pxefile, pxe_config)

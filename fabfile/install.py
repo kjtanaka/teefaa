@@ -6,7 +6,7 @@
 
 from fabric.api import task
 from cuisine import select_package, package_ensure, file_update, text_strip_margin,\
-        file_append
+        file_append, text_ensure_line
 
 @task
 def pxeserver():

@@ -12,7 +12,7 @@ from cuisine import select_package, package_ensure, file_update, text_strip_marg
 def pxeserver():
     """Install PXE server"""
     select_package('apt')
-    package_ensure('tftpd-hpa', 'syslinux')
+    package_ensure('tftpd-hpa' 'syslinux')
     file_update('/etc/default/tftpd-hpa', _update_tftpd_conf)
 
 def _update_tftpd_conf(conf):

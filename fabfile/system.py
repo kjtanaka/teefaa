@@ -371,3 +371,4 @@ def _update_menu_cfg(conf):
             |    kernel /live/vmlinuz
             |    append initrd=/live/initrd.img boot=live config   quiet
             |""")
+    return new_conf

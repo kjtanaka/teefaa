@@ -22,5 +22,5 @@ def _update_tftpd_conf(conf):
             |# Defaults for tftpd-hpa",
             |RUN_DAEMON=\"yes\"",
             |OPTIONS=\"-l -s /tftpboot\"
-            """)
+            |""")
     return new_conf

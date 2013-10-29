@@ -50,3 +50,5 @@ def nfsserver(allowed_subnet):
                 "/nfsroot  {0}(rw,no_root_squash,async,insecure,no_subtree_check)".format(allowed_subnet)
             ))
     run('exportfs -rv')
+
+

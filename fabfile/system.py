@@ -412,5 +412,5 @@ def _update_pxefile(conf):
             |label PXENAME
             |  kernel PXENAME/amd64/vmlinuz-2.6.32-5-amd64
             |  append initrd=PXENAME/amd64/initrd.img-2.6.32-5-amd64 boot=live netboot=nfs nfsroot=PXESERVER:EXPDIR console=tty0 console=ttyS0,115200n8r text --
-            |"""
+            |""")
     return new_conf

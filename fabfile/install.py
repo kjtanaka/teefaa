@@ -33,6 +33,5 @@ def nfsserver(allowed_subnet):
     file_update(
             '/etc/exports',
             lambda _:text_ensure_line(_,
-                "/nfsroot  {0}(rw,no_root_squash,async,insecure,no_subtree_check)".format(allowed_subnet),
-                "# just test\n"
+                "/nfsroot  {0}(rw,no_root_squash,async,insecure,no_subtree_check)".format(allowed_subnet)
             ))

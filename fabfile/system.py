@@ -398,12 +398,12 @@ def make_pxeimage(pxename):
     pxefile = '%s/%s' % (prefix['pxelinux_cfg'], pxename)
     pxe_config = text_strip_margin(
             """
-            |default PXENAME
+            |default {0}
             |prompt 1
             |timeout 30
             |
-            |label PXENAME
-            |  kernel PXENAME/amd64/vmlinuz-2.6.32-5-amd64
-            |  append initrd=PXENAME/amd64/initrd.img-2.6.32-5-amd64 boot=live netboot=nfs nfsroot=PXESERVER:EXPDIR console=tty0 console=ttyS0,115200n8r text --
+            |label {0}
+            |  kernel {0}/amd64/vmlinuz-2.6.32-5-amd64
+            |  append initrd={0}/amd64/initrd.img-2.6.32-5-amd64 boot=live netboot=nfs nfsroot={2}:{1} console=tty0 console=ttyS0,115200n8r text --
             |""".format(pxename, expdir, config['nfs_ip']))
     file_write(pxefile, pxe_config)

@@ -23,6 +23,7 @@ def _update_tftpd_conf(conf):
     new_conf = [
             "# Defaults for tftpd-hpa",
             "RUN_DAEMON=\"yes\"",
-            "OPTIONS=\"-l -s /tftpboot\""
+            "OPTIONS=\"-l -s /tftpboot\"",
+            ""
             ]
     return '\n'.join(new_conf)

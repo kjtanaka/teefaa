@@ -479,8 +479,8 @@ class BaremetalProvisioningUbuntu(BaremetalProvisioning):
                 run('chmod 700 /mnt/root/.ssh')
             file = '/mnt/root/.ssh/authorized_keys'
             run('rm -f %s' % file)
-            for key in self.host['pubkeys']:
-                append(file, '%s' % self.host['pubkeys'][key])
+            for key in self.image['pubkeys']:
+                append(file, '%s' % self.image['pubkeys'][key])
             run('chmod 640 %s' % file)
     
     def install_bootloader(self):

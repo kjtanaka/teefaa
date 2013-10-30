@@ -538,8 +538,8 @@ def make_pxeimage(pxename):
     sed(pxefile, 'PXESERVER', pxecfg['nfs_ip'])
 
 @task
-def create_snapshot(hostname, save_to):
-    ''':name,saveto  -  Make Snapshot'''
+def create_snapshot(hostname, snapshot_name):
+    ''':hostname,snapshot_name  -  Make Snapshot'''
     env.host_string = hostname
     env.user = 'root'
     today = datetime.date.today
@@ -563,11 +563,11 @@ def create_snapshot(hostname, save_to):
     run('rsync -a --stats --one-file-system \
             /boot/ {}/boot'.format(workdir))
     run('mksquashfs {0} /tmp/{1}-{2}.squashfs \
-            -noappend'.format(workdir, hostname, today()))
-    get('/tmp/{0}-{1}.squashfs'.format(hostname, today()), \
-            '{0}/{1}-{2}.squashfs'.format(save_to, hostname, today()))
+            -noappend'.format(workdir, snapshot_name, today()))
+    get('/tmp/{0}-{1}.squashfs'.format(snapshot_name, today()), \
+            '{0}/{1}-{2}.squashfs'.format(snapshot_name, today()))
     run('rm -rf {}'.format(workdir))
-    run('rm -f /tmp/{0}-{1}.squashfs'.format(hostname, today()))
+    run('rm -f /tmp/{0}-{1}.squashfs'.format(snapshot_name, today()))
 
 @task
 def hello(hostname):

@@ -562,7 +562,7 @@ def create_snapshot(hostname, save_to):
             /var/ {}/var'.format(workdir))
     run('rsync -a --stats --one-file-system \
             /boot/ {}/boot'.format(workdir))
-    run('mksquashfs %s /tmp/%s-%s.squashfs \
+    run('mksquashfs {0} /tmp/{1}-{2}.squashfs \
             -noappend'.format(workdir, hostname, today()))
     get('/tmp/{0}-{1}.squashfs'.format(hostname, today()), \
             '{0}/{1}-{2}.squashfs'.format(save_to, name, today()))

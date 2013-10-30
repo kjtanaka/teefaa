@@ -538,8 +538,10 @@ def make_pxeimage(pxename):
     sed(pxefile, 'PXESERVER', pxecfg['nfs_ip'])
 
 @task
-def mksnapshot(name, saveto):
+def create_snapshot(hostname, save_to):
     ''':name,saveto  -  Make Snapshot'''
+    env.host = hostname
+    env.user = 'root'
     today = datetime.date.today
     distro = run('python -c "import platform; print platform.dist()[0].lower()"')
     print distro
@@ -552,20 +554,20 @@ def mksnapshot(name, saveto):
     else:
         print 'ERROR: distro %s is not supported.' % distro
         exit(1)
-    workdir = '/root/TFROOTIMG-%s' % today()
-    run('mkdir -p %s' % workdir)
-    run('rsync -a --stats --one-file-system --exclude=%s / %s' \
-            % (workdir.lstrip('/'), workdir))
-    run('rsync -a --stats --one-file-system /var/ %s/var' \
-            % workdir)
-    run('rsync -a --stats --one-file-system /boot/ %s/boot' \
-            % workdir)
-    run('mksquashfs %s /tmp/%s-%s.squashfs -noappend' \
-            % (workdir, name, today()))
-    get('/tmp/%s-%s.squashfs' % (name, today()), \
-            '%s/%s-%s.squashfs' % (saveto, name, today()))
-    run('rm -rf %s' % workdir)
-    run('rm -f /tmp/%s-%s.squashfs' % (name, today()))
+    workdir = '/tmp/ROOTIMG-{}'.format(today())
+    run('mkdir -p {}'.format(workdir))
+    run('rsync -a --stats --one-file-system \
+            --exclude={0} / {1}'.format(workdir.lstrip('/'), workdir))
+    run('rsync -a --stats --one-file-system \
+            /var/ {}/var'.format(workdir))
+    run('rsync -a --stats --one-file-system \
+            /boot/ {}/boot'.format(workdir))
+    run('mksquashfs %s /tmp/%s-%s.squashfs \
+            -noappend'.format(workdir, name, today()))
+    get('/tmp/{0}-{1}.squashfs'.format(name, today()), \
+            '{0}/{1}-{2}.squashfs'.format(save_to, name, today()))
+    run('rm -rf {}'.format(workdir))
+    run('rm -f /tmp/{0}-{1}.squashfs'.format(name, today()))
 
 @task
 def hello(hostname):

@@ -354,7 +354,8 @@ class BaremetalProvisioningRedHat6(BaremetalProvisioning):
                     print "ERROR: bootproto = %s is not supported."
                     exit(1)
         # Delete key pair
-        #if host['del_keypair']:
+        if self.image['del_keypair']:
+            run('rm -rf /mnt/root/.ssh/id_*')
     
         # Update Authorized Keys
         if self.image['update_keys']:
@@ -468,8 +469,11 @@ class BaremetalProvisioningUbuntu(BaremetalProvisioning):
         # Generate ssh host key if it doesn't exist.
         run('rm -f /mnt/etc/ssh/ssh_host_*')    
         run('ssh-keygen -t rsa -N "" -f /mnt/etc/ssh/ssh_host_rsa_key')
+        # Delete key pair
+        if self.image['del_keypair']:
+            run('rm -rf /mnt/root/.ssh/id_*')
         # Update authorized_keys.
-        if self.host['update_keys']:
+        if self.image['update_keys']:
             if not file_exists('/mnt/root/.ssh'):
                 run('mkdir -p /mnt/root/.ssh')
                 run('chmod 700 /mnt/root/.ssh')

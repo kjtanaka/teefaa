@@ -340,7 +340,7 @@ class BaremetalProvisioningRedHat6(BaremetalProvisioning):
         # Update Network Interfaces
         for iface in self.host['network'].keys():
             print "IFACE",iface
-            if iface['name'] in ['bmc','pxe']:
+            if iface in ['bmc','pxe']:
                 pass
             else:
                 iface_conf = self.host['network'][iface]

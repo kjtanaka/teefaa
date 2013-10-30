@@ -403,7 +403,7 @@ def make_pxeimage(pxename):
             |timeout 30
             |
             |label {0}
-            |  kernel {0}/amd64/vmlinuz
-            |  append initrd={0}/amd64/initrd.img boot=live netboot=nfs nfsroot={2}:{1}/{0} console=tty0 console=ttyS0,115200n8r text --
+            |  kernel {0}/vmlinuz
+            |  append initrd={0}/initrd.img boot=live netboot=nfs nfsroot={2}:{1}/{0} console=tty0 console=ttyS0,115200n8r text --
             |""".format(pxename, expdir, config['nfs_ip']))
     file_write(pxefile, pxe_config)

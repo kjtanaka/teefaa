@@ -565,7 +565,7 @@ def create_snapshot(hostname, snapshot_name):
     run('mksquashfs {0} /tmp/{1}-{2}.squashfs \
             -noappend'.format(workdir, snapshot_name, today()))
     get('/tmp/{0}-{1}.squashfs'.format(snapshot_name, today()), \
-            '$HOME/{0}-{1}.squashfs'.format(snapshot_name, today()))
+            '\$HOME/{0}-{1}.squashfs'.format(snapshot_name, today()))
     run('rm -rf {}'.format(workdir))
     run('rm -f /tmp/{0}-{1}.squashfs'.format(snapshot_name, today()))
 

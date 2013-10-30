@@ -540,7 +540,7 @@ def make_pxeimage(pxename):
 @task
 def create_snapshot(hostname, save_to):
     ''':name,saveto  -  Make Snapshot'''
-    env.host = hostname
+    env.host_string = hostname
     env.user = 'root'
     today = datetime.date.today
     distro = run('python -c "import platform; print platform.dist()[0].lower()"')

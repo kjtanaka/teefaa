@@ -62,18 +62,11 @@ def provisioning(hostname, imagename):
     if hostname in excluded_hosts:
         print "ERROR: {0} is excluded.".format(hostname)
         exit(1)
-    """
-    old code to be deleted
-    pxeboot(hostname, 'netboot')
-    power(hostname, 'off')
-    power(hostname, 'wait_till_off')
-    power(hostname, 'on')
-    power(hostname, 'wait_till_on')
-    wait_till_ping(hostname, '100')
-    wait_till_ssh(hostname, '100')
-    bootstrap(hostname, imagename)
-    pxeboot(hostname, 'localboot')
-    """
+
+    with settings(hide('running')):
+        if not run("grep \" {}\" /etc/hosts".format(hostname)):
+            print "ERROR: {0} doesn\'t exist on /etc/hosts.".format(hostname)
+            exit(1)
     
     STATUS("NETBOOT START")
     pxeboot(hostname, 'netboot')
@@ -449,18 +442,6 @@ class BaremetalProvisioningUbuntu(BaremetalProvisioning):
         # Disable ssh password login
         sed('/mnt/etc/ssh/sshd_config', 'PasswordAuthentication yes', 'PasswordAuthentication no')
         sed('/mnt/etc/ssh/sshd_config', '#PasswordAuthentication no', 'PasswordAuthentication no')
-        # Disable cloud-init
-        for file in [
-                '/mnt/etc/init/cloud-config.conf',
-                '/mnt/etc/init/cloud-final.conf',
-                '/mnt/etc/init/cloud-init.conf',
-                '/mnt/etc/init/cloud-init-container.conf',
-                '/mnt/etc/init/cloud-init-local.conf',
-                '/mnt/etc/init/cloud-init-nonet.conf',
-                '/mnt/etc/init/cloud-log-shutdown.conf'
-                ]:
-            if file_is_file(file):
-                run('mv %s %s.bak' % (file, file))
         # Update hostname
         file = '/mnt/etc/hostname'
         run('rm -f %s' % file)

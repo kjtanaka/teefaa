@@ -16,19 +16,37 @@ def help(function):
     local('pydoc {0}.{1}'.format(myfunc, function))
 
 @task
-def pxeserver():
-    """Install PXE server"""
+def pxeserver(tftp_addr):
+    """Install PXE server.
+    
+    Command example:
+        fab install.pxeserver:tftp_addr=192.168.1.1
+
+    Note:
+        tftp_addr will set TFTP_ADDRESS in
+        \"/etc/default/tftpd-hpa\"
+    """
     select_package('apt')
     package_ensure("tftpd-hpa syslinux")
-    file_update('/etc/default/tftpd-hpa', _update_tftpd_conf)
+    tftp_conf = text_strip_margin(
+            """
+            |# Defaults for tftpd-hpa"
+            |RUN_DAEMON=\"yes\"
+            |OPTIONS=\"-l -s /tftpboot\"
+            |TFTP_ADDRESS=\"{0}:69\"
+            |TFTP_OPTIONS=\"--secure\"
+            |""".format(tftp_addr))
+    file_write('/etc/default/tftpd-hpa', tftp_conf, sudo=True)
+    sudo('start tftpd-hpa||restart tftpd-hpa')
 
 def _update_tftpd_conf(conf):
     """Update /etc/default/tftpd-hpa"""
     new_conf = text_strip_margin(
             """
-            |# Defaults for tftpd-hpa",
-            |RUN_DAEMON=\"yes\"",
+            |# Defaults for tftpd-hpa"
+            |RUN_DAEMON=\"yes\"
             |OPTIONS=\"-l -s /tftpboot\"
+            |TFTP_OPTIONS="--secure"
             |""")
     return new_conf
 

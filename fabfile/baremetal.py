@@ -540,6 +540,7 @@ def make_pxeimage(pxename):
 @task
 def create_snapshot(hostname, snapshot_name):
     ''':hostname,snapshot_name  -  Make Snapshot'''
+    env.disable_known_hosts = True
     env.host_string = hostname
     env.user = 'root'
     today = datetime.date.today

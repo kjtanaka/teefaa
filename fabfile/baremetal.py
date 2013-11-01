@@ -57,6 +57,7 @@ def bootstrap(hostname, imagename):
 def provisioning(hostname, imagename):
     ''':hostname,imagename | Provisioning'''
     env.disable_known_hosts = True
+    env.host_string = hostname
     excluded_hosts = read_ymlfile('config.yml')['excluded_hosts']
 
     if hostname in excluded_hosts:

@@ -56,19 +56,19 @@ def bootstrap(hostname, imagename):
 @task
 def provisioning(hostname, imagename):
     ''':hostname,imagename | Provisioning'''
-    env.disable_known_hosts = True
-    env.host_string = hostname
+    #env.disable_known_hosts = True
+    #env.host_string = hostname
     excluded_hosts = read_ymlfile('config.yml')['excluded_hosts']
-    env.user = 'root'
+    #env.user = 'root'
 
     if hostname in excluded_hosts:
         print "ERROR: {0} is excluded.".format(hostname)
         exit(1)
 
-    with settings(hide('running')):
-        if not run("grep \" {}\" /etc/hosts".format(hostname)):
-            print "ERROR: {0} doesn\'t exist on /etc/hosts.".format(hostname)
-            exit(1)
+    #with settings(hide('running')):
+    #    if not run("grep \" {}\" /etc/hosts".format(hostname)):
+    #        print "ERROR: {0} doesn\'t exist on /etc/hosts.".format(hostname)
+    #        exit(1)
     
     STATUS("NETBOOT START")
     pxeboot(hostname, 'netboot')

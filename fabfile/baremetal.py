@@ -59,6 +59,7 @@ def provisioning(hostname, imagename):
     env.disable_known_hosts = True
     env.host_string = hostname
     excluded_hosts = read_ymlfile('config.yml')['excluded_hosts']
+    env.user = 'root'
 
     if hostname in excluded_hosts:
         print "ERROR: {0} is excluded.".format(hostname)

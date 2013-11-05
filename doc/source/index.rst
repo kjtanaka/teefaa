@@ -69,6 +69,32 @@ This stracture enables a simplified separation among concurrent developments, wh
 people to work on multile projects and multiple versions in a simple fashion. For example, 
 while one person is developing EXAMPLE, another person can start developing EXAMPLE2.
 
+Installation
+------------
+
+Users Guide (Under Construction)
+=====================================
+
+Installation
+------------
+
+* Download FG Teefaa from github repository. ::
+
+     git clone https://github.com/futuregrid/teefaa.git
+
+* Install required software. ::
+
+     cd teefaa
+     pip install -r requirements.txt
+     
+* Confirm you got everything. ::
+
+     cd teefaa
+     fab -l
+
+* That is all for installation and you should be able to see the list of scripts.
+
+
 Support
 -------
 

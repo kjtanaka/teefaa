@@ -72,16 +72,16 @@ while one person is developing EXAMPLE, another person can start developing EXAM
 Installation
 ------------
 
-* Download FG Teefaa from github repository. ::
+* Download FG Teefaa from the github repository::
 
      git clone https://github.com/cloudmesh/teefaa.git
 
-* Install required software. ::
+* Install required software::
 
      cd teefaa
      pip install -r requirements.txt
      
-* Confirm you got everything. ::
+* Confirm you got everything::
 
      cd teefaa
      fab -l

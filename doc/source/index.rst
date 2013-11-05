@@ -72,15 +72,9 @@ while one person is developing EXAMPLE, another person can start developing EXAM
 Installation
 ------------
 
-Users Guide (Under Construction)
-=====================================
-
-Installation
-------------
-
 * Download FG Teefaa from github repository. ::
 
-     git clone https://github.com/futuregrid/teefaa.git
+     git clone https://github.com/cloudmesh/teefaa.git
 
 * Install required software. ::
 

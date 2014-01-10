@@ -16,10 +16,9 @@ Welcome to Cloudmesh Teefaa!
    :maxdepth: 2
 
    usersguide
-   modules
    adminguide
+   modules
    license
-
 
 Cloudmesh Teefaa is a set of deployment scripts for with focuss on bare metal provisioning. Cloudmesh Teefaa is 
 simple and flexible allowing contributors to expand upon it.

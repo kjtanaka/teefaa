@@ -1,4 +1,4 @@
-Users Guide (Under Construction)
+Users Guide
 =====================================
 
 Installation

@@ -1,9 +1,8 @@
 Cloudmesh Teefaa
 =================
 
-This project creates a virtual cluster with the help of euca
-tools. The cluster uses SLURM as resource manager. A simple MPI
-program is included to test the functionality. of teh virtual cluster.
+Cloudmesh Teefaa is a set of deployment scripts for System Provisioning with focus on Baremetal Provisioning. 
+It is designed to be  simple, flexible, programable. 
 
 The project Documentation is located at http://cloudmesh.github.com/teefaa/
 

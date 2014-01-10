@@ -4,15 +4,22 @@ Users Guide
 Installation
 ------------
 
-* Install required software. ::
+* Install required software. Teefaa depends on a small set of
+  software. Best is to install it via pip::
 
-     pip install fabric
-     pip install cuisine
-     pip install PyYAML
+     pip install -r requirements.txt 
 
-* Download FG Teefaa from github repository. ::
+  after you download it
 
-     git clone https://github.com/futuregrid/teefaa.git
+* Advanced features of teefa also depend on the cloudmesh core
+  software. This includes a database for managing compute resources.
+  Please, visit the cloudmesh web site on github. 
+
+  * https://github.com/cloudmesh    
+
+* Download Cloudmesh Teefaa from github repository. ::
+
+     git clone https://github.com/cloudmesh/teefaa.git
 
 * Confirm you got everything. ::
 

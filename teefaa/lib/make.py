@@ -248,6 +248,8 @@ class MakeIso(object):
         cmd = ['chroot', self.new_squashfs_dir, 'aptitude', '-y', 'install',
                 'openssh-server', 'vim', 'squashfs-tools', 'xfsprogs', 'parted']
         sudo(' '.join(cmd))
+        cmd = ['chroot', self.new_squashfs_dir, 'update-rc.d', 'ssh', 'defaults']
+        sudo(' '.join(cmd))
 
     def _create_user(self):
         """

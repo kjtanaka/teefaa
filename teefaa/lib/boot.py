@@ -58,7 +58,7 @@ class FabricBoot(object):
         ipmi_user = self.power_driver_config['ipmi_user']
         bmc_address = self.power_driver_config['bmc_address']
         cmd = ['ipmitool', '-I', 'lanplus', '-U', ipmi_user, '-P', ipmi_password, '-E',
-                '-H', bmc_address, 'power', 'state']
+                '-H', bmc_address, 'power', 'status']
         subprocess.check_call(cmd)
         time.sleep(1)
 

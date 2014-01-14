@@ -62,6 +62,17 @@ class FabricBoot(object):
         subprocess.check_call(cmd)
         time.sleep(1)
 
+    def _power_on_ipmi(self):
+
+        print("Power on machine \'{host}\' ...".format(host=env.host_string))
+        ipmi_password = self.power_driver_config['ipmi_password']
+        ipmi_user = self.power_driver_config['ipmi_user']
+        bmc_address = self.power_driver_config['bmc_address']
+        cmd = ['ipmitool', '-I', 'lanplus', '-U', ipmi_user, '-P', ipmi_password, '-E',
+                '-H', bmc_address, 'power', 'on']
+        subprocess.check_call(cmd)
+        time.sleep(1)
+
     def _power_off_virtualbox(self):
         """
         Power off VM (VirtualBox)

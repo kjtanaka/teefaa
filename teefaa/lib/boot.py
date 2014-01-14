@@ -122,6 +122,7 @@ class FabricBoot(object):
         pxe_config = self.boot_driver_config['boot_config_file']
         pxe_config_diskless = self.boot_driver_config['diskless_boot_config_file']
         env.host_string = server
+        env.user = user
         cmd = ['cat', pxe_config_diskless, '>', pxe_config]
         run(' '.join(cmd))
 

@@ -1,0 +1,68 @@
+#!/usr/bin/env python
+# vim: tabstop=8 expandtab shiftwidth=4 softtabstop=4
+#
+# Copyright 2013-2014, Indiana University
+# 
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+"""
+sub command provision
+"""
+
+import os
+import time
+import argparse
+from fabric.api import execute
+from cuisine import text_strip_margin
+
+from .lib.make import make_swap, make_fs
+from .lib.boot import boot_diskless, boot_disk
+from .lib.partition import make_partition, mount_partition
+from .lib.install import install_snapshot, install_grub, condition
+
+class TeefaaProvision(object):
+
+    def setup(self, parser):
+
+        provision = parser.add_parser('provision', help='Provision OS')
+        provision.set_defaults(func=self.do_provision)
+
+    def do_provision(self, args):
+
+        text = text_strip_margin("""
+        | 
+        | _|_|_|_|_|                        _|_|                      
+        |    |_|      _|_|      _|_|      _|        _|_|_|    _|_|_|  
+        |    |_|    _|_|_|_|  _|_|_|_|  _|_|_|_|  _|    _|  _|    _|  
+        |    |_|    _|        _|          _|      _|    _|  _|    _|  
+        |    |_|      _|_|_|    _|_|_|    _|        _|_|_|    _|_|_|
+        |""")
+        print(text)
+        #execute(boot_diskless)
+        #execute(check_ssh)
+        execute(make_partition)
+        time.sleep(2)
+        execute(make_swap)
+        time.sleep(2)
+        execute(make_fs)
+        time.sleep(2)
+        execute(mount_partition)
+        time.sleep(2)
+        execute(install_snapshot)
+        time.sleep(2)
+        execute(condition)
+        time.sleep(2)
+        execute(install_grub)
+        time.sleep(2)
+        execute(boot_disk)
+

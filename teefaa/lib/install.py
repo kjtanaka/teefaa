@@ -1,0 +1,277 @@
+#!/usr/bin/env python
+# vim: tabstop=8 expandtab shiftwidth=4 softtabstop=4
+
+import os
+import time
+
+from fabric.api import (
+        cd,
+        env,
+        get,
+        hide,
+        run,
+        sudo,
+        task
+        )
+from fabric.contrib.files import (
+        append,
+        put
+        )
+from cuisine import (
+        file_append,
+        file_exists,
+        file_is_link,
+        file_write,
+        mode_sudo,
+        text_strip_margin
+        )
+
+from .common import read_config
+
+class InstallSnapshot(object):
+
+    def __init__(self):
+        # Set config
+        config = read_config()
+        env.host_string = config['host_config']['hostname']
+        self.snapshot_file = config['snapshot_config']['save_as']
+        distro = config['snapshot_config']['os']['distro']
+        # Create tmp dir
+        self.tmp_dir = "/mnt/tmp/teefaa"
+        self.squashfs = self.tmp_dir + "/filesystem.squashfs"
+        self.rootimg = self.tmp_dir + "/rootimg"
+        if not file_exists(self.rootimg):
+            cmd = ['mkdir', '-p', self.rootimg]
+            sudo(' '.join(cmd))
+        cmd = ['chmod', '700', self.tmp_dir, '&&',
+               'chown', '\$USER', self.tmp_dir]
+        sudo(' '.join(cmd))
+
+    def _upload_squashfs(self):
+        # Download snapshot
+        if not file_exists(self.squashfs):
+            put(self.snapshot_file, self.squashfs)
+            sudo("sync && echo 3 > /proc/sys/vm/drop_caches")
+
+    def _mount_squashfs(self):
+
+        with hide('stdout'):
+            output = sudo("df -a")
+        if not self.rootimg in output:
+            cmd = ['mount', '-o', 'loop', self.squashfs, self.rootimg]
+            sudo(' '.join(cmd))
+
+    def _copy_files(self):
+
+        cmd = ['rsync', '-a', '--stats', '--exclude=\'/tmp/*\'']
+        cmd.append(self.rootimg + '/') 
+        cmd.append('/mnt')
+        sudo(' '.join(cmd))
+        sudo("sync && echo 3 > /proc/sys/vm/drop_caches")
+
+    def run(self):
+
+        self._upload_squashfs()
+        self._mount_squashfs()
+        self._copy_files()
+
+
+class Condition(object):
+
+    def __init__(self):
+        config = read_config()
+        env.host_string = config['host_config']['hostname']
+        self.distro = config['snapshot_config']['os']['distro']
+        self.interfaces = config['network_config']
+        self.disk_config = config['disk_config']
+        self.rootimg = "/mnt"
+        if not file_exists(self.rootimg + '/etc'):
+            raise IOError("snapshot isn't installed yet.")
+
+    def condition_ubuntu(self):
+        self.condition_common()
+        self._condition_ubuntu_hostname()
+        self._condition_ubuntu_network()
+        self._condition_ubuntu_resolv()
+        self._condition_ubuntu_fstab()
+        self._condition_ubuntu_mtab()
+
+    def _condition_ubuntu_hostname(self):
+
+        with mode_sudo():
+            file_write('/mnt/etc/hostname', env.host_string)
+
+    def _condition_ubuntu_network(self):
+
+        text = text_strip_margin("""
+        |# This file describes the network interfaces available on your system
+        |# and how to activate them. For more information, see interfaces(5).
+        |
+        |# The loopback network interface
+        |auto lo
+        |iface lo inet loopback
+        |""")
+        file_path = "/mnt/etc/network/interfaces"
+        with mode_sudo():
+            file_write(file_path, text)
+
+        for iface in self.interfaces['add']:
+            bootp = self.interfaces['add'][iface]['bootp']
+            if bootp == 'dhcp':
+                text = text_strip_margin("""
+                |# {iface}
+                |auto {iface}
+                |iface {iface} inet dhcp
+                |""".format(iface=iface))
+                with mode_sudo():
+                    file_append(file_path, text)
+            elif iface['bootp'] == 'static':
+                pass
+            else:
+                raise TypeError("network_config: {0} is not supported.".format(iface))
+
+    def _condition_ubuntu_fstab(self):
+
+        file_path = "/mnt/etc/fstab"
+        label_type = self.disk_config['label_type']
+        device = self.disk_config['device']
+        system_format = self.disk_config['system']['format']
+        if label_type == 'mbr':
+            num = 0
+        elif label_type == 'gpt':
+            num = 1
+        text = text_strip_margin("""
+        |# /etc/fstab: static file system information.
+        |#
+        |# Use 'blkid' to print the universally unique identifier for a
+        |# device; this may be used with UUID= as a more robust way to name devices
+        |# that works even if disks are added and removed. See fstab(5).
+        |#
+        |# <file system> <mount point>   <type>  <options>       <dump>  <pass>
+        |proc   /proc           proc    nodev,noexec,nosuid 0       0
+        |{device}{swap_num}   none            swap    sw              0       0
+        |{device}{system_num}   /               {system_format}    errors=remount-ro 0       1
+        |""".format(device=device,
+            swap_num=num+1,
+            system_num=num+2,
+            system_format=system_format))
+        with mode_sudo():
+            file_write(file_path, text)
+
+    def _condition_ubuntu_mtab(self):
+
+        file_path = "/mnt/etc/mtab"
+        label_type = self.disk_config['label_type']
+        device = self.disk_config['device']
+        system_format = self.disk_config['system']['format']
+        if label_type == 'mbr':
+            num = 0
+        elif label_type == 'gpt':
+            num = 1
+        text = text_strip_margin("""
+        |{device}{system_num} / {system_format} rw,errors=remount-ro 0 0
+        |proc /proc proc rw,noexec,nosuid,nodev 0 0
+        |sysfs /sys sysfs rw,noexec,nosuid,nodev 0 0
+        |none /sys/fs/fuse/connections fusectl rw 0 0
+        |none /sys/kernel/debug debugfs rw 0 0
+        |none /sys/kernel/security securityfs rw 0 0
+        |udev /dev devtmpfs rw,mode=0755 0 0
+        |devpts /dev/pts devpts rw,noexec,nosuid,gid=5,mode=0620 0 0
+        |tmpfs /run tmpfs rw,noexec,nosuid,size=10%,mode=0755 0 0
+        |none /run/lock tmpfs rw,noexec,nosuid,nodev,size=5242880 0 0
+        |none /run/shm tmpfs rw,nosuid,nodev 0 0
+        |rpc_pipefs /run/rpc_pipefs rpc_pipefs rw 0 0
+        |""".format(device=device,
+            system_num=num+2,
+            system_format=system_format))
+        with mode_sudo():
+            file_write(file_path, text)
+
+    def _condition_ubuntu_resolv(self):
+
+        file_path = "/mnt/etc/resolv.conf"
+        sudo("rm -f " + file_path)
+        sudo("cat /etc/resolv.conf > " + file_path)
+
+    def condition_common(self):
+        
+        self._condition_common_rules()
+
+    def _condition_common_rules(self):
+
+        file_path = "/mnt/etc/udev/rules.d/70-persistent-net.rules"
+        if file_exists(file_path):
+            if not file_is_link(file_path):
+                cmd = ['rm', '-rf', file_path]
+                sudo(' '.join(cmd))
+                cmd = ['ln', '-s', '/dev/null', file_path]
+                sudo(' '.join(cmd))
+
+    def run(self):
+        sub_func = getattr(self, 'condition_' + self.distro)
+        sub_func()
+
+
+class InstallGrub(object):
+
+    def __init__(self):
+        config = read_config()
+        env.host_string = config['host_config']['hostname']
+        self.device = config['disk_config']['device']
+        self.bootloader_type = config['bootloader_config']['type']
+
+    def install_bootloader_grub2(self):
+        self._install_bootloader_mount_devices()
+        self._install_bootloader_grub2()
+
+    def _install_bootloader_mount_devices(self):
+
+        with hide('stdout', 'running'):
+            output = sudo("df -a")
+        mpoint = "/mnt/proc"
+        if not mpoint in output:
+            sudo("mount -t proc proc /mnt/proc")
+            time.sleep(2)
+        mpoint = "/mnt/sys"
+        if not mpoint in output:
+            sudo("mount -t sysfs sys /mnt/sys")
+            time.sleep(2)
+        mpoint = "/mnt/dev"
+        if not mpoint in output:
+            sudo("mount -o bind /dev /mnt/dev")
+            time.sleep(2)
+        mpoint = "/mnt/run"
+        if not mpoint in output:
+            sudo("mount -o bind /run /mnt/run")
+            time.sleep(2)
+
+    def _install_bootloader_grub2(self):
+
+        #cmd = ['chroot', '/mnt', 'apt-get', '-o','Dpkg::Options::=\'--force-confdef\'','-o',
+        #        'Dpkg::Options::=\'--force-confold\'', '-f','-q', '-y', 'install', 'grub2']
+        #sudo(' '.join(cmd))
+        cmd = ['chroot', '/mnt', 'update-grub']
+        sudo(' '.join(cmd))
+        cmd = ['chroot', '/mnt', 'grub-install', '--recheck', self.device]
+        sudo(' '.join(cmd))
+        sudo("sync")
+
+    def run(self):
+        sub_func = getattr(self, 'install_bootloader_' + self.bootloader_type)
+        sub_func()
+
+
+@task
+def install_snapshot():
+    insnap = InstallSnapshot()
+    insnap.run()
+
+@task
+def condition():
+    cond = Condition()
+    cond.run()
+
+@task
+def install_grub():
+    inst_grub = InstallGrub()
+    inst_grub.run()

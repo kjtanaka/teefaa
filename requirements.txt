@@ -1,4 +1,0 @@
-Fabric==1.6.1
-PyYAML==3.10
-cuisine==0.6.4
-python-hostlist

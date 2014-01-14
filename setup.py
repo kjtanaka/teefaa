@@ -14,10 +14,34 @@
 # See the License for the specific language governing permissions and        #
 # limitations under the License.                                             #
 # -------------------------------------------------------------------------- #
-import setuptools
+from setuptools import setup, find_packages
+import sys, os
 
-setuptools.setup(
-    setup_requires=['d2to1', 'pbr>=0.5,<0.6'],
-    d2to1=True)
+version = '0.3.1'
 
-#    version='#:')
+setup(name='teefaa',
+      version=version,
+      description="FutureGrid: Baremetal Provisioning Toolkit",
+      long_description="""\
+""",
+      classifiers=[], # Get strings from http://pypi.python.org/pypi?%3Aaction=list_classifiers
+      keywords='Cloudmesh Teefaa',
+      author = ['Koji Tanaka','Javier Diaz'],
+      author_email = 'kj.tanaka@gmail.com',
+      maintainer = ['Koji Tanaka', 'Javier Diaz', 'Gregor von Laszewski'],
+      url='https://github.com/cloudmesh/teefaa',
+      license='Apache Software License',
+      packages=find_packages(exclude=['ez_setup', 'examples', 'tests']),
+      include_package_data=True,
+      zip_safe=False,
+      install_requires=[
+          "Fabric>=1.6",
+	  "cuisine>=0.6",
+	  "PyYAML>=3.10"
+      ],
+      entry_points="""
+      [console_scripts]
+      teefaa = teefaa.shell:main
+      """,
+      )
+

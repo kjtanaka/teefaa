@@ -1,3 +1,0 @@
-# pxecfg.yml
-
-pxeprefix: '/tftpboot/pxelinux.cfg'

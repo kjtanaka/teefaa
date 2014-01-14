@@ -26,23 +26,46 @@ import time
 import ConfigParser
 import argparse
 import string
+import envoy
 from fabric.api import *
 from fabric.contrib import *
 
 def baremetal_provisioning(hostname, imagename):
-    cfgfile = '~/.teefaa/teefaa.conf'
+    cfgfile = os.environ['TEEFAA_CONF_DIR']
     cfg = ConfigParser.SafeConfigParser()
     cfg.read(os.path.expanduser(cfgfile))
 
-    sys.path.append(cfg.get('fabric', 'path_to_fabfile'))
+    fab_path = cfg.get('fabric', 'path_to_fabfile')
+
+    sys.path.append(fab_path)
     import baremetal
 
-    execute(baremetal.provisioning, hostname, imagename)
-    print imagename
+    status = execute(baremetal.provisioning, hostname, imagename)
+    print status
+
+    return 'OK'
+
+def baremetal_provisioning_dev(hostname, imagename):
+    cfgfile = '~/.teefaa/teefaa.yml'
+    cfg = ConfigParser.SafeConfigParser()
+    cfg.read(os.path.expanduser(cfgfile))
+
+    fab_path = cfg.get('fabric', 'path_to_fabfile')
+
+    sys.path.append(fab_path)
+    import baremetal
+
+    status = execute(baremetal.provisioning, hostname, imagename)
+    print status
+
+    return 'OK'
 
 def main():
     '''This is just a test for now.'''
-    baremetal_provisioning('i2', 'india_openstack_v1')
+    #baremetal_provisioning('i2', 'india_openstack_v1')
+    envoy.run('cd {0}'.format(os.environ['TEEFAA_DIR']))
+    r = envoy.run('pwd')
+    print r.std_out
 
 if __name__ == "__main__":
  main()

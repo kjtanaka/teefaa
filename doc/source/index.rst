@@ -40,31 +40,6 @@ FG Teefaa requires(/thanks to):
 * Torque Resource Manager (for scheduing Baremetal Provisioning)
 
 
-Simple Design
--------------
-
-* Scripts for handling Shell commands are written in Fabric and Cuisine.
-* Configuration files are written in YAML format. One of the goals of Teefaa 
-  is to make it understandable by reading the YAML files.
-* Each scripts has four types of directories as shown below. ::
-
-    |-- fabfile/EXAMPLE.py
-    |-- ymlfile/EXAMPLE
-    |           |-- config1.yml
-    |           `-- config2.yml
-    |-- private/EXAMPLE
-    |           `-- dir1
-    |               |-- file1
-    |               `-- file2
-    `-- share/EXAMPLE
-              `-- dir1
-                  |-- file1
-                  `-- file2
-
-This stracture enables a simplified separation among concurrent developments, which allows 
-people to work on multile projects and multiple versions in a simple fashion. For example, 
-while one person is developing EXAMPLE, another person can start developing EXAMPLE2.
-
 Installation
 ------------
 
@@ -75,12 +50,11 @@ Installation
 * Install required software::
 
      cd teefaa
-     pip install -r requirements.txt
+     python setup.py install
      
 * Confirm you got everything::
 
-     cd teefaa
-     fab -l
+     teefaa -h
 
 * That is all for installation and you should be able to see the list of scripts.
 

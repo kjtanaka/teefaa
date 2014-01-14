@@ -8,7 +8,8 @@ import subprocess
 from fabric.api import (
         env,
         local,
-        task
+        task,
+        run
         )
 from fabric.contrib.files import (
         append
@@ -122,7 +123,7 @@ class FabricBoot(object):
         pxe_config_diskless = self.boot_driver_config['diskless_boot_config_file']
         env.host_string = server
         cmd = ['cat', pxe_config_diskless, '>', pxe_config]
-        sudo(' '.join(cmd))
+        run(' '.join(cmd))
 
     def setup_diskboot(self):
         """

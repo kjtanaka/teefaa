@@ -245,10 +245,10 @@ class MakeIso(object):
         cmd = ['cp', '/etc/resolv.conf', self.new_squashfs_dir + '/etc/resolv.conf']
         sudo(' '.join(cmd))
         # Install packages
+        cmd = ['chroot', self.new_squashfs_dir, 'aptitude', 'update']
+        sudo(' '.join(cmd))
         cmd = ['chroot', self.new_squashfs_dir, 'aptitude', '-y', 'install',
                 'openssh-server', 'vim', 'squashfs-tools', 'xfsprogs', 'parted']
-        sudo(' '.join(cmd))
-        cmd = ['chroot', self.new_squashfs_dir, 'update-rc.d', 'ssh', 'defaults']
         sudo(' '.join(cmd))
 
     def _create_user(self):

@@ -28,4 +28,5 @@ class TeefaaSsh(object):
             cmd.append('-i ' + ssh_key)
         except:
             pass
+        print(' '.join(cmd))
         subprocess.call(cmd)

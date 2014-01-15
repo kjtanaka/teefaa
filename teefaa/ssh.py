@@ -24,7 +24,7 @@ class TeefaaSsh(object):
         hostname = config['host_config']['hostname']
         cmd = ['ssh', '-F', ssh_config, hostname]
         try:
-            ssh_key = os.path.expanduser(config['ssh_key'])
+            ssh_key = os.path.abspath(config['ssh_key'])
             cmd.append('-i ' + ssh_key)
         except:
             pass

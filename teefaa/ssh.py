@@ -4,7 +4,7 @@
 import os
 import argparse
 import subprocess
-from fabric.api import local, execute, task
+from fabric.api import local, execute, task, hide
 
 from .lib.common import read_config
 
@@ -27,11 +27,15 @@ class TeefaaSsh(object):
             ssh_key = os.path.abspath(config['ssh_key'])
             cmd.append('-i ' + ssh_key)
         except:
-            pass
+            ssh_key = None
         print(' '.join(cmd))
         execute(fab_ssh, ssh_config, hostname, ssh_key)
 
 @task
 def fab_ssh(ssh_config, hostname, ssh_key):
-    cmd = ['ssh', '-F', ssh_config, '-i', ssh_key, hostname]
-    local(' '.join(cmd))
+    cmd = ['ssh', '-F', ssh_config, hostname]
+    if not ssh_key == None:
+        cmd.append("-i " + ssh_key)
+    with hide('running'):
+        print("ssh to machine '{0}'...".format(hostname))
+        local(' '.join(cmd))

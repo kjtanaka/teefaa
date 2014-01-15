@@ -19,6 +19,8 @@ from fabric.contrib.files import (
 from cuisine import (
         dir_ensure,
         dir_exists,
+        file_ensure,
+        file_exists,
         file_write,
         mode_sudo,
         package_ensure_apt,
@@ -34,7 +36,7 @@ class MakeSnapshot(object):
         # Set config
         config = read_config()
         env.host_string = config['snapshot_config']['hostname']
-        distro = config['snapshot_config']['os']['distro']
+        self.distro = config['snapshot_config']['os']['distro']
         try:
             self.overwrite = config['snapshot_config']['overwrite']
         except:
@@ -43,14 +45,19 @@ class MakeSnapshot(object):
         self.exclude_list = config['snapshot_config']['exclude']
         self.tmp_dir = "/tmp/teefaa"
         self.user = run("echo $USER")
-        self.squashed = "{tmp_dir}/filesystem.squashfs".format(tmp_dir=self.tmp_dir)
+        self.squashfs = "{tmp_dir}/filesystem.squashfs".format(tmp_dir=self.tmp_dir)
         self.rootimg = "{tmp_dir}/rootimg".format(tmp_dir=self.tmp_dir)
-        # Install squashfs-tools
+
+    def _install_required_packages(self):
+        """
+        Install required packages
+        """
+        print("Ensuring required packages are installed...")
         pkgs = ['squashfs-tools',
                 'rsync']
-        if distro in ['ubuntu', 'debian']:
+        if self.distro in ['ubuntu', 'debian']:
             for pkg in pkgs: package_ensure_apt(pkg)
-        elif distro in ['centos', 'fedora']:
+        elif self.distro in ['centos', 'fedora']:
             for pkg in pkgs: package_ensure_yum(pkg)
         else:
             raise TypeError("Teefaa only supports ubuntu, debian, centos and fedora")
@@ -59,7 +66,10 @@ class MakeSnapshot(object):
             dir_ensure(self.tmp_dir, owner=self.user, mode=700)
 
     def _copy_system_to_tmp(self):
-        # Copy system image in to temp directory
+        """
+        Copy system to temp directory
+        """
+        print("Copying system to temp directory...")
         if not dir_exists(self.rootimg + '/etc') or self.overwrite==True:
             cmd = ['rsync', '-a', '--stats', '--delete', 
                     '--one-file-system', '--exclude=\'/tmp/*\'']
@@ -73,27 +83,32 @@ class MakeSnapshot(object):
             sudo(' '.join(cmd))
 
     def _make_squashfs(self):
-        # Make SquashFS
-        try:
-            cmd = ['ls', self.squashed]
-            sudo(' '.join(cmd))
-            assert(self.overwrite==False)
-        except:
-            cmd = ['mksquashfs', self.rootimg, self.squashed, '-noappend']
-            sudo(' '.join(cmd))
-            cmd = ['chown', '\$USER', self.squashed]
-            sudo(' '.join(cmd))
+        """
+        Make SquashFS of system
+        """
+        print("Making squashFS of system...")
+        with mode_sudo():
+            if not file_exists(self.squashfs) \
+                    or self.overwrite==True:
+                cmd = ['mksquashfs', self.rootimg, self.squashfs, '-noappend']
+                run(' '.join(cmd))
+                user = run("echo \$USER")
+                file_ensure(self.squashfs, owner=user, mode=0600)
             
     def _download_squashfs(self):
-        # Download snapshot
+        """
+        Download snapshot
+        """
+        print("Downloading snapshot...")
         try:
             os.path.exists(self.save_as)
             assert(self.overwrite==False)
         except:
-            get(self.squashed, self.save_as)
+            get(self.squashfs, self.save_as)
 
     def run(self):
 
+        self._install_required_packages()
         self._copy_system_to_tmp()
         self._make_squashfs()
         self._download_squashfs()

@@ -21,7 +21,9 @@ sub command make-*, mk*
 
 import os
 import argparse
-from fabric.api import execute
+from fabric.api import execute, hide
+from cuisine import text_strip_margin
+
 
 from .lib.make import (
         make_snapshot,
@@ -53,7 +55,17 @@ class TeefaaMake(object):
 
     def do_make_snapshot(self, args):
 
-        execute(make_snapshot)
+        text = text_strip_margin("""
+        | 
+        | _|_|_|_|_|                        _|_|                      
+        |    |_|      _|_|      _|_|      _|        _|_|_|    _|_|_|  
+        |    |_|    _|_|_|_|  _|_|_|_|  _|_|_|_|  _|    _|  _|    _|  
+        |    |_|    _|        _|          _|      _|    _|  _|    _|  
+        |    |_|      _|_|_|    _|_|_|    _|        _|_|_|    _|_|_|
+        |""")
+        print(text)
+        with hide('running', 'stdout'):
+            execute(make_snapshot)
 
     def do_make_iso(self, args):
 

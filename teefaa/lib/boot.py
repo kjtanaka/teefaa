@@ -126,6 +126,17 @@ class FabricBoot(object):
         cmd = ['cat', pxe_config_diskless, '>', pxe_config]
         run(' '.join(cmd))
 
+    def _setup_diskboot_pxe(self):
+
+        server = self.boot_driver_config['pxe_server']
+        user = self.boot_driver_config['pxe_server_user']
+        pxe_config = self.boot_driver_config['boot_config_file']
+        pxe_config_localdisk = self.boot_driver_config['disk_boot_config_file']
+        env.host_string = server
+        env.user = user
+        cmd = ['cat', pxe_config_localdisk, '>', pxe_config]
+        run(' '.join(cmd))
+
     def setup_diskboot(self):
         """
         Set local disk boot

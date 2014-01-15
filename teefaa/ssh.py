@@ -23,4 +23,7 @@ class TeefaaSsh(object):
         ssh_config = config['ssh_config']
         hostname = config['host_config']['hostname']
         cmd = ['ssh', '-F', ssh_config, hostname]
+        try:
+            ssh_key = config['ssh_key']
+            cmd.append('-i ' + ssh_key)
         subprocess.call(cmd)

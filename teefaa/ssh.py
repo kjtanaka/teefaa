@@ -26,4 +26,6 @@ class TeefaaSsh(object):
         try:
             ssh_key = config['ssh_key']
             cmd.append('-i ' + ssh_key)
+        except:
+            pass
         subprocess.call(cmd)

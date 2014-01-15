@@ -109,7 +109,7 @@ class MakeIso(object):
         self.distro = config['iso_config']['builder']['distro']
         self.base_iso = '/tmp/' + config['iso_config']['base_iso']
         self.base_iso_url = config['iso_config']['base_iso_url']
-        self.save_as = config['iso_config']['snapshot_path']
+        self.save_as = config['iso_config']['iso_path']
         self.base_iso_dir = "/tmp/teefaa/base_iso_dir"
         self.new_iso_dir = "/tmp/teefaa/new_iso_dir"
         self.base_squashfs = self.base_iso_dir + '/live/filesystem.squashfs'
@@ -121,7 +121,7 @@ class MakeIso(object):
         """ 
         Ensure reuqired packages are installed...
         """
-        print(self._install_required_pkgs.__doc__)
+        print("Ensuring reuqired packages are installed...")
         time.sleep(1)
         # Install squashfs-tools
         pkgs = ['squashfs-tools',
@@ -139,7 +139,7 @@ class MakeIso(object):
         """
         Download base image...
         """
-        print(self._download_iso.__doc__)
+        print("Downloading base image...")
         time.sleep(1)
         try:
             cmd = ['ls', self.base_iso, '1>/dev/null']
@@ -152,7 +152,7 @@ class MakeIso(object):
         """
         Mout base image...
         """
-        print(self._mount_iso.__doc__)
+        print("Mounting base image...")
         time.sleep(1)
         cmd = ['ls', self.base_iso_dir, '1>/dev/null', '||', 
                 'mkdir', '-p', self.base_iso_dir]
@@ -168,7 +168,7 @@ class MakeIso(object):
         """
         Copy files from base image to new image...
         """
-        print(self._copy_base_iso_to_new_iso.__doc__)
+        print("Copying files from base image to new image...")
         time.sleep(1)
         # Make sure new_iso_dir exists
         cmd = ['ls', self.new_iso_dir, '||', 
@@ -184,7 +184,7 @@ class MakeIso(object):
         """
         Mount base base root file system...
         """
-        print(self._mount_base_squashfs.__doc__)
+        print("Mounting root filesystem of base image...")
         time.sleep(1)
         # Make sure base_squash_dir exists
         cmd = ['ls', self.base_squashfs_dir, '||', 
@@ -201,7 +201,7 @@ class MakeIso(object):
         """
         Copy files from base system to new system...
         """
-        print(self._copy_base_squashfs_to_new_squashfs.__doc__)
+        print("Copying files from base system to new system...")
         time.sleep(1)
         cmd = ['rsync', '-a', '--stats', '--delete',
                 self.base_squashfs_dir+'/', self.new_squashfs_dir.rstrip('/')]
@@ -211,7 +211,7 @@ class MakeIso(object):
         """
         Mount /proc /sys /dev...
         """
-        print(self._mount_proc_sys_dev.__doc__)
+        print("Mounting /proc /sys /dev...")
         time.sleep(1)
         # Mount /proc
         try:
@@ -239,7 +239,7 @@ class MakeIso(object):
         """
         Install required packages to new image...
         """
-        print(self._install_packages_in_new_image.__doc__)
+        print("Installing required packages in new image...")
         time.sleep(1)
         # Copy /etc/resolv.conf to new image's dir
         cmd = ['cp', '/etc/resolv.conf', self.new_squashfs_dir + '/etc/resolv.conf']
@@ -255,7 +255,7 @@ class MakeIso(object):
         """
         Create admin user...
         """
-        print(self._create_user.__doc__)
+        print("Creating admin user...")
         time.sleep(1)
         # Create admin user
         root_dir = self.new_squashfs_dir
@@ -301,6 +301,7 @@ class MakeIso(object):
         """
         Unmount all dir...
         """
+        print("Unmounting all dir...")
         # Unmount /dev
         for mpoint in [ self.new_squashfs_dir + '/dev', 
                         self.new_squashfs_dir + '/sys', 
@@ -318,6 +319,7 @@ class MakeIso(object):
         """
         Make new squashfs...
         """
+        print("Making new squashfs...")
         try:
             cmd = ['ls', self.new_squashfs]
             sudo(' '.join(cmd))
@@ -330,6 +332,7 @@ class MakeIso(object):
         """
         Make new iso image...
         """
+        print("Making new iso image...")
         new_iso = '/tmp/teefaa/custom.iso'
         try:
             cmd = ['ls', new_iso]
@@ -343,12 +346,14 @@ class MakeIso(object):
             cmd = ['ls', self.save_as]
             sudo(' '.join(cmd))
         except:
+            print("Downloading new iso image...")
             get(new_iso, self.save_as)
 
     def _update_menu_cfg(self):
         """
         Update menu.cfg
         """
+        print("Updating menu.cfg...")
         menu_cfg_file = "isolinux/menu.cfg"
         new_menu_cfg = text_strip_margin("""
         |DEFAULT live
@@ -368,6 +373,7 @@ class MakeIso(object):
         """
         Update md5sum.txt
         """
+        print("Updating md5sum.txt...")
         cmd = ['rm', '-f', 'md5sum.txt']
         sudo(' '.join(cmd))
         cmd = ['find', '-type', 'f', '-print0', '|', 
@@ -377,6 +383,7 @@ class MakeIso(object):
         sudo(' '.join(cmd))
 
     def _mkisofs(self, new_iso):
+        print("Making new disk image...")
         cmd = ['mkisofs', '-D', '-r', '-V', 'CustomISO', '-cache-inodes',
                 '-J', '-l', '-b', 'isolinux/isolinux.bin', '-c', 
                 'isolinux/boot.cat', '-no-emul-boot', '-boot-load-size', 

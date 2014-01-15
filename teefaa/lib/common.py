@@ -28,7 +28,7 @@ def read_config():
 
     try:
         env.key_filename = config['ssh_key']
-    except IOError:
+    except KeyError:
         pass
 
     env.use_ssh_config = True

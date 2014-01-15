@@ -107,7 +107,10 @@ class MakeSnapshot(object):
             get(self.squashfs, self.save_as)
 
     def run(self):
-
+        """
+        Make a snapshot of the system
+        """
+        print("Start making a snapshot of machine '{0}'...".format(env.host_string))
         self._install_required_packages()
         self._copy_system_to_tmp()
         self._make_squashfs()

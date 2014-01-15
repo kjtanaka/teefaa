@@ -4,7 +4,7 @@
 import os
 import argparse
 import subprocess
-from fabric.api import local, env
+from fabric.api import local, execute
 
 from .lib.common import read_config
 
@@ -29,4 +29,9 @@ class TeefaaSsh(object):
         except:
             pass
         print(' '.join(cmd))
-        subprocess.call(cmd)
+        execute(fab_ssh, ssh_config, hostname, ssh_key)
+
+@task
+def fab_ssh(ssh_config, hostname, ssh_key):
+    cmd = ['ssh', '-F', ssh_config, '-i', ssh_key, hostname]
+    local(' '.join(cmd))

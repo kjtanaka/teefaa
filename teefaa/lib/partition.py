@@ -168,7 +168,7 @@ class Partition(object):
         cmd = ['mount', self.device+str(num+2), '/mnt']
         sudo(' '.join(cmd))
         with mode_sudo():
-            dir_ensure('/mnt'+self.data['dir'])
+            dir_ensure('/mnt'+self.data['dir'], recursive=True)
         cmd = ['mount', self.device+str(num+3), '/mnt'+self.data['dir']]
         sudo(' '.join(cmd))
 

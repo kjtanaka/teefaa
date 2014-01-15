@@ -21,6 +21,6 @@ nosetests.xml
 .project
 .pydevproject
 .vagrant
-Teefaafile
+Teefaafile.yml
 .teefaa
 ssh-config

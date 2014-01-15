@@ -39,7 +39,7 @@ class MakeSnapshot(object):
             self.overwrite = config['snapshot_config']['overwrite']
         except:
             self.overwrite = True
-        self.save_as = config['snapshot_config']['save_as']
+        self.save_as = config['snapshot_config']['snapshot_path']
         self.exclude_list = config['snapshot_config']['exclude']
         self.tmp_dir = "/tmp/teefaa"
         self.user = run("echo $USER")
@@ -109,7 +109,7 @@ class MakeIso(object):
         self.distro = config['iso_config']['builder']['distro']
         self.base_iso = '/tmp/' + config['iso_config']['base_iso']
         self.base_iso_url = config['iso_config']['base_iso_url']
-        self.save_as = config['iso_config']['save_as']
+        self.save_as = config['iso_config']['snapshot_path']
         self.base_iso_dir = "/tmp/teefaa/base_iso_dir"
         self.new_iso_dir = "/tmp/teefaa/new_iso_dir"
         self.base_squashfs = self.base_iso_dir + '/live/filesystem.squashfs'

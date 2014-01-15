@@ -34,7 +34,7 @@ class InstallSnapshot(object):
         # Set config
         config = read_config()
         env.host_string = config['host_config']['hostname']
-        self.snapshot_file = config['snapshot_config']['snapsthot_path']
+        self.snapshot_file = config['snapshot_config']['snapshot_path']
         distro = config['snapshot_config']['os']['distro']
         # Create tmp dir
         self.tmp_dir = "/mnt/tmp/teefaa"

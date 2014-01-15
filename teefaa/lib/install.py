@@ -241,9 +241,9 @@ class InstallGrub(object):
             sudo("mount -o bind /dev /mnt/dev")
             time.sleep(2)
         mpoint = "/mnt/run"
-        if not mpoint in output:
-            sudo("mount -o bind /run /mnt/run")
-            time.sleep(2)
+        #if not mpoint in output:
+        #    sudo("mount -o bind /run /mnt/run")
+        #    time.sleep(2)
 
     def _install_bootloader_grub2(self):
 

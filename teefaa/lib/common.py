@@ -19,11 +19,11 @@ from fabric.api import (
 def read_config():
     """Make snapshot"""
     try:
-        f = open("Teefaa.yml")
+        f = open("Teefaafile.yml")
         config = yaml.safe_load(f)
         f.close()
     except IOError:
-        print("Teefaa.yml does not exist.", file=sys.stderr)
+        print("Teefaafile.yml does not exist.", file=sys.stderr)
         exit(1)
 
     try:

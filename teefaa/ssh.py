@@ -4,7 +4,7 @@
 import os
 import argparse
 import subprocess
-from fabric.api import local, execute
+from fabric.api import local, execute, task
 
 from .lib.common import read_config
 

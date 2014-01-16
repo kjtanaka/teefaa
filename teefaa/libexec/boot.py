@@ -214,7 +214,7 @@ class Boot(object):
 
     def _power_on_ipmi(self):
 
-        print("Power on machine \'{host}\' ...".format(host=env.host_string))
+        print("Power on machine \'{host}\' ...".format(host=self.hostname))
         ipmi_password = self.power_driver_config['ipmi_password']
         ipmi_user = self.power_driver_config['ipmi_user']
         bmc_address = self.power_driver_config['bmc_address']

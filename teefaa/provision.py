@@ -25,6 +25,7 @@ import argparse
 from fabric.api import execute, hide
 from cuisine import text_strip_margin
 
+from .ssh import check_ssh
 from .lib.make import make_swap, make_fs
 from .lib.boot import boot_diskless, boot_disk
 from .lib.partition import make_partition, mount_partition
@@ -52,8 +53,8 @@ class TeefaaProvision(object):
         print("...")
         time.sleep(1)
         with hide('running', 'stdout'):
-            #execute(boot_diskless)
-            #execute(check_ssh)
+            execute(boot_diskless)
+            check_ssh()
             execute(make_partition)
             time.sleep(2)
             execute(make_swap)

@@ -389,12 +389,12 @@ class MakeIso(object):
         print("Updating menu.cfg...")
         menu_cfg_file = "isolinux/menu.cfg"
         new_menu_cfg = text_strip_margin("""
-        |DEFAULT live
+        |DEFAULT Teefaa
         |TIMEOUT 10
         |TOTALTIMEOUT 20
         |
-        |LABEL live
-        |    MENU LABEL live
+        |LABEL Teefaa
+        |    MENU LABEL Teefaa
         |    KERNEL /live/vmlinuz
         |    APPEND initrd=/live/initrd.img boot=live config quiet noprompt noeject
         |""")

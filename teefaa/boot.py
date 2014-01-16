@@ -46,11 +46,11 @@ class TeefaaBoot(object):
         power_off = parser.add_parser('power-off', help='Power off machine')
         power_off.set_defaults(func=self.do_power_off)
         power_state = parser.add_parser('power-state', help='Check power state of machine')
-        power_off.set_defaults(func=self.do_shutdown)
-        power_state = parser.add_parser('shutdown', help='Shutdown machine')
-        power_state.set_defaults(func=self.do_shutdown)
-        power_state = parser.add_parser('reboot', help='Reboot machine')
-        power_state.set_defaults(func=self.do_reboot)
+        power_state.set_defaults(func=self.do_power_state)
+        power_shutdown = parser.add_parser('shutdown', help='Shutdown machine')
+        power_shutdown.set_defaults(func=self.do_shutdown)
+        power_reboot = parser.add_parser('reboot', help='Reboot machine')
+        power_reboot.set_defaults(func=self.do_reboot)
 
     def do_boot_installer(self, args):
 

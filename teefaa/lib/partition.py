@@ -26,7 +26,7 @@ class Partition(object):
     def __init__(self):
         # Set config
         config = read_config()
-        env.host_string = config['host_config']['hostname']
+        env.host_string = self.hostname = config['host_config']['hostname']
         self.distro = config['snapshot_config']['os']['distro']
         self.label_type = config['disk_config']['label_type']
         self.device = config['disk_config']['device']
@@ -45,7 +45,7 @@ class Partition(object):
         """
         Partition Disk with MBR(Master Boot Recorder)
         """
-        print(self._make_partition_mbr.__doc__)
+        print("Partition disk with MBR(Master Boot Recorder)...")
         time.sleep(1)
 
         # Create label
@@ -97,7 +97,7 @@ class Partition(object):
         """
         Partition Disk with GPT(GUID Partition Table)
         """
-        print(self._make_partition_mbr.__doc__)
+        print("Partition disk with GPT(GUID Partition Table)...")
         time.sleep(1)
 
         # Create label
@@ -155,6 +155,11 @@ class Partition(object):
         time.sleep(2)
 
     def mount_partition(self):
+        """
+        Mount partitions
+        """
+        print("Mounting partitions...")
+        time.sleep(1)
 
         if self.label_type == 'mbr':
             num = 0
@@ -168,7 +173,7 @@ class Partition(object):
         cmd = ['mount', self.device+str(num+2), '/mnt']
         sudo(' '.join(cmd))
         with mode_sudo():
-            dir_ensure('/mnt'+self.data['dir'])
+            dir_ensure('/mnt'+self.data['dir'], recursive=True)
         cmd = ['mount', self.device+str(num+3), '/mnt'+self.data['dir']]
         sudo(' '.join(cmd))
 

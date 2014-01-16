@@ -22,7 +22,7 @@ sub command provision
 import os
 import time
 import argparse
-from fabric.api import execute
+from fabric.api import execute, hide
 from cuisine import text_strip_margin
 
 from .lib.make import make_swap, make_fs
@@ -48,21 +48,25 @@ class TeefaaProvision(object):
         |    |_|      _|_|_|    _|_|_|    _|        _|_|_|    _|_|_|
         |""")
         print(text)
-        #execute(boot_diskless)
-        #execute(check_ssh)
-        execute(make_partition)
-        time.sleep(2)
-        execute(make_swap)
-        time.sleep(2)
-        execute(make_fs)
-        time.sleep(2)
-        execute(mount_partition)
-        time.sleep(2)
-        execute(install_snapshot)
-        time.sleep(2)
-        execute(condition)
-        time.sleep(2)
-        execute(install_grub)
-        time.sleep(2)
-        execute(boot_disk)
+        time.sleep(1)
+        print("...")
+        time.sleep(1)
+        with hide('running', 'stdout'):
+            #execute(boot_diskless)
+            #execute(check_ssh)
+            execute(make_partition)
+            time.sleep(2)
+            execute(make_swap)
+            time.sleep(2)
+            execute(make_fs)
+            time.sleep(2)
+            execute(mount_partition)
+            time.sleep(2)
+            execute(install_snapshot)
+            time.sleep(2)
+            execute(condition)
+            time.sleep(2)
+            execute(install_grub)
+            time.sleep(2)
+            execute(boot_disk)
 

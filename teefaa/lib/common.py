@@ -19,22 +19,28 @@ from fabric.api import (
 def read_config():
     """Make snapshot"""
     try:
-        f = open("Teefaafile")
+        f = open("Teefaafile.yml")
         config = yaml.safe_load(f)
         f.close()
     except IOError:
-        print("Teefaafile does not exist.", file=sys.stderr)
+        print("Teefaafile.yml does not exist.", file=sys.stderr)
         exit(1)
+
+    try:
+        env.key_filename = config['ssh_key']
+    except KeyError:
+        pass
 
     env.use_ssh_config = True
     env.disable_known_hosts = True
     try:
         env.ssh_config_path = os.path.expanduser(config['ssh_config'])
     except KeyError:
-        print("Error: ssh_config is not set on Teefaa properly.", file=sys.stderr)
+        print("ssh_config doesn't exist in .teefaa.yml or .teefaa.local.yml", file=sys.stderr)
         exit(1)
-
+   
     return config
+
 
 @task
 def check_ssh_access(limit=30):

@@ -8,7 +8,8 @@ import subprocess
 from fabric.api import (
         env,
         local,
-        task
+        task,
+        run
         )
 from fabric.contrib.files import (
         append
@@ -28,7 +29,7 @@ class FabricBoot(object):
     def __init__(self):
         # Set config
         config = read_config()
-        env.host_string = config['host_config']['hostname']
+        env.host_string = self.hostname = config['host_config']['hostname']
         self.distro = config['snapshot_config']['os']['distro']
         self.power_driver = config['host_config']['power_driver']
         self.power_driver_config = config['host_config']['power_driver_config']
@@ -40,11 +41,44 @@ class FabricBoot(object):
         sub_func = getattr(self, '_power_off_'+ self.power_driver)
         sub_func()
 
+    def _power_off_ipmi(self):
+
+        print("Power off machine \'{host}\' ...".format(host=env.host_string))
+        ipmi_password = self.power_driver_config['ipmi_password']
+        ipmi_user = self.power_driver_config['ipmi_user']
+        bmc_address = self.power_driver_config['bmc_address']
+        cmd = ['ipmitool', '-I', 'lanplus', '-U', ipmi_user, '-P', ipmi_password, '-E',
+                '-H', bmc_address, 'power', 'off']
+        subprocess.check_call(cmd)
+        time.sleep(1)
+
+    def _power_state_ipmi(self):
+
+        print("Checking power state of machine \'{host}\' ...".format(host=env.host_string))
+        ipmi_password = self.power_driver_config['ipmi_password']
+        ipmi_user = self.power_driver_config['ipmi_user']
+        bmc_address = self.power_driver_config['bmc_address']
+        cmd = ['ipmitool', '-I', 'lanplus', '-U', ipmi_user, '-P', ipmi_password, '-E',
+                '-H', bmc_address, 'power', 'status']
+        subprocess.check_call(cmd)
+        time.sleep(1)
+
+    def _power_on_ipmi(self):
+
+        print("Power on machine \'{host}\' ...".format(host=env.host_string))
+        ipmi_password = self.power_driver_config['ipmi_password']
+        ipmi_user = self.power_driver_config['ipmi_user']
+        bmc_address = self.power_driver_config['bmc_address']
+        cmd = ['ipmitool', '-I', 'lanplus', '-U', ipmi_user, '-P', ipmi_password, '-E',
+                '-H', bmc_address, 'power', 'on']
+        subprocess.check_call(cmd)
+        time.sleep(1)
+
     def _power_off_virtualbox(self):
         """
         Power off VM (VirtualBox)
         """
-        print(self._power_off_virtualbox.__doc__)
+        print("Power off machine '{h}'...".format(h=self.hostname))
         time.sleep(1)
         vbox_name = self.power_driver_config['vbox_name']
         cmd = ['VBoxManage', 'list', 'runningvms']
@@ -65,11 +99,13 @@ class FabricBoot(object):
         """
         Set ISO Boot (VirtualBox)
         """
-        print(self._setup_diskless_boot_virtualbox.__doc__)
-        time.sleep(1)
 
         vbox_name = self.power_driver_config['vbox_name']
         iso_file = self.boot_driver_config['iso_file']
+        print("Setting machine '{h}' to boot with file '{f}'...".format(
+            h=self.hostname,f=iso_file))
+        time.sleep(1)
+
         cmd = ['VBoxManage', 'storageattach', vbox_name, '--storagectl', 'IDE Controller', 
                 '--port', '0', '--device', '1', '--type', 'dvddrive', '--medium', iso_file]
         subprocess.check_call(cmd)
@@ -80,6 +116,28 @@ class FabricBoot(object):
         cmd = ['VBoxManage', 'modifyvm', vbox_name, '--boot2', 'disk']
         subprocess.check_call(cmd)
         time.sleep(1)
+
+    def _setup_diskless_boot_pxe(self):
+
+        server = self.boot_driver_config['pxe_server']
+        user = self.boot_driver_config['pxe_server_user']
+        pxe_config = self.boot_driver_config['boot_config_file']
+        pxe_config_diskless = self.boot_driver_config['diskless_boot_config_file']
+        env.host_string = server
+        env.user = user
+        cmd = ['cat', pxe_config_diskless, '>', pxe_config]
+        run(' '.join(cmd))
+
+    def _setup_diskboot_pxe(self):
+
+        server = self.boot_driver_config['pxe_server']
+        user = self.boot_driver_config['pxe_server_user']
+        pxe_config = self.boot_driver_config['boot_config_file']
+        pxe_config_localdisk = self.boot_driver_config['disk_boot_config_file']
+        env.host_string = server
+        env.user = user
+        cmd = ['cat', pxe_config_localdisk, '>', pxe_config]
+        run(' '.join(cmd))
 
     def setup_diskboot(self):
         """
@@ -111,7 +169,7 @@ class FabricBoot(object):
         """
         Power on VM (VirtualBox)
         """
-        print(self._power_on_virtualbox.__doc__)
+        print("Power on machine '{h}'...".format(h=self.hostname))
         time.sleep(1)
         vbox_name = self.power_driver_config['vbox_name']
         cmd = ['VBoxManage', 'list', 'runningvms']
@@ -132,6 +190,8 @@ class FabricBoot(object):
         """
         Check power state (VirtualBox)
         """
+        print("Checking power state of '{h}'...".format(h=self.hostname))
+        time.sleep(1)
         vbox_name = self.power_driver_config['vbox_name']
         cmd = ['VBoxManage', 'showvminfo', vbox_name]
         output = subprocess.check_output(cmd)

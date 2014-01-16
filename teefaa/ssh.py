@@ -4,7 +4,7 @@
 import os
 import argparse
 import subprocess
-from fabric.api import local, env
+from fabric.api import local, execute, task, hide
 
 from .lib.common import read_config
 
@@ -23,4 +23,22 @@ class TeefaaSsh(object):
         ssh_config = config['ssh_config']
         hostname = config['host_config']['hostname']
         cmd = ['ssh', '-F', ssh_config, hostname]
-        subprocess.call(cmd)
+        try:
+            ssh_key = os.path.abspath(config['ssh_key'])
+            cmd.append('-i ' + ssh_key)
+        except:
+            ssh_key = None
+        print("\nssh to machine '{0}'...\n".format(hostname))
+        try:
+            subprocess.check_call(cmd)
+            #execute(fab_ssh, ssh_config, hostname, ssh_key)
+        except subprocess.CalledProcessError:
+            print("SSH is disconnected...")
+
+@task
+def fab_ssh(ssh_config, hostname, ssh_key):
+    cmd = ['ssh', '-F', ssh_config, hostname]
+    if not ssh_key == None:
+        cmd.append("-i " + ssh_key)
+    with hide('running'):
+        local(' '.join(cmd))

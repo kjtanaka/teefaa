@@ -34,7 +34,7 @@ class InstallSnapshot(object):
         # Set config
         config = read_config()
         env.host_string = config['host_config']['hostname']
-        self.snapshot_file = config['snapshot_config']['save_as']
+        self.snapshot_file = config['snapshot_config']['snapshot_path']
         distro = config['snapshot_config']['os']['distro']
         # Create tmp dir
         self.tmp_dir = "/mnt/tmp/teefaa"
@@ -49,20 +49,22 @@ class InstallSnapshot(object):
 
     def _upload_squashfs(self):
         # Download snapshot
+        print("Uploading snapshot '{f}'...".format(f=self.squashfs))
         if not file_exists(self.squashfs):
             put(self.snapshot_file, self.squashfs)
             sudo("sync && echo 3 > /proc/sys/vm/drop_caches")
 
     def _mount_squashfs(self):
 
-        with hide('stdout'):
-            output = sudo("df -a")
+        print("Mounting snapshot '{f}'...".format(f=self.squashfs))
+        output = sudo("df -a")
         if not self.rootimg in output:
             cmd = ['mount', '-o', 'loop', self.squashfs, self.rootimg]
             sudo(' '.join(cmd))
 
     def _copy_files(self):
 
+        print("Copying system from snapshot to local disk...")
         cmd = ['rsync', '-a', '--stats', '--exclude=\'/tmp/*\'']
         cmd.append(self.rootimg + '/') 
         cmd.append('/mnt')
@@ -98,11 +100,14 @@ class Condition(object):
 
     def _condition_ubuntu_hostname(self):
 
+        print("Updating hostname...")
+        time.sleep(1)
         with mode_sudo():
             file_write('/mnt/etc/hostname', env.host_string)
 
     def _condition_ubuntu_network(self):
 
+        print("Updating network interface...")
         text = text_strip_margin("""
         |# This file describes the network interfaces available on your system
         |# and how to activate them. For more information, see interfaces(5).
@@ -116,6 +121,7 @@ class Condition(object):
             file_write(file_path, text)
 
         for iface in self.interfaces['add']:
+            print(iface + "...")
             bootp = self.interfaces['add'][iface]['bootp']
             if bootp == 'dhcp':
                 text = text_strip_margin("""
@@ -132,6 +138,8 @@ class Condition(object):
 
     def _condition_ubuntu_fstab(self):
 
+        print("updating /etc/fstab...")
+        time.sleep(1)
         file_path = "/mnt/etc/fstab"
         label_type = self.disk_config['label_type']
         device = self.disk_config['device']
@@ -160,6 +168,8 @@ class Condition(object):
 
     def _condition_ubuntu_mtab(self):
 
+        print("Updating /etc/mtab...")
+        time.sleep(1)
         file_path = "/mnt/etc/mtab"
         label_type = self.disk_config['label_type']
         device = self.disk_config['device']
@@ -189,6 +199,7 @@ class Condition(object):
 
     def _condition_ubuntu_resolv(self):
 
+        print("Updating /etc/resolv.conf...")
         file_path = "/mnt/etc/resolv.conf"
         sudo("rm -f " + file_path)
         sudo("cat /etc/resolv.conf > " + file_path)
@@ -199,6 +210,8 @@ class Condition(object):
 
     def _condition_common_rules(self):
 
+        print("Updating /etc/udev/rules.d/70-persistent-net.rules...")
+        time.sleep(1)
         file_path = "/mnt/etc/udev/rules.d/70-persistent-net.rules"
         if file_exists(file_path):
             if not file_is_link(file_path):
@@ -226,6 +239,7 @@ class InstallGrub(object):
 
     def _install_bootloader_mount_devices(self):
 
+        print("Mounting /proc /sys /dev...")
         with hide('stdout', 'running'):
             output = sudo("df -a")
         mpoint = "/mnt/proc"
@@ -240,13 +254,14 @@ class InstallGrub(object):
         if not mpoint in output:
             sudo("mount -o bind /dev /mnt/dev")
             time.sleep(2)
-        mpoint = "/mnt/run"
-        if not mpoint in output:
-            sudo("mount -o bind /run /mnt/run")
-            time.sleep(2)
+        #mpoint = "/mnt/run"
+        #if not mpoint in output:
+        #    sudo("mount -o bind /run /mnt/run")
+        #    time.sleep(2)
 
     def _install_bootloader_grub2(self):
 
+        print("Installing Grub2...")
         #cmd = ['chroot', '/mnt', 'apt-get', '-o','Dpkg::Options::=\'--force-confdef\'','-o',
         #        'Dpkg::Options::=\'--force-confold\'', '-f','-q', '-y', 'install', 'grub2']
         #sudo(' '.join(cmd))

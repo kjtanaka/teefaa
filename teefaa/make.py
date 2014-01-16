@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# vim: tabstop=8 expandtab shiftwidth=4 softtabstop=4
 #
 # Copyright 2013-2014, Indiana University
 # 
@@ -25,7 +24,7 @@ from fabric.api import execute, hide
 from cuisine import text_strip_margin
 
 
-from .lib.make import (
+from .libexec.make import (
         make_snapshot,
         make_iso,
         make_swap,

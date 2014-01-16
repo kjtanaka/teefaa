@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# vim: tabstop=8 expandtab shiftwidth=4 softtabstop=4
 #
 # Copyright 2013-2014, Indiana University
 # 
@@ -24,32 +23,38 @@ import os
 import argparse
 from fabric.api import execute
 
-from .lib.boot import (
-        boot_diskless,
+from .libexec.boot import (
+        boot_installer,
         boot_disk,
         power_on,
         power_off,
-        power_state
+        power_state,
+        reboot,
+        shutdown
         )
 
 class TeefaaBoot(object):
 
     def setup(self, parser):
 
-        boot_diskless = parser.add_parser('boot-diskless', help='Boot without local disk')
-        boot_diskless.set_defaults(func=self.do_boot_diskless)
-        boot_disk = parser.add_parser('boot-disk', help='boot with local disk')
+        boot_installer = parser.add_parser('boot-installer', help='Boot installer on machine')
+        boot_installer.set_defaults(func=self.do_boot_installer)
+        boot_disk = parser.add_parser('boot-disk', help='boot system on machine')
         boot_disk.set_defaults(func=self.do_boot_disk)
-        power_on = parser.add_parser('power-on', help='Power on your dest-machine')
+        power_on = parser.add_parser('power-on', help='Power on machine')
         power_on.set_defaults(func=self.do_power_on)
-        power_off = parser.add_parser('power-off', help='Power off your dest-machine')
+        power_off = parser.add_parser('power-off', help='Power off machine')
         power_off.set_defaults(func=self.do_power_off)
-        power_state = parser.add_parser('power-state', help='Check power state of your dest-machine')
+        power_state = parser.add_parser('power-state', help='Check power state of machine')
         power_state.set_defaults(func=self.do_power_state)
+        power_shutdown = parser.add_parser('shutdown', help='Shutdown machine')
+        power_shutdown.set_defaults(func=self.do_shutdown)
+        power_reboot = parser.add_parser('reboot', help='Reboot machine')
+        power_reboot.set_defaults(func=self.do_reboot)
 
-    def do_boot_diskless(self, args):
+    def do_boot_installer(self, args):
 
-        execute(boot_diskless)
+        execute(boot_installer)
 
     def do_boot_disk(self, args):
 
@@ -66,3 +71,11 @@ class TeefaaBoot(object):
     def do_power_state(self, args):
 
         execute(power_state)
+
+    def do_shutdown(self, args):
+
+        execute(shutdown)
+
+    def do_reboot(self, args):
+
+        execute(reboot)

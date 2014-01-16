@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# vim: tabstop=8 expandtab shiftwidth=4 softtabstop=4
 
 import os
 import time
@@ -7,7 +6,7 @@ import argparse
 import subprocess
 from fabric.api import local, execute, task, hide
 
-from .lib.common import read_config
+from .libexec.common import read_config
 
 class TeefaaSsh(object):
 
@@ -33,7 +32,7 @@ class TeefaaSsh(object):
         print("\nssh to machine '{0}'...\n".format(self.hostname))
         self.check_ssh()
         cmd = ['ssh', '-F', self.ssh_config, self.hostname]
-        if self.ssh_key: cmd.append('-i' + self.key)
+        if self.ssh_key: cmd.append('-i' + self.ssh_key)
         try:
             subprocess.check_call(cmd)
         except subprocess.CalledProcessError:
@@ -45,7 +44,7 @@ class TeefaaSsh(object):
         limit = 50
         FNULL = open(os.devnull, 'w')
         cmd = ['ssh', '-o', 'ConnectTimeout=5', '-F', self.ssh_config]
-        if self.ssh_key: cmd.append('-i' + self.key)
+        if self.ssh_key: cmd.append('-i' + self.ssh_key)
         cmd.append(self.hostname)
         cmd.append('hostname')
         while count < limit:

@@ -20,7 +20,7 @@ Make a Teefaa ISO/PXE boot image
 --------------------------------
 
 ISO image of Teefaa is based on Debian7 and you can create the image with Ubuntu or Debian.
-Here I'll use Ubuntu VM with Vagrant. Here's my example Vagrantfile.
+Here I'll use Ubuntu VM with Vagrant. Here's my example Vagrantfile.::
 
     Vagrant.configure("2") do |config|
     
@@ -32,14 +32,14 @@ Here I'll use Ubuntu VM with Vagrant. Here's my example Vagrantfile.
 
     end
 
-And, boot the VM.
+And, boot the VM.::
 
     vagrant up ubuntu1204
     vagrant ssh-config ubuntu1204 > ssh-config
 
 The ssh-config is used by Teefaa to login the VM.
 
-Next, write the configuration for making ISO image and save the file named as Teefaafile.
+Next, write the configuration for making ISO image and save the file named as Teefaafile.::
 
     ssh_config: ssh-config
 
@@ -51,7 +51,7 @@ Next, write the configuration for making ISO image and save the file named as Te
         distro: ubuntu
       save_as: teefaa-debian-live.iso
 
-Then, execute this command.
+Then, execute this command.::
 
     teefaa make-iso
 
@@ -61,7 +61,7 @@ Make a snapshot of your system
 ------------------------------
 
 To make a snapshot of your system, you need to update your ssh-config to be able to login
-to the host by ssh <hostname>.
+to the host by ssh <hostname>.::
 
    Host ubuntu1204
      HostName 127.0.0.1

@@ -1,11 +1,10 @@
 #!/usr/bin/env python
-# vim: tabstop=8 expandtab shiftwidth=4 softtabstop=4
 
 import os
 import argparse
 from fabric.api import execute
 
-from .lib.partition import make_partition, mount_partition
+from .libexec.partition import make_partition, mount_partition
 
 class TeefaaPartition(object):
 

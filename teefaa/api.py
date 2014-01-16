@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# vim: tabstop=8 expandtab shiftwidth=4 softtabstop=4
 # -------------------------------------------------------------------------- #
 # Copyright 2012-2013, Indiana University                                    #
 #                                                                            #

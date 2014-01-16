@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# vim: tabstop=8 expandtab shiftwidth=4 softtabstop=4
 
 from __future__ import print_function
 import os
@@ -40,28 +39,3 @@ def read_config():
         exit(1)
    
     return config
-
-
-@task
-def check_ssh_access(limit=30):
-    """
-    Check ssh access...
-    """
-    config = read_config()
-    ssh_config = config['ssh_config']
-    hostname = config['host_config']['hostname']
-    print(check_ssh_access.__doc__)
-    time.sleep(1)
-    count = 0
-    result = True
-    while result:
-        try:
-            cmd = ['ssh', '-o ConnectTimeout=5', '-F', ssh_config, hostname, 'hostname']
-            local(' '.join(cmd))
-            result = False
-        except BaseException as e:
-            count+=1
-            print(str(count) + '/' + str(limit))
-            if count >= limit:
-                result == False
-            time.sleep(10)

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -------------------------------------------------------------------------- #
-# Copyright 2010-2011, Indiana University                                    #
+# Copyright 2012-2014, Indiana University                                    #
 #                                                                            #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may    #
 # not use this file except in compliance with the License. You may obtain    #
@@ -17,7 +17,7 @@
 from setuptools import setup, find_packages
 import sys, os
 
-version = '0.3.1'
+version = '0.4.0'
 
 setup(name='teefaa',
       version=version,

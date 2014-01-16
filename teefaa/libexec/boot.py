@@ -38,11 +38,6 @@ class Boot(object):
         self.boot_driver = config['host_config']['boot_driver']
         self.boot_driver_config = config['host_config']['boot_driver_config']
 
-    def power_off(self):
-        """Power off"""
-        sub_func = getattr(self, '_power_off_'+ self.power_driver)
-        sub_func()
-
     def shutdown(self):
 
         print("Shutting down '{h}'...".format(h=self.hostname))
@@ -53,6 +48,11 @@ class Boot(object):
         print("Rebooting '{h}'...".format(h=self.hostname))
         with hide('running', 'stdout'): sudo("reboot")
 
+    def power_off(self):
+        """Power off"""
+        sub_func = getattr(self, '_power_off_'+ self.power_driver)
+        sub_func()
+
     def _power_off_ipmi(self):
 
         print("Power off machine \'{host}\' ...".format(host=env.host_string))
@@ -61,28 +61,6 @@ class Boot(object):
         bmc_address = self.power_driver_config['bmc_address']
         cmd = ['ipmitool', '-I', 'lanplus', '-U', ipmi_user, '-P', ipmi_password, '-E',
                 '-H', bmc_address, 'power', 'off']
-        subprocess.check_call(cmd)
-        time.sleep(1)
-
-    def _power_state_ipmi(self):
-
-        print("Checking power state of machine \'{host}\' ...".format(host=env.host_string))
-        ipmi_password = self.power_driver_config['ipmi_password']
-        ipmi_user = self.power_driver_config['ipmi_user']
-        bmc_address = self.power_driver_config['bmc_address']
-        cmd = ['ipmitool', '-I', 'lanplus', '-U', ipmi_user, '-P', ipmi_password, '-E',
-                '-H', bmc_address, 'power', 'status']
-        subprocess.check_call(cmd)
-        time.sleep(1)
-
-    def _power_on_ipmi(self):
-
-        print("Power on machine \'{host}\' ...".format(host=env.host_string))
-        ipmi_password = self.power_driver_config['ipmi_password']
-        ipmi_user = self.power_driver_config['ipmi_user']
-        bmc_address = self.power_driver_config['bmc_address']
-        cmd = ['ipmitool', '-I', 'lanplus', '-U', ipmi_user, '-P', ipmi_password, '-E',
-                '-H', bmc_address, 'power', 'on']
         subprocess.check_call(cmd)
         time.sleep(1)
 
@@ -99,6 +77,37 @@ class Boot(object):
             cmd = ['VBoxManage', 'controlvm', vbox_name, 'poweroff']
             subprocess.check_call(cmd)
             time.sleep(1)
+
+    def power_state(self):
+        """
+        Check power state
+        """
+        sub_func = getattr(self, '_power_state_'+ self.power_driver)
+        sub_func()
+
+    def _power_state_virtualbox(self):
+        """
+        Check power state (VirtualBox)
+        """
+        print("Checking power state of '{h}'...".format(h=self.hostname))
+        time.sleep(1)
+        vbox_name = self.power_driver_config['vbox_name']
+        cmd = ['VBoxManage', 'showvminfo', vbox_name]
+        output = subprocess.check_output(cmd)
+        for line in output.split('\n'):
+            if line.startswith('State:'):
+                print('\n ' + line + '\n')
+
+    def _power_state_ipmi(self):
+
+        print("Checking power state of machine \'{host}\' ...".format(host=env.host_string))
+        ipmi_password = self.power_driver_config['ipmi_password']
+        ipmi_user = self.power_driver_config['ipmi_user']
+        bmc_address = self.power_driver_config['bmc_address']
+        cmd = ['ipmitool', '-I', 'lanplus', '-U', ipmi_user, '-P', ipmi_password, '-E',
+                '-H', bmc_address, 'power', 'status']
+        subprocess.check_call(cmd)
+        time.sleep(1)
 
     def setup_diskless_boot(self):
         """
@@ -140,6 +149,13 @@ class Boot(object):
         cmd = ['cat', pxe_config_diskless, '>', pxe_config]
         run(' '.join(cmd))
 
+    def setup_diskboot(self):
+        """
+        Set local disk boot
+        """
+        sub_func = getattr(self, '_setup_diskboot_'+ self.boot_driver)
+        sub_func()
+
     def _setup_diskboot_pxe(self):
 
         server = self.boot_driver_config['pxe_server']
@@ -150,13 +166,6 @@ class Boot(object):
         env.user = user
         cmd = ['cat', pxe_config_localdisk, '>', pxe_config]
         run(' '.join(cmd))
-
-    def setup_diskboot(self):
-        """
-        Set local disk boot
-        """
-        sub_func = getattr(self, '_setup_diskboot_'+ self.boot_driver)
-        sub_func()
 
     def _setup_diskboot_virtualbox(self):
         """
@@ -177,6 +186,17 @@ class Boot(object):
         sub_func = getattr(self, '_power_on_'+ self.power_driver)
         sub_func()
 
+    def _power_on_ipmi(self):
+
+        print("Power on machine \'{host}\' ...".format(host=env.host_string))
+        ipmi_password = self.power_driver_config['ipmi_password']
+        ipmi_user = self.power_driver_config['ipmi_user']
+        bmc_address = self.power_driver_config['bmc_address']
+        cmd = ['ipmitool', '-I', 'lanplus', '-U', ipmi_user, '-P', ipmi_password, '-E',
+                '-H', bmc_address, 'power', 'on']
+        subprocess.check_call(cmd)
+        time.sleep(1)
+
     def _power_on_virtualbox(self):
         """
         Power on VM (VirtualBox)
@@ -190,26 +210,6 @@ class Boot(object):
             cmd = ['VBoxManage', 'startvm', vbox_name, '--type', 'gui']
             subprocess.check_call(cmd)
             time.sleep(1)
-
-    def power_state(self):
-        """
-        Check power state
-        """
-        sub_func = getattr(self, '_power_state_'+ self.power_driver)
-        sub_func()
-
-    def _power_state_virtualbox(self):
-        """
-        Check power state (VirtualBox)
-        """
-        print("Checking power state of '{h}'...".format(h=self.hostname))
-        time.sleep(1)
-        vbox_name = self.power_driver_config['vbox_name']
-        cmd = ['VBoxManage', 'showvminfo', vbox_name]
-        output = subprocess.check_output(cmd)
-        for line in output.split('\n'):
-            if line.startswith('State:'):
-                print('\n ' + line + '\n')
 
     def boot_diskless(self):
         try:

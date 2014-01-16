@@ -44,7 +44,7 @@ class TeefaaSsh(object):
         limit = 50
         FNULL = open(os.devnull, 'w')
         cmd = ['ssh', '-o', 'ConnectTimeout=5', '-F', self.ssh_config]
-        if self.ssh_key: cmd.append('-i' + self.key)
+        if self.ssh_key: cmd.append('-i' + self.ssh_key)
         cmd.append(self.hostname)
         cmd.append('hostname')
         while count < limit:

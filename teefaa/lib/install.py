@@ -18,6 +18,7 @@ from fabric.contrib.files import (
         put
         )
 from cuisine import (
+        dir_ensure,
         file_append,
         file_exists,
         file_is_link,
@@ -84,11 +85,45 @@ class Condition(object):
         config = read_config()
         env.host_string = config['host_config']['hostname']
         self.distro = config['snapshot_config']['os']['distro']
+        self.user = config['user_config']['username']
+        self.home_dir = "/home/" + self.user
+        self.authorized_keys = config['user_config']['authorized_keys_path']
         self.interfaces = config['network_config']
         self.disk_config = config['disk_config']
         self.rootimg = "/mnt"
         if not file_exists(self.rootimg + '/etc'):
             raise IOError("snapshot isn't installed yet.")
+
+    def condition_common(self):
+        
+        self._condition_common_rules()
+        self._condition_common_user()
+
+    def _condition_common_rules(self):
+
+        time.sleep(1)
+        file_path = "/mnt/etc/udev/rules.d/70-persistent-net.rules"
+        if file_exists(file_path):
+            if not file_is_link(file_path):
+                cmd = ['rm', '-rf', file_path]
+                sudo(' '.join(cmd))
+                cmd = ['ln', '-s', '/dev/null', file_path]
+                sudo(' '.join(cmd))
+
+    def _condition_common_user(self):
+
+        cmd = ['chroot', self.rootimg, 'id', self.user, '||',
+                'chroot', self.rootimg, 'useradd', self.user, '-m',
+                '-s', '/bin/bash', '-d', self.home_dir]
+        sudo(' '.join(cmd))
+        with mode_sudo():
+            ssh_dir = '/mnt/' + self.home_dir + '/.ssh'
+            dir_ensure(ssh_dir, mode=700)
+        put(self.authorized_keys, ssh_dir + '/authorized_keys',
+                use_sudo=True, mode=644)
+        cmd = ['chroot', self.rootimg, 'chown', '-R', self.user,
+                self.home_dir + '/.ssh']
+        sudo(' '.join(cmd))
 
     def condition_ubuntu(self):
         print("Updating configuration...")
@@ -199,21 +234,6 @@ class Condition(object):
         file_path = "/mnt/etc/resolv.conf"
         sudo("rm -f " + file_path)
         sudo("cat /etc/resolv.conf > " + file_path)
-
-    def condition_common(self):
-        
-        self._condition_common_rules()
-
-    def _condition_common_rules(self):
-
-        time.sleep(1)
-        file_path = "/mnt/etc/udev/rules.d/70-persistent-net.rules"
-        if file_exists(file_path):
-            if not file_is_link(file_path):
-                cmd = ['rm', '-rf', file_path]
-                sudo(' '.join(cmd))
-                cmd = ['ln', '-s', '/dev/null', file_path]
-                sudo(' '.join(cmd))
 
     def run(self):
         sub_func = getattr(self, 'condition_' + self.distro)

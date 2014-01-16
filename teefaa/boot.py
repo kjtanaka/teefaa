@@ -24,7 +24,7 @@ import os
 import argparse
 from fabric.api import execute
 
-from .lib.boot import (
+from .libexec.boot import (
         boot_diskless,
         boot_disk,
         power_on,

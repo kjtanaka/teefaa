@@ -7,7 +7,7 @@ import argparse
 import subprocess
 from fabric.api import local, execute, task, hide
 
-from .lib.common import read_config
+from .libexec.common import read_config
 
 class TeefaaSsh(object):
 

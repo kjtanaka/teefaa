@@ -26,10 +26,10 @@ from fabric.api import execute, hide
 from cuisine import text_strip_margin
 
 from .ssh import check_ssh
-from .lib.make import make_swap, make_fs
-from .lib.boot import boot_diskless, boot_disk
-from .lib.partition import make_partition, mount_partition
-from .lib.install import install_snapshot, install_grub, condition
+from .libexec.make import make_swap, make_fs
+from .libexec.boot import boot_diskless, boot_disk
+from .libexec.partition import make_partition, mount_partition
+from .libexec.install import install_snapshot, install_grub, condition
 
 class TeefaaProvision(object):
 

@@ -23,7 +23,7 @@ import os
 import argparse
 from fabric.api import execute
 
-from .lib.install import install_snapshot, condition, install_grub
+from .libexec.install import install_snapshot, condition, install_grub
 
 class TeefaaInstall(object):
 

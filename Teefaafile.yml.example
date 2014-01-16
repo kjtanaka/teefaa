@@ -1,0 +1,79 @@
+ssh_config: ../.teefaa/ssh_config
+
+snapshot_config:
+  hostname: host0
+  os:
+    distro: ubuntu
+    ver: 12.04
+  snapshot_path: .teefaa/ubuntu1204-2014-01-12.squashfs
+  exclude:
+    - /path/to/excluded/dir
+
+iso_config:
+  base_iso: debian-live-7.2-amd64-standard.iso
+  base_iso_url: http://cdimage.debian.org/debian-cd/current-live/amd64/iso-hybrid/debian-live-7.2-amd64-standard.iso
+  builder:
+    hostname: host0
+    distro: ubuntu
+  iso_path: .teefaa/teefaa-debian-live.iso
+
+host_config:
+  hostname: host1
+  power_driver: virtualbox
+  power_driver_config:
+    # check the vbox name with "VBoxManage list vms"
+    vbox_name: teefaa_host1_XXXXXXXXXXXXX_XXXXX
+  boot_driver: virtualbox
+  boot_driver_config:
+    installer_boot: iso
+    iso_file: .teefaa/teefaa-debian-live.iso
+
+# Baremetal
+#dest_host:
+#  hostname: host1
+#  power_driver: ipmi
+#  power_driver_config:
+#    ipmi_password: XXXXXXXXXX
+#    ipmi_user: ipmiadmin
+#    bmc_address: 192.168.1.1
+#  boot_driver: pxe
+#  boot_driver_config:
+#    boot_config_file: /tftpboot/pxelinux.cfg/host1
+#    installer_boot_config_file: /tftpboot/pxelinux.cfg/netboot
+#    disk_boot_config_file: /tftpboot/pxelinux.cfg/localboot
+
+disk_config:
+  label_type: gpt
+  device: /dev/sda
+  swap:
+    size: 2
+  system:
+    size: 10
+    format: ext4
+  data:
+    size: -1
+    dir: /data
+    format: xfs
+
+network_config:
+  add:
+    eth0:
+      bootp: dhcp
+    #eth1:
+    #  bootp: static
+    #  address: 192.168.32.101
+    #  netmask: 255.255.255.0
+    #  gateway: 192.168.32.254
+    #dnsserver:
+    #  address: 192.168.32.1
+    #  interface: eth1
+  #delete:
+    #- ib0
+    #- br0
+
+bootloader_config:
+  type: grub2
+
+user_config:
+  username: teefaa
+  authorized_keys_path: ../.teefaa/ssh_authorized_keys

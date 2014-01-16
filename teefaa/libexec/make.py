@@ -41,7 +41,10 @@ class MakeSnapshot(object):
         except:
             self.overwrite = True
         self.save_as = config['snapshot_config']['snapshot_path']
-        self.exclude_list = config['snapshot_config']['exclude']
+        try:
+            self.exclude_list = config['snapshot_config']['exclude']
+        except:
+            self.exclude_list = None
         self.tmp_dir = "/tmp/teefaa"
         self.user = run("echo $USER")
         self.squashfs = "{tmp_dir}/filesystem.squashfs".format(tmp_dir=self.tmp_dir)

@@ -30,9 +30,4 @@ def read_config():
         print("ssh_config doesn't exist in Teefaafile.yml", file=sys.stderr)
         exit(1)
 
-    # Check if image file exists.
-    iso_file = config['snapshot_config']['snapshot_path']
-    if not os.path.isfile(iso_file):
-        raise IOError("{f} doesn't exist.".format(f=iso_file))
-
     return config

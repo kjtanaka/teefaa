@@ -24,7 +24,7 @@ from cuisine import (
 from .common import read_config
 
 
-class FabricBoot(object):
+class Boot(object):
 
     def __init__(self):
         # Set config
@@ -218,31 +218,31 @@ class FabricBoot(object):
 
 @task
 def boot_diskless():
-    fabboot = FabricBoot()
+    fabboot = Boot()
     fabboot.boot_diskless()
 
 @task
 def boot_disk():
-    fabboot = FabricBoot()
+    fabboot = Boot()
     fabboot.boot_disk()
 
 @task
 def power_off():
-    fabboot = FabricBoot()
+    fabboot = Boot()
     fabboot.power_off()
 
 @task
 def power_on():
-    fabboot = FabricBoot()
+    fabboot = Boot()
     fabboot.power_on()
 
 @task
 def power_state():
-    fabboot = FabricBoot()
+    fabboot = Boot()
     fabboot.power_state()
 
 @task
 def test_boot(func):
-    fabboot = FabricBoot()
+    fabboot = Boot()
     test_func = getattr(fabboot, func)
     test_func()

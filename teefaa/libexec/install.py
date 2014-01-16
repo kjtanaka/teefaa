@@ -120,10 +120,14 @@ class Condition(object):
             ssh_dir = '/mnt/' + self.home_dir + '/.ssh'
             dir_ensure(ssh_dir, mode=700)
         put(self.authorized_keys, ssh_dir + '/authorized_keys',
-                use_sudo=True, mode=644)
+                use_sudo=True, mode=0644)
         cmd = ['chroot', self.rootimg, 'chown', '-R', self.user,
                 self.home_dir + '/.ssh']
         sudo(' '.join(cmd))
+
+        sudo_conf = self.rootimg + '/etc/sudoers'
+        append_text = "{u}   ALL=NOPASSWD:ALL".format(u=self.user)
+        append(sudo_conf, append_text, use_sudo=True)
 
     def condition_ubuntu(self):
         print("Updating configuration...")

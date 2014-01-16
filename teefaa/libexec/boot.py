@@ -7,9 +7,11 @@ import subprocess
 
 from fabric.api import (
         env,
+        hide,
         local,
         task,
-        run
+        run,
+        sudo
         )
 from fabric.contrib.files import (
         append
@@ -40,6 +42,16 @@ class Boot(object):
         """Power off"""
         sub_func = getattr(self, '_power_off_'+ self.power_driver)
         sub_func()
+
+    def shutdown(self):
+
+        print("Shutting down '{h}'...".format(h=self.hostname))
+        with hide('running', 'stdout'): sudo("shutdown -h now")
+
+    def reboot(self):
+        
+        print("Rebooting '{h}'...".format(h=self.hostname))
+        with hide('running', 'stdout'): sudo("reboot")
 
     def _power_off_ipmi(self):
 
@@ -200,7 +212,10 @@ class Boot(object):
                 print('\n ' + line + '\n')
 
     def boot_diskless(self):
-        self.power_off()
+        try:
+            self.shutdown()
+        except:
+            self.power_off()
         time.sleep(1)
         self.setup_diskless_boot()
         time.sleep(1)
@@ -240,6 +255,16 @@ def power_on():
 def power_state():
     fabboot = Boot()
     fabboot.power_state()
+
+@task
+def shutdown():
+    fabboot = Boot()
+    fabboot.shutdown()
+
+@task
+def reboot():
+    fabboot = Boot()
+    fabboot.reboot()
 
 @task
 def test_boot(func):

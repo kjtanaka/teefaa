@@ -32,7 +32,7 @@ class TeefaaSsh(object):
         print("\nssh to machine '{0}'...\n".format(self.hostname))
         self.check_ssh()
         cmd = ['ssh', '-F', self.ssh_config, self.hostname]
-        if self.ssh_key: cmd.append('-i' + self.key)
+        if self.ssh_key: cmd.append('-i' + self.ssh_key)
         try:
             subprocess.check_call(cmd)
         except subprocess.CalledProcessError:

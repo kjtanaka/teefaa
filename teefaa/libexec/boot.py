@@ -40,6 +40,10 @@ class Boot(object):
 
     def shutdown(self):
 
+        sub_func = getattr(self, '_shutdown_'+ self.power_driver)
+        sub_func()
+
+    def _shutdown_virtualbox(self):
         print("Shutting down '{h}'...".format(h=self.hostname))
         with hide('running', 'stdout'):
             try:
@@ -48,6 +52,16 @@ class Boot(object):
                 print("machine is offline.")
                 exit(1)
             self._ensure_power_off_virtualbox()
+
+    def _shutdown_ipmi(self):
+        print("Shutting down '{h}'...".format(h=self.hostname))
+        with hide('running', 'stdout'):
+            try:
+                sudo("shutdown -h now")
+            except fabric.exceptions.NetworkError:
+                print("machine is offline.")
+                exit(1)
+            self._ensure_power_off_ipmi()
 
     def reboot(self):
         
@@ -68,7 +82,7 @@ class Boot(object):
         cmd = ['ipmitool', '-I', 'lanplus', '-U', ipmi_user, '-P', ipmi_password, '-E',
                 '-H', bmc_address, 'power', 'off']
         subprocess.check_call(cmd)
-        time.sleep(1)
+        self._ensure_power_off_ipmi()
 
     def _power_off_virtualbox(self):
         """
@@ -246,6 +260,27 @@ class Boot(object):
         else:
             print("Confirmed power is off...")
 
+    def _ensure_power_off_ipmi(self):
+
+        print("Checking power is off...")
+        count = 1
+        limit = 50
+        interval = 10
+        FNULL = open(os.devnull, 'w')
+        ipmi_password = self.power_driver_config['ipmi_password']
+        ipmi_user = self.power_driver_config['ipmi_user']
+        bmc_address = self.power_driver_config['bmc_address']
+        cmd = ['ipmitool', '-I', 'lanplus', '-U', ipmi_user, '-P', ipmi_password, '-E',
+                '-H', bmc_address, 'power', 'status']
+        while count < limit:
+            output = subprocess.check_output(cmd)
+            if "Power is off" in output: break
+            time.sleep(interval)
+        if count == limit:
+            raise SystemExit("Power won't be off.")
+        else:
+            print("Confirmed power is off...")
+
     def boot_installer(self):
         try:
             self.shutdown()
@@ -271,41 +306,41 @@ class Boot(object):
 
 @task
 def boot_installer():
-    fabboot = Boot()
-    fabboot.boot_installer()
+    tfboot = Boot()
+    tfboot.boot_installer()
 
 @task
 def boot_disk():
-    fabboot = Boot()
-    fabboot.boot_disk()
+    tfboot = Boot()
+    tfboot.boot_disk()
 
 @task
 def power_off():
-    fabboot = Boot()
-    fabboot.power_off()
+    tfboot = Boot()
+    tfboot.power_off()
 
 @task
 def power_on():
-    fabboot = Boot()
-    fabboot.power_on()
+    tfboot = Boot()
+    tfboot.power_on()
 
 @task
 def power_state():
-    fabboot = Boot()
-    fabboot.power_state()
+    tfboot = Boot()
+    tfboot.power_state()
 
 @task
 def shutdown():
-    fabboot = Boot()
-    fabboot.shutdown()
+    tfboot = Boot()
+    tfboot.shutdown()
 
 @task
 def reboot():
-    fabboot = Boot()
-    fabboot.reboot()
+    tfboot = Boot()
+    tfboot.reboot()
 
 @task
 def test_boot(func):
-    fabboot = Boot()
-    test_func = getattr(fabboot, func)
+    tfboot = Boot()
+    test_func = getattr(tfboot, func)
     test_func()

@@ -28,8 +28,12 @@ class TeefaaSsh(object):
             cmd.append('-i ' + ssh_key)
         except:
             ssh_key = None
-        print(' '.join(cmd))
-        execute(fab_ssh, ssh_config, hostname, ssh_key)
+        print("\nssh to machine '{0}'...\n".format(hostname))
+        try:
+            subprocess.check_call(cmd)
+            #execute(fab_ssh, ssh_config, hostname, ssh_key)
+        except subprocess.CalledProcessError:
+            print("SSH is disconnected...")
 
 @task
 def fab_ssh(ssh_config, hostname, ssh_key):
@@ -37,5 +41,4 @@ def fab_ssh(ssh_config, hostname, ssh_key):
     if not ssh_key == None:
         cmd.append("-i " + ssh_key)
     with hide('running'):
-        print("ssh to machine '{0}'...".format(hostname))
         local(' '.join(cmd))

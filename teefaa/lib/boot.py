@@ -29,7 +29,7 @@ class FabricBoot(object):
     def __init__(self):
         # Set config
         config = read_config()
-        env.host_string = config['host_config']['hostname']
+        env.host_string = self.hostname = config['host_config']['hostname']
         self.distro = config['snapshot_config']['os']['distro']
         self.power_driver = config['host_config']['power_driver']
         self.power_driver_config = config['host_config']['power_driver_config']
@@ -78,7 +78,7 @@ class FabricBoot(object):
         """
         Power off VM (VirtualBox)
         """
-        print(self._power_off_virtualbox.__doc__)
+        print("Power off machine '{h}'...".format(h=self.hostname))
         time.sleep(1)
         vbox_name = self.power_driver_config['vbox_name']
         cmd = ['VBoxManage', 'list', 'runningvms']
@@ -99,11 +99,13 @@ class FabricBoot(object):
         """
         Set ISO Boot (VirtualBox)
         """
-        print(self._setup_diskless_boot_virtualbox.__doc__)
-        time.sleep(1)
 
         vbox_name = self.power_driver_config['vbox_name']
         iso_file = self.boot_driver_config['iso_file']
+        print("Setting machine '{h}' to boot with file '{f}'...".format(
+            h=self.hostname,f=iso_file))
+        time.sleep(1)
+
         cmd = ['VBoxManage', 'storageattach', vbox_name, '--storagectl', 'IDE Controller', 
                 '--port', '0', '--device', '1', '--type', 'dvddrive', '--medium', iso_file]
         subprocess.check_call(cmd)
@@ -167,7 +169,7 @@ class FabricBoot(object):
         """
         Power on VM (VirtualBox)
         """
-        print(self._power_on_virtualbox.__doc__)
+        print("Power on machine '{h}'...".format(h=self.hostname))
         time.sleep(1)
         vbox_name = self.power_driver_config['vbox_name']
         cmd = ['VBoxManage', 'list', 'runningvms']
@@ -188,6 +190,8 @@ class FabricBoot(object):
         """
         Check power state (VirtualBox)
         """
+        print("Checking power state of '{h}'...".format(h=self.hostname))
+        time.sleep(1)
         vbox_name = self.power_driver_config['vbox_name']
         cmd = ['VBoxManage', 'showvminfo', vbox_name]
         output = subprocess.check_output(cmd)

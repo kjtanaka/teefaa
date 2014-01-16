@@ -31,7 +31,7 @@ from cuisine import (
 from .common import read_config
 
 class MakeSnapshot(object):
-    """Make snapshot"""
+
     def __init__(self):
         # Set config
         config = read_config()
@@ -93,7 +93,7 @@ class MakeSnapshot(object):
                 cmd = ['mksquashfs', self.rootimg, self.squashfs, '-noappend']
                 run(' '.join(cmd))
                 user = run("echo \$USER")
-                file_ensure(self.squashfs, owner=user, mode=0600)
+                file_ensure(self.squashfs, owner=user, mode=600)
             
     def _download_squashfs(self):
         """
@@ -106,15 +106,31 @@ class MakeSnapshot(object):
         except:
             get(self.squashfs, self.save_as)
 
+    def _clean_tmp(self):
+
+        text = text_strip_margin("""
+        |The system copy is still stored on /tmp/teefaa on {h}.
+        |Right now, Teefaa doesn't delete it for security reason. 
+        |So please go check and delete it as needed.
+        |""".format(h=env.host_string))
+        print(text)
+
     def run(self):
         """
         Make a snapshot of the system
         """
-        print("Start making a snapshot of machine '{0}'...".format(env.host_string))
+        print("Starts making a snapshot of machine '{0}'...".format(env.host_string))
         self._install_required_packages()
         self._copy_system_to_tmp()
         self._make_squashfs()
         self._download_squashfs()
+        self._clean_tmp()
+        text = text_strip_margin("""
+        |Done...
+        |
+        |Snapshot is downloaded and saved as {f}.
+        |""".format(f=self.save_as))
+        print(text)
 
 
 class MakeIso(object):
@@ -448,13 +464,15 @@ class MakeFilesystem(object):
         if label_type == 'gpt': self.n += 1
 
     def make_swap(self):
-        
+    
+        print("Making swap partition...")
         p = self.device + str(1 + self.n)
         cmd = ['mkswap', p]
         sudo(' '.join(cmd))
 
     def make_fs_system(self):
 
+        print("Making system partition...")
         p = self.device + str(2 + self.n)
         mkfs = 'mkfs.' + self.system['format']
         cmd = [mkfs, p]
@@ -463,6 +481,7 @@ class MakeFilesystem(object):
 
     def make_fs_data(self):
 
+        print("Making data partition...")
         p = self.device + str(3 + self.n)
         mkfs = 'mkfs.' + self.data['format']
         cmd = [mkfs, '-f', p]

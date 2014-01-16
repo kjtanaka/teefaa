@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# vim: tabstop=8 expandtab shiftwidth=4 softtabstop=4
 
 import os
 import time
@@ -109,22 +108,22 @@ class Boot(object):
         subprocess.check_call(cmd)
         time.sleep(1)
 
-    def setup_diskless_boot(self):
+    def setup_installer_boot(self):
         """
         Set ISO Boot
         """
-        sub_func = getattr(self, '_setup_diskless_boot_'+ self.boot_driver)
+        sub_func = getattr(self, '_setup_installer_boot_'+ self.boot_driver)
         sub_func()
 
-    def _setup_diskless_boot_virtualbox(self):
+    def _setup_installer_boot_virtualbox(self):
         """
         Set ISO Boot (VirtualBox)
         """
 
         vbox_name = self.power_driver_config['vbox_name']
         iso_file = self.boot_driver_config['iso_file']
-        print("Setting machine '{h}' to boot with file '{f}'...".format(
-            h=self.hostname,f=iso_file))
+        print("Booting Installer on '{h}'...".format(
+            h=self.hostname))
         time.sleep(1)
 
         cmd = ['VBoxManage', 'storageattach', vbox_name, '--storagectl', 'IDE Controller', 
@@ -138,15 +137,15 @@ class Boot(object):
         subprocess.check_call(cmd)
         time.sleep(1)
 
-    def _setup_diskless_boot_pxe(self):
+    def _setup_installer_boot_pxe(self):
 
         server = self.boot_driver_config['pxe_server']
         user = self.boot_driver_config['pxe_server_user']
         pxe_config = self.boot_driver_config['boot_config_file']
-        pxe_config_diskless = self.boot_driver_config['diskless_boot_config_file']
+        pxe_config_installer = self.boot_driver_config['installer_boot_config_file']
         env.host_string = server
         env.user = user
-        cmd = ['cat', pxe_config_diskless, '>', pxe_config]
+        cmd = ['cat', pxe_config_installer, '>', pxe_config]
         run(' '.join(cmd))
 
     def setup_diskboot(self):
@@ -211,13 +210,13 @@ class Boot(object):
             subprocess.check_call(cmd)
             time.sleep(1)
 
-    def boot_diskless(self):
+    def boot_installer(self):
         try:
             self.shutdown()
         except:
             self.power_off()
         time.sleep(1)
-        self.setup_diskless_boot()
+        self.setup_installer_boot()
         time.sleep(1)
         self.power_on()
         time.sleep(1)
@@ -232,9 +231,9 @@ class Boot(object):
 
 
 @task
-def boot_diskless():
+def boot_installer():
     fabboot = Boot()
-    fabboot.boot_diskless()
+    fabboot.boot_installer()
 
 @task
 def boot_disk():

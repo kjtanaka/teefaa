@@ -3,6 +3,7 @@
 import os
 import time
 import subprocess
+import fabric.exceptions
 
 from fabric.api import (
         env,
@@ -40,7 +41,13 @@ class Boot(object):
     def shutdown(self):
 
         print("Shutting down '{h}'...".format(h=self.hostname))
-        with hide('running', 'stdout'): sudo("shutdown -h now")
+        with hide('running', 'stdout'):
+            try:
+                sudo("shutdown -h now")
+            except fabric.exceptions.NetworkError:
+                print("machine is offline.")
+                exit(1)
+            self._ensure_power_off_virtualbox()
 
     def reboot(self):
         
@@ -75,7 +82,7 @@ class Boot(object):
         if vbox_name in output:
             cmd = ['VBoxManage', 'controlvm', vbox_name, 'poweroff']
             subprocess.check_call(cmd)
-            time.sleep(1)
+            self._ensure_power_off_virtualbox()
 
     def power_state(self):
         """
@@ -157,6 +164,9 @@ class Boot(object):
 
     def _setup_diskboot_pxe(self):
 
+        print("Setting up boot local disk boot...")
+        time.sleep(1)
+
         server = self.boot_driver_config['pxe_server']
         user = self.boot_driver_config['pxe_server_user']
         pxe_config = self.boot_driver_config['boot_config_file']
@@ -170,13 +180,16 @@ class Boot(object):
         """
         Set local disk boot (VirtualBox)
         """
-        print(self._setup_diskboot_virtualbox.__doc__)
+        print("Setting up boot local disk boot...")
         time.sleep(1)
 
         vbox_name = self.power_driver_config['vbox_name']
         cmd = ['VBoxManage', 'storageattach', vbox_name, '--storagectl', 'IDE Controller', 
                 '--port', '0', '--device', '1', '--type', 'dvddrive', '--medium', 'none']
-        subprocess.check_call(cmd)
+        try:
+            subprocess.check_call(cmd)
+        except subprocess.CalledProcessError:
+            print("Machine is already set with local disk boot...")
 
     def power_on(self):
         """
@@ -210,6 +223,29 @@ class Boot(object):
             subprocess.check_call(cmd)
             time.sleep(1)
 
+    def ensure_power_off(self):
+        """Power off"""
+        sub_func = getattr(self, '_ensure_power_off_'+ self.power_driver)
+        sub_func()
+
+    def _ensure_power_off_virtualbox(self):
+
+        print("Checking power is off...")
+        count = 1
+        limit = 50
+        interval = 10
+        FNULL = open(os.devnull, 'w')
+        vbox_name = self.power_driver_config['vbox_name']
+        cmd = ['VBoxManage', 'list', 'runningvms']
+        while count < limit:
+            output = subprocess.check_output(cmd)
+            if not vbox_name in output: break
+            time.sleep(interval)
+        if count == limit:
+            raise SystemExit("Power won't be off.")
+        else:
+            print("Confirmed power is off...")
+
     def boot_installer(self):
         try:
             self.shutdown()
@@ -222,7 +258,10 @@ class Boot(object):
         time.sleep(1)
 
     def boot_disk(self):
-        self.power_off()
+        try:
+            self.shutdown()
+        except:
+            self.power_off()
         time.sleep(1)
         self.setup_diskboot()
         time.sleep(1)

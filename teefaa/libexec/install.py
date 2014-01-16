@@ -168,10 +168,37 @@ class Condition(object):
                 |""".format(iface=iface))
                 with mode_sudo():
                     file_append(file_path, text)
-            elif iface['bootp'] == 'static':
-                pass
+            elif bootp == 'static':
+                address = self.interfaces['add'][iface]['address']
+                netmask = self.interfaces['add'][iface]['netmask']
+                text = text_strip_margin("""
+                |# {iface}
+                |auto {iface}
+                |iface {iface} inet static
+                |  address {addr}
+                |  netmask {mask}
+                |""".format(iface=iface,
+                    addr=address, mask=netmask))
+                with mode_sudo(): 
+                    file_append(file_path, text)
+                try:
+                    gateway = self.interfaces['add'][iface]['gateway']
+                except:
+                    gateway = None
+                if gateway:
+                    text = "  gateway {g}\n".format(g=gateway)
+                    with mode_sudo():
+                        file_append(file_path, text)
+                try:
+                    dnsserver = self.interfaces['add'][iface]['dnsserver']
+                except:
+                    dnsserver = None
+                if dnsserver:
+                    text = "  dns-nameservers {d}\n".format(d=dnsserver)
+                    with mode_sudo():
+                        file_append(file_path, text)
             else:
-                raise TypeError("network_config: {0} is not supported.".format(iface))
+                raise TypeError("network_config: {0} is not supported.\n".format(iface))
 
     def _condition_ubuntu_fstab(self):
 

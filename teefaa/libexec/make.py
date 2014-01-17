@@ -7,13 +7,15 @@ from fabric.api import (
         cd,
         env,
         get,
+        hide,
         run,
         sudo,
         task
         )
 from fabric.contrib.files import (
         append,
-        get
+        get,
+        put
         )
 from cuisine import (
         dir_ensure,
@@ -142,6 +144,8 @@ class MakeIso(object):
         # Set variables
         config = read_config()
         env.host_string = config['iso_config']['builder']['hostname']
+        self.user = 'teefaa'
+        self.ssh_key = config['ssh_key']
         self.distro = config['iso_config']['builder']['distro']
         self.base_iso = '/tmp/' + config['iso_config']['base_iso']
         self.base_iso_url = config['iso_config']['base_iso_url']
@@ -177,10 +181,7 @@ class MakeIso(object):
         """
         print("Downloading base image...")
         time.sleep(1)
-        try:
-            cmd = ['ls', self.base_iso, '1>/dev/null']
-            sudo(' '.join(cmd))
-        except:
+        if not file_exists(self.base_iso):
             cmd = ['wget', self.base_iso_url, '-O', self.base_iso]
             sudo(' '.join(cmd))
 
@@ -190,13 +191,10 @@ class MakeIso(object):
         """
         print("Mounting base image...")
         time.sleep(1)
-        cmd = ['ls', self.base_iso_dir, '1>/dev/null', '||', 
-                'mkdir', '-p', self.base_iso_dir]
-        sudo(' '.join(cmd))
-        try:
-            cmd = ['df', '-ha', '|', 'grep', self.base_iso_dir, '1>/dev/null']
-            sudo(' '.join(cmd))
-        except:
+        with mode_sudo():
+            dir_ensure(self.base_iso_dir, recursive=True)
+        output = sudo("df -a")
+        if not self.base_iso_dir in output:
             cmd = ['mount', '-o','loop', self.base_iso, self.base_iso_dir]
             sudo(' '.join(cmd))
 
@@ -207,9 +205,8 @@ class MakeIso(object):
         print("Copying files from base image to new image...")
         time.sleep(1)
         # Make sure new_iso_dir exists
-        cmd = ['ls', self.new_iso_dir, '||', 
-                    'mkdir', '-p', self.new_iso_dir]
-        sudo(' '.join(cmd))
+        with mode_sudo():
+            dir_ensure(self.new_iso_dir)
         # Copy files to new dir
         cmd = ['rsync', '-a', '--stats', '--delete',
                 '--exclude=\"/live/filesystem.squashfs\"', 
@@ -295,8 +292,8 @@ class MakeIso(object):
         time.sleep(1)
         # Create admin user
         root_dir = self.new_squashfs_dir
-        user = run("echo $USER")
-        home_dir = run("echo $HOME")
+        user = self.user
+        home_dir = '/home/' + user
         try:
             cmd = ['chroot', root_dir, 'id', user]
             sudo(' '.join(cmd))
@@ -305,17 +302,13 @@ class MakeIso(object):
                     '-s', '/bin/bash', '-d', home_dir]
             sudo(' '.join(cmd))
         # Copy ~/.ssh
-        try:
-            cmd = ['diff', home_dir + '/.ssh/authorized_keys',
-                    root_dir + home_dir + '/.ssh/authorized_keys']
-            sudo(' '.join(cmd))
-        except:
-            cmd = ['ls', root_dir + home_dir, '||', 'mkdir', root_dir + home_dir]
-            sudo(' '.join(cmd))
-            cmd = ['cp', '-rp', home_dir + '/.ssh', root_dir + home_dir + '/.ssh']
-            sudo(' '.join(cmd))
-            cmd = ['chroot', root_dir, 'chown', '-R', user, home_dir + '/.ssh' ]
-            sudo(' '.join(cmd))
+        ssh_dir = root_dir + home_dir + '/.ssh'
+        ssh_authorize = ssh_dir + '/authorised_keys'
+        with mode_sudo(): 
+            dir_ensure(ssh_dir, recursive=True, mode=700)
+        put(self.ssh_key + '.pub', ssh_authorize, mode=0644, use_sudo=True)
+        cmd = ['chroot', root_dir, 'chown', '-R', self.user, home_dir + '/.ssh']
+        sudo(' '.join(cmd))
         # Copy /etc/ssh
         try:
             cmd = ['diff', '/etc/ssh/ssh_host_dsa_key', 

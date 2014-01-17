@@ -85,6 +85,11 @@ class MakeSnapshot(object):
             cmd.append('/')
             cmd.append(self.rootimg)
             sudo(' '.join(cmd))
+            # Make sure /boot is copied.
+            cmd = ['rsync', '-a', '--stats', '--delete',
+                    '--one-file-system', '/boot/', 
+                    self.rootimg + '/boot']
+            sudo(' '.join(cmd))
 
     def _make_squashfs(self):
         """
@@ -303,7 +308,7 @@ class MakeIso(object):
             sudo(' '.join(cmd))
         # Copy ~/.ssh
         ssh_dir = root_dir + home_dir + '/.ssh'
-        ssh_authorize = ssh_dir + '/authorised_keys'
+        ssh_authorize = ssh_dir + '/authorized_keys'
         with mode_sudo(): 
             dir_ensure(ssh_dir, recursive=True, mode=700)
         put(self.ssh_key + '.pub', ssh_authorize, mode=0644, use_sudo=True)

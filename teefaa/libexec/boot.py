@@ -146,6 +146,7 @@ class Boot(object):
         print("Booting Installer on '{h}'...".format(
             h=self.hostname))
         time.sleep(1)
+        self._check_id_controller_virtualbox()
 
         cmd = ['VBoxManage', 'storageattach', vbox_name, '--storagectl', 'IDE Controller', 
                 '--port', '0', '--device', '1', '--type', 'dvddrive', '--medium', iso_file]
@@ -157,6 +158,17 @@ class Boot(object):
         cmd = ['VBoxManage', 'modifyvm', vbox_name, '--boot2', 'disk']
         subprocess.check_call(cmd)
         time.sleep(1)
+
+    def _check_id_controller_virtualbox(self):
+
+        vbox_name = self.power_driver_config['vbox_name']
+        storage_controller_name = "IDE Controller"
+        cmd = ['VBoxManage', 'showvminfo', vbox_name]
+        output = subprocess.check_output(cmd)
+        if not storage_controller_name in output:
+            cmd = ['VBoxManage', 'storagectl', vbox_name, 
+                    '--name', storage_controller_name, '--add', 'ide']
+            subprocess.check_call(cmd)
 
     def _setup_installer_boot_pxe(self):
 
@@ -196,6 +208,7 @@ class Boot(object):
         """
         print("Setting up boot local disk boot...")
         time.sleep(1)
+        self._check_id_controller_virtualbox()
 
         vbox_name = self.power_driver_config['vbox_name']
         cmd = ['VBoxManage', 'storageattach', vbox_name, '--storagectl', 'IDE Controller', 

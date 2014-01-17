@@ -118,7 +118,7 @@ class Condition(object):
         sudo(' '.join(cmd))
         with mode_sudo():
             ssh_dir = '/mnt/' + self.home_dir + '/.ssh'
-            dir_ensure(ssh_dir, mode=700)
+            dir_ensure(ssh_dir, mode=700, recursive=True)
         put(self.authorized_keys, ssh_dir + '/authorized_keys',
                 use_sudo=True, mode=0644)
         cmd = ['chroot', self.rootimg, 'chown', '-R', self.user,

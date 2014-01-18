@@ -46,13 +46,13 @@ class TeefaaMake(object):
     def do_make_snapshot(self, args):
 
         print_logo()
-        with hide('running', 'stdout'):
+        with hide('everything'):
             execute(make_snapshot)
 
     def do_make_installer(self, args):
 
         print_logo()
-        with hide('running', 'stdout'):
+        with hide('everything'):
             execute(make_installer)
 
     def do_make_swap(self, args):

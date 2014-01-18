@@ -34,14 +34,13 @@ def read_config():
 
     return config
 
-def do_sudo(cmd, warn_only=True):
+def do_sudo(cmd, warn_only=False):
 
     if warn_only:
-        with settings(hide('everything'), warn_only=True):
+        with settings(warn_only=True):
             return sudo(' '.join(cmd))
     else:
-        with settings(hide('everything')):
-            return sudo(' '.join(cmd))
+        return sudo(' '.join(cmd))
 
 def print_logo():
 

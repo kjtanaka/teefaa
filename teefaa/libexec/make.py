@@ -8,6 +8,7 @@ from fabric.api import (
         env,
         get,
         hide,
+        local,
         put,
         run,
         sudo,
@@ -291,7 +292,7 @@ class MakeInstaller(object):
         home_dir = '/home/' + user
         # Create admin user
         cmd = ['grep', user, self.new_squashfs_dir + '/etc/passwd']
-        output = do_sudo(cmd)
+        output = do_sudo(cmd, warn_only=True)
         if not user in output:
             cmd = ['chroot', root_dir, 'useradd', user, '-m',
                     '-s', '/bin/bash', '-d', home_dir]
@@ -305,20 +306,17 @@ class MakeInstaller(object):
         cmd = ['chroot', root_dir, 'chown', '-R', self.user, home_dir + '/.ssh']
         do_sudo(cmd)
         # Copy /etc/ssh
-        try:
-            cmd = ['diff', '/etc/ssh/ssh_host_dsa_key', 
-                    root_dir + '/etc/ssh/ssh_host_dsa_key']
-            sudo(' '.join(cmd))
-        except:
+        text1 = do_sudo(['cat', '/etc/ssh/ssh_host_dsa_key'])
+        text2 = do_sudo(['cat', root_dir+'/etc/ssh/ssh_host_dsa_key'], warn_only=True)
+        if not text1 == text2:
             cmd = ['cp', '-rp', '/etc/ssh/*', root_dir + '/etc/ssh']
-            sudo(' '.join(cmd))
+            do_sudo(cmd)
         # Enable sudo
         config = root_dir + '/etc/sudoers'
         text = user + "   ALL=NOPASSWD:ALL"
-        try:
-            cmd = ['grep', '\"'+text+'\"', config ]
-            sudo(' '.join(cmd))
-        except:
+        cmd = ['grep', '\"'+text+'\"', config]
+        output = do_sudo(cmd, warn_only=True)
+        if not text in output:
             append(config, text, use_sudo=True)
 
     def _unmount_all(self):
@@ -343,7 +341,7 @@ class MakeInstaller(object):
         print("Making new squashfs...")
         
         cmd = ['ls', self.new_squashfs]
-        output = do_sudo(cmd)
+        output = do_sudo(cmd, warn_only=True)
         if output.startswith(self.new_squashfs):
             print("New SquashFS already exists. Skip...")
         else:
@@ -358,7 +356,7 @@ class MakeInstaller(object):
         print("Making new iso image...")
         new_iso = '/tmp/teefaa/custom.iso'
         cmd = ['ls', new_iso]
-        output = do_sudo(cmd)
+        output = do_sudo(cmd, warn_only=True)
         if output.startswith(new_iso):
             print("New ISO image aready exists. Skip...")
         else:
@@ -367,7 +365,7 @@ class MakeInstaller(object):
                 self._update_md5sum()
                 self._mkisofs(new_iso)
         cmd = ['ls', self.save_as]
-        output = local(cmd, capture=True)
+        output = local(' '.join(cmd), capture=True)
         if output.startswith(self.save_as):
             print("New ISO image is already downloaded. Skip...")
         else:
@@ -400,12 +398,12 @@ class MakeInstaller(object):
         """
         print("Updating md5sum.txt...")
         cmd = ['rm', '-f', 'md5sum.txt']
-        sudo(' '.join(cmd))
+        do_sudo(cmd)
         cmd = ['find', '-type', 'f', '-print0', '|', 
                 'xargs', '-0', 'md5sum', '|',
                 'grep', '-v', 'isolinux/boot.cat', '|', 
                 'tee md5sum.txt']
-        sudo(' '.join(cmd))
+        do_sudo(cmd)
 
     def _mkisofs(self, new_iso):
 
@@ -414,7 +412,7 @@ class MakeInstaller(object):
                 '-J', '-l', '-b', 'isolinux/isolinux.bin', '-c', 
                 'isolinux/boot.cat', '-no-emul-boot', '-boot-load-size', 
                 '4', '-boot-info-table', '-o', new_iso, '.']
-        sudo(' '.join(cmd))
+        do_sudo(cmd)
 
     def setup(self):
         self._install_required_pkgs()
@@ -477,7 +475,7 @@ class MakeFilesystem(object):
         p = self.device + str(3 + self.n)
         mkfs = 'mkfs.' + self.data['format']
         cmd = [mkfs, '-f', p]
-        sudo(' '.join(cmd))
+        do_sudo(cmd)
         time.sleep(1)
 
     def make_fs(self):

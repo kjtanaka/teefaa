@@ -24,6 +24,7 @@ import argparse
 from fabric.api import execute, hide
 from cuisine import text_strip_margin
 
+from .libexec.common import print_logo
 from .ssh import check_ssh
 from .libexec.make import make_swap, make_fs
 from .libexec.boot import boot_installer, boot_disk
@@ -39,18 +40,7 @@ class TeefaaProvision(object):
 
     def do_provision(self, args):
 
-        text = text_strip_margin("""
-        | 
-        | _|_|_|_|_|                        _|_|                      
-        |    |_|      _|_|      _|_|      _|        _|_|_|    _|_|_|  
-        |    |_|    _|_|_|_|  _|_|_|_|  _|_|_|_|  _|    _|  _|    _|  
-        |    |_|    _|        _|          _|      _|    _|  _|    _|  
-        |    |_|      _|_|_|    _|_|_|    _|        _|_|_|    _|_|_|
-        |""")
-        print(text)
-        time.sleep(1)
-        print("...")
-        time.sleep(1)
+        print_logo()
         with hide('running', 'stdout'):
             execute(boot_installer)
             check_ssh()

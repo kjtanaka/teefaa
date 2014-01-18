@@ -21,7 +21,6 @@ sub command make-*, mk*
 import os
 import argparse
 from fabric.api import execute, hide
-from cuisine import text_strip_margin
 
 from .libexec.common import print_logo
 from .libexec.make import (

@@ -286,17 +286,16 @@ class MakeInstaller(object):
         """
         print("Creating admin user...")
         time.sleep(1)
-        # Create admin user
         root_dir = self.new_squashfs_dir
         user = self.user
         home_dir = '/home/' + user
-        try:
-            cmd = ['chroot', root_dir, 'id', user]
-            sudo(' '.join(cmd))
-        except:
+        # Create admin user
+        cmd = ['grep', user, self.new_squashfs_dir + '/etc/passwd']
+        output = do_sudo(cmd)
+        if not user in output:
             cmd = ['chroot', root_dir, 'useradd', user, '-m',
                     '-s', '/bin/bash', '-d', home_dir]
-            do_sudo(' '.join(cmd))
+            do_sudo(cmd)
         # Copy ~/.ssh
         ssh_dir = root_dir + home_dir + '/.ssh'
         ssh_authorize = ssh_dir + '/authorized_keys'
@@ -304,7 +303,7 @@ class MakeInstaller(object):
             dir_ensure(ssh_dir, recursive=True, mode=700)
         put(self.ssh_key + '.pub', ssh_authorize, mode=0644, use_sudo=True)
         cmd = ['chroot', root_dir, 'chown', '-R', self.user, home_dir + '/.ssh']
-        sudo(' '.join(cmd))
+        do_sudo(cmd)
         # Copy /etc/ssh
         try:
             cmd = ['diff', '/etc/ssh/ssh_host_dsa_key', 

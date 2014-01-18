@@ -180,7 +180,7 @@ class Boot(object):
         pxe_config_installer = self.boot_driver_config['installer_boot_config_file']
         env.host_string = server
         env.user = user
-        cmd = ['cat', pxe_config_installer, '>', pxe_config]
+        cmd = ['cp', pxe_config_installer, pxe_config]
         run(' '.join(cmd))
 
     def setup_diskboot(self):

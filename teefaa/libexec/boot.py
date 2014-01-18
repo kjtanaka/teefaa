@@ -263,7 +263,7 @@ class Boot(object):
         count = 1
         limit = 50
         interval = 10
-        FNULL = open(os.devnull, 'w')
+        #FNULL = open(os.devnull, 'w')
         vbox_name = self.power_driver_config['vbox_name']
         cmd = ['VBoxManage', 'list', 'runningvms']
         while count < limit:
@@ -274,7 +274,6 @@ class Boot(object):
             raise SystemExit("Power won't be off.")
         else:
             print("Confirmed power is off...")
-        FNULL.close()
 
     def _ensure_power_off_ipmi(self):
 
@@ -296,6 +295,7 @@ class Boot(object):
             raise SystemExit("Power won't be off.")
         else:
             print("Confirmed power is off...")
+        FNULL.close()
 
     def boot_installer(self):
         try:

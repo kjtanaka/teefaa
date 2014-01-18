@@ -84,6 +84,7 @@ class Boot(object):
                 '-H', bmc_address, 'power', 'off']
         subprocess.check_call(cmd, stdout=FNULL, stderr=subprocess.STDOUT)
         self._ensure_power_off_ipmi()
+        FNULL.close()
 
     def _power_off_virtualbox(self):
         """
@@ -273,6 +274,7 @@ class Boot(object):
             raise SystemExit("Power won't be off.")
         else:
             print("Confirmed power is off...")
+        FNULL.close()
 
     def _ensure_power_off_ipmi(self):
 

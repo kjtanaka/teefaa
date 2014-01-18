@@ -5,7 +5,7 @@ import os
 import sys
 import yaml
 
-from fabric.api import env
+from fabric.api import env, sudo, settings, hide
 
 def read_config():
     """Make snapshot"""
@@ -31,3 +31,19 @@ def read_config():
         exit(1)
 
     return config
+
+def do_sudo(cmd):
+    with settings(hide('everything'), warn_only=True):
+        return sudo(' '.join(cmd))
+
+def print_logo():
+
+    text = text_strip_margin("""
+    |
+    | _|_|_|_|_|                        _|_|
+    |    |_|      _|_|      _|_|      _|        _|_|_|    _|_|_|
+    |    |_|    _|_|_|_|  _|_|_|_|  _|_|_|_|  _|    _|  _|    _|
+    |    |_|    _|        _|          _|      _|    _|  _|    _|
+    |    |_|      _|_|_|    _|_|_|    _|        _|_|_|    _|_|_|
+    |""")
+    print(text)

@@ -23,7 +23,7 @@ import argparse
 from fabric.api import execute, hide
 from cuisine import text_strip_margin
 
-
+from .libexec.common import print_logo
 from .libexec.make import (
         make_snapshot,
         make_installer,
@@ -46,21 +46,15 @@ class TeefaaMake(object):
 
     def do_make_snapshot(self, args):
 
-        text = text_strip_margin("""
-        | 
-        | _|_|_|_|_|                        _|_|                      
-        |    |_|      _|_|      _|_|      _|        _|_|_|    _|_|_|  
-        |    |_|    _|_|_|_|  _|_|_|_|  _|_|_|_|  _|    _|  _|    _|  
-        |    |_|    _|        _|          _|      _|    _|  _|    _|  
-        |    |_|      _|_|_|    _|_|_|    _|        _|_|_|    _|_|_|
-        |""")
-        print(text)
+        print_logo()
         with hide('running', 'stdout'):
             execute(make_snapshot)
 
     def do_make_installer(self, args):
 
-        execute(make_installer)
+        print_logo()
+        with hide('running', 'stdout'):
+            execute(make_installer)
 
     def do_make_swap(self, args):
 

@@ -27,7 +27,7 @@ from cuisine import (
         text_strip_margin
         )
 
-from .common import read_config
+from .common import read_config, do_sudo
 
 class MakeSnapshot(object):
 
@@ -82,12 +82,12 @@ class MakeSnapshot(object):
                 pass
             cmd.append('/')
             cmd.append(self.rootimg)
-            sudo(' '.join(cmd))
+            do_sudo(cmd)
             # Make sure /boot is copied.
             cmd = ['rsync', '-a', '--stats', '--delete',
                     '--one-file-system', '/boot/', 
                     self.rootimg + '/boot']
-            sudo(' '.join(cmd))
+            do_sudo(cmd)
 
     def _make_squashfs(self):
         """
@@ -250,24 +250,16 @@ class MakeInstaller(object):
         print("Mounting /proc /sys /dev...")
         time.sleep(1)
         # Mount /proc
-        try:
-            cmd = ['df', '-a', '|', 'grep', self.new_squashfs_dir + '/proc']
-            sudo(' '.join(cmd))
-        except:
+        output = sudo("df -ha")
+        if not '/proc' in output:
             cmd = ['mount', '-t', 'proc', 'proc', self.new_squashfs_dir + '/proc']
             sudo(' '.join(cmd))
         # Mount /sys
-        try:
-            cmd = ['df', '-a', '|', 'grep', self.new_squashfs_dir + '/sys']
-            sudo(' '.join(cmd))
-        except:
+        if not '/sys' in output:
             cmd = ['mount', '-t', 'sysfs', 'sys', self.new_squashfs_dir + '/sys']
             sudo(' '.join(cmd))
         # Mount /dev
-        try:
-            cmd = ['df', '-a', '|', 'grep', self.new_squashfs_dir + '/dev']
-            sudo(' '.join(cmd))
-        except:
+        if not '/dev' in output:
             cmd = ['mount', '-o', 'bind', '/dev', self.new_squashfs_dir + '/dev']
             sudo(' '.join(cmd))
 
@@ -277,6 +269,7 @@ class MakeInstaller(object):
         """
         print("Installing required packages in new image...")
         time.sleep(1)
+        #TODO: /etc/resolve.conf should be recovered after this.
         # Copy /etc/resolv.conf to new image's dir
         cmd = ['cp', '/etc/resolv.conf', self.new_squashfs_dir + '/etc/resolv.conf']
         sudo(' '.join(cmd))
@@ -303,7 +296,7 @@ class MakeInstaller(object):
         except:
             cmd = ['chroot', root_dir, 'useradd', user, '-m',
                     '-s', '/bin/bash', '-d', home_dir]
-            sudo(' '.join(cmd))
+            do_sudo(' '.join(cmd))
         # Copy ~/.ssh
         ssh_dir = root_dir + home_dir + '/.ssh'
         ssh_authorize = ssh_dir + '/authorized_keys'
@@ -335,30 +328,29 @@ class MakeInstaller(object):
         """
         print("Unmounting all dir...")
         # Unmount /dev
+        mlist = sudo("df -a")
         for mpoint in [ self.new_squashfs_dir + '/dev', 
                         self.new_squashfs_dir + '/sys', 
                         self.new_squashfs_dir + '/proc',
                         self.base_squashfs_dir ]:
-            try:
-                cmd = ['df', '-a', '|', 'grep', mpoint ]
-                sudo(' '.join(cmd))
+            if mpoint in mlist:
                 cmd = ['umount', mpoint]
                 sudo(' '.join(cmd))
-            except:
-                pass
 
     def _make_new_squashfs(self):
         """
         Make new squashfs...
         """
         print("Making new squashfs...")
-        try:
-            cmd = ['ls', self.new_squashfs]
-            sudo(' '.join(cmd))
-        except:
+        
+        cmd = ['ls', self.new_squashfs]
+        output = do_sudo(cmd)
+        if output.startswith(self.new_squashfs):
+            print("New SquashFS already exists. Skip...")
+        else:
             cmd = ['mksquashfs', self.new_squashfs_dir, 
                     self.new_squashfs, '-noappend']
-            sudo(' '.join(cmd))
+            do_sudo(cmd)
 
     def _make_new_iso(self):
         """
@@ -366,18 +358,20 @@ class MakeInstaller(object):
         """
         print("Making new iso image...")
         new_iso = '/tmp/teefaa/custom.iso'
-        try:
-            cmd = ['ls', new_iso]
-            sudo(' '.join(cmd))
-        except:
+        cmd = ['ls', new_iso]
+        output = do_sudo(cmd)
+        if output.startswith(new_iso):
+            print("New ISO image aready exists. Skip...")
+        else:
             with cd(self.new_iso_dir):
                 self._update_menu_cfg()
                 self._update_md5sum()
                 self._mkisofs(new_iso)
-        try:
-            cmd = ['ls', self.save_as]
-            sudo(' '.join(cmd))
-        except:
+        cmd = ['ls', self.save_as]
+        output = local(cmd, capture=True)
+        if output.startswith(self.save_as):
+            print("New ISO image is already downloaded. Skip...")
+        else:
             print("Downloading new iso image...")
             get(new_iso, self.save_as)
 
@@ -398,7 +392,7 @@ class MakeInstaller(object):
         |    APPEND initrd=/live/initrd.img boot=live config quiet noprompt noeject
         |""")
         cmd = ['chmod', 'u+w', menu_cfg_file]
-        sudo(' '.join(cmd))
+        do_sudo(cmd)
         file_write(menu_cfg_file, new_menu_cfg, sudo=True)
 
     def _update_md5sum(self):
@@ -415,6 +409,7 @@ class MakeInstaller(object):
         sudo(' '.join(cmd))
 
     def _mkisofs(self, new_iso):
+
         print("Making new disk image...")
         cmd = ['mkisofs', '-D', '-r', '-V', 'CustomISO', '-cache-inodes',
                 '-J', '-l', '-b', 'isolinux/isolinux.bin', '-c', 

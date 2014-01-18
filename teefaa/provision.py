@@ -41,22 +41,28 @@ class TeefaaProvision(object):
     def do_provision(self, args):
 
         print_logo()
-        with hide('running', 'stdout'):
-            execute(boot_installer)
-            check_ssh()
-            execute(make_partition)
-            time.sleep(2)
-            execute(make_swap)
-            time.sleep(2)
-            execute(make_fs)
-            time.sleep(2)
-            execute(mount_partition)
-            time.sleep(2)
-            execute(install_snapshot)
-            time.sleep(2)
-            execute(condition)
-            time.sleep(2)
-            execute(install_grub)
-            time.sleep(2)
-            execute(boot_disk)
+        if args.debug:
+            self._do_provision()
+        else:
+            with hide('everything'):
+                self._do_provision()
 
+    def _do_provision(self):
+
+        execute(boot_installer)
+        check_ssh()
+        execute(make_partition)
+        time.sleep(2)
+        execute(make_swap)
+        time.sleep(2)
+        execute(make_fs)
+        time.sleep(2)
+        execute(mount_partition)
+        time.sleep(2)
+        execute(install_snapshot)
+        time.sleep(2)
+        execute(condition)
+        time.sleep(2)
+        execute(install_grub)
+        time.sleep(2)
+        execute(boot_disk)

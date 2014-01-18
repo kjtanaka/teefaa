@@ -36,6 +36,9 @@ class TeefaaShell(object):
     def setup(self):
 
         self.parser = argparse.ArgumentParser()
+        self.parser.add_argument("--debug", 
+                                 help="Enable debugging",
+                                 action="store_true")
         
         self.subparsers = self.parser.add_subparsers(help='sub-command help')
 

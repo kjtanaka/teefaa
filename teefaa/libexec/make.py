@@ -254,15 +254,15 @@ class MakeInstaller(object):
         output = sudo("df -ha")
         if not '/proc' in output:
             cmd = ['mount', '-t', 'proc', 'proc', self.new_squashfs_dir + '/proc']
-            sudo(' '.join(cmd))
+            do_sudo(cmd)
         # Mount /sys
         if not '/sys' in output:
             cmd = ['mount', '-t', 'sysfs', 'sys', self.new_squashfs_dir + '/sys']
-            sudo(' '.join(cmd))
+            do_sudo(cmd)
         # Mount /dev
         if not '/dev' in output:
             cmd = ['mount', '-o', 'bind', '/dev', self.new_squashfs_dir + '/dev']
-            sudo(' '.join(cmd))
+            do_sudo(cmd)
 
     def _install_packages_in_new_image(self):
         """
@@ -273,13 +273,13 @@ class MakeInstaller(object):
         #TODO: /etc/resolve.conf should be recovered after this.
         # Copy /etc/resolv.conf to new image's dir
         cmd = ['cp', '/etc/resolv.conf', self.new_squashfs_dir + '/etc/resolv.conf']
-        sudo(' '.join(cmd))
+        do_sudo(cmd)
         # Install packages
         cmd = ['chroot', self.new_squashfs_dir, 'aptitude', 'update']
-        sudo(' '.join(cmd))
+        do_sudo(cmd)
         cmd = ['chroot', self.new_squashfs_dir, 'aptitude', '-y', 'install',
                 'openssh-server', 'vim', 'squashfs-tools', 'xfsprogs', 'parted']
-        sudo(' '.join(cmd))
+        do_sudo(cmd)
 
     def _create_user(self):
         """
@@ -332,7 +332,7 @@ class MakeInstaller(object):
                         self.base_squashfs_dir ]:
             if mpoint in mlist:
                 cmd = ['umount', mpoint]
-                sudo(' '.join(cmd))
+                do_sudo(cmd)
 
     def _make_new_squashfs(self):
         """
@@ -364,13 +364,8 @@ class MakeInstaller(object):
                 self._update_menu_cfg()
                 self._update_md5sum()
                 self._mkisofs(new_iso)
-        cmd = ['ls', self.save_as]
-        output = local(' '.join(cmd), capture=True)
-        if output.startswith(self.save_as):
-            print("New ISO image is already downloaded. Skip...")
-        else:
-            print("Downloading new iso image...")
-            get(new_iso, self.save_as)
+        print("Downloading new iso image...")
+        get(new_iso, self.save_as)
 
     def _update_menu_cfg(self):
         """
@@ -458,7 +453,7 @@ class MakeFilesystem(object):
         print("Making swap partition...")
         p = self.device + str(1 + self.n)
         cmd = ['mkswap', p]
-        sudo(' '.join(cmd))
+        do_sudo(cmd)
 
     def make_fs_system(self):
 
@@ -466,7 +461,7 @@ class MakeFilesystem(object):
         p = self.device + str(2 + self.n)
         mkfs = 'mkfs.' + self.system['format']
         cmd = [mkfs, p]
-        sudo(' '.join(cmd))
+        do_sudo(cmd)
         time.sleep(1)
 
     def make_fs_data(self):
@@ -496,9 +491,8 @@ def make_fs():
 
 @task
 def make_installer():
-    with hide('running', 'stdout'):
-        mkinst = MakeInstaller()
-        mkinst.run()
+    mkinst = MakeInstaller()
+    mkinst.run()
 
 @task
 def make_snapshot():

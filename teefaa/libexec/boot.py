@@ -281,21 +281,21 @@ class Boot(object):
         count = 1
         limit = 50
         interval = 10
-        FNULL = open(os.devnull, 'w')
+        #FNULL = open(os.devnull, 'w')
         ipmi_password = self.power_driver_config['ipmi_password']
         ipmi_user = self.power_driver_config['ipmi_user']
         bmc_address = self.power_driver_config['bmc_address']
         cmd = ['ipmitool', '-I', 'lanplus', '-U', ipmi_user, '-P', ipmi_password, '-E',
                 '-H', bmc_address, 'power', 'status']
         while count < limit:
-            output = subprocess.check_output(cmd, stderr=FNULL)
+            output = subprocess.check_output(cmd)
             if "Power is off" in output: break
             time.sleep(interval)
         if count == limit:
             raise SystemExit("Power won't be off.")
         else:
             print("Confirmed power is off...")
-        FNULL.close()
+        #FNULL.close()
 
     def boot_installer(self):
         try:

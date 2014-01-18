@@ -181,7 +181,7 @@ class Boot(object):
         env.host_string = server
         env.user = user
         cmd = ['cp', pxe_config_installer, pxe_config]
-        run(' '.join(cmd))
+        #run(' '.join(cmd))
 
     def setup_diskboot(self):
         """
@@ -202,7 +202,7 @@ class Boot(object):
         env.host_string = server
         env.user = user
         cmd = ['cat', pxe_config_localdisk, '>', pxe_config]
-        #run(' '.join(cmd))
+        run(' '.join(cmd))
 
     def _setup_diskboot_virtualbox(self):
         """

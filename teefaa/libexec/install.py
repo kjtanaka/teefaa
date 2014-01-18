@@ -402,7 +402,11 @@ class InstallBootloader(object):
         else:
             raise TypeError, "label_type is not supported."
         self.distro = config['snapshot_config']['os']['distro']
-        self.bootloader_type = config['snapshot_config']['bootloader']
+        #self.bootloader_type = config['snapshot_config']['bootloader']
+        if self.distro in ['ubuntu', 'debian']:
+            self.bootloader_type = 'grub2'
+        if self.distro in ['centos', 'fedora']:
+            self.bootloader_type = 'grub'
 
     def install_bootloader_ubuntu_grub2(self):
         self._install_bootloader_mount_devices()
@@ -411,7 +415,7 @@ class InstallBootloader(object):
 
     def install_bootloader_centos_grub(self):
         self._install_bootloader_mount_devices()
-        self._update_grub_conf_centos()
+        self._update_grub_conf()
         self._install_bootloader_type1()
 
     def _install_bootloader_mount_devices(self):
@@ -443,7 +447,7 @@ class InstallBootloader(object):
         cmd = ['chroot', '/mnt', 'update-grub']
         sudo(' '.join(cmd))
 
-    def _update_grub_conf_centos(self):
+    def _update_grub_conf(self):
 
         device = self.device
         rootp = self.rootp

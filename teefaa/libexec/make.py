@@ -8,15 +8,13 @@ from fabric.api import (
         env,
         get,
         hide,
+        put,
         run,
         sudo,
         task
         )
-from fabric.contrib.files import (
-        append,
-        get,
-        put
-        )
+from fabric.contrib.files import append
+
 from cuisine import (
         dir_ensure,
         dir_exists,
@@ -142,7 +140,7 @@ class MakeSnapshot(object):
         print(text)
 
 
-class MakeIso(object):
+class MakeInstaller(object):
 
     def __init__(self):
         """Make ISO image"""
@@ -505,22 +503,12 @@ def make_fs():
     mf.make_fs()
 
 @task
-def make_iso():
+def make_installer():
     with hide('running', 'stdout'):
-        mkiso = MakeIso()
-        mkiso.run()
+        mkinst = MakeInstaller()
+        mkinst.run()
 
 @task
 def make_snapshot():
     mksnap = MakeSnapshot()
     mksnap.run()
-
-@task
-def test(func):
-    """
-    Test functions.
-    param: func - function to test.
-    """
-    mkiso = MakeIso()
-    test_func = getattr(mkiso, func)
-    test_func()

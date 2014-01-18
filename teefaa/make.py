@@ -26,7 +26,7 @@ from cuisine import text_strip_margin
 
 from .libexec.make import (
         make_snapshot,
-        make_iso,
+        make_installer,
         make_swap,
         make_fs
         )
@@ -36,17 +36,9 @@ class TeefaaMake(object):
     def setup(self, parser):
 
         make_snapshot = parser.add_parser('make-snapshot', help='Make a snapshot')
-        make_snapshot.add_argument(
-                '--host',
-                metavar='<host_name>',
-                help='Set hostname')
-        make_snapshot.add_argument(
-                '--ssh-config',
-                metavar='</path/to/ssh-config>',
-                help='Set the path to ssh-config if you have')
         make_snapshot.set_defaults(func=self.do_make_snapshot)
-        make_iso = parser.add_parser('make-iso', help='Make a iso image')
-        make_iso.set_defaults(func=self.do_make_iso)
+        make_installer = parser.add_parser('make-installer', help='Make a iso image')
+        make_installer.set_defaults(func=self.do_make_installer)
         make_swap = parser.add_parser('make-swap', help='Make swap')
         make_swap.set_defaults(func=self.do_make_swap)
         make_fs = parser.add_parser('make-fs', help='Make filesystem')
@@ -66,9 +58,9 @@ class TeefaaMake(object):
         with hide('running', 'stdout'):
             execute(make_snapshot)
 
-    def do_make_iso(self, args):
+    def do_make_installer(self, args):
 
-        execute(make_iso)
+        execute(make_installer)
 
     def do_make_swap(self, args):
 

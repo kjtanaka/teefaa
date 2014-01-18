@@ -44,7 +44,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'Cloudmesh Teefaa'
-copyright = u'2012-2014, Developed as part of FutureGrid by Koji Tanaka, Gregor von Laszewski, Fugang Wang, Javier Diaz, Allan Streib.'
+copyright = u'2012-2014 Indiana University, developed by Koji Tanaka, Gregor von Laszewski, Fugang Wang, Javier Diaz, Allan Streib.'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the

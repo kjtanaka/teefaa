@@ -248,7 +248,7 @@ class MakeInstaller(object):
         """
         Mount /proc /sys /dev...
         """
-        print("Mounting /proc /sys /dev...")
+        print("Mounting proc, sys, dev...")
         time.sleep(1)
         # Mount /proc
         output = sudo("df -ha")
@@ -371,7 +371,6 @@ class MakeInstaller(object):
         """
         Update menu.cfg
         """
-        print("Updating menu.cfg...")
         menu_cfg_file = "isolinux/menu.cfg"
         new_menu_cfg = text_strip_margin("""
         |DEFAULT Teefaa
@@ -391,7 +390,6 @@ class MakeInstaller(object):
         """
         Update md5sum.txt
         """
-        print("Updating md5sum.txt...")
         cmd = ['rm', '-f', 'md5sum.txt']
         do_sudo(cmd)
         cmd = ['find', '-type', 'f', '-print0', '|', 
@@ -402,7 +400,6 @@ class MakeInstaller(object):
 
     def _mkisofs(self, new_iso):
 
-        print("Making new disk image...")
         cmd = ['mkisofs', '-D', '-r', '-V', 'CustomISO', '-cache-inodes',
                 '-J', '-l', '-b', 'isolinux/isolinux.bin', '-c', 
                 'isolinux/boot.cat', '-no-emul-boot', '-boot-load-size', 

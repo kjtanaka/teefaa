@@ -21,7 +21,7 @@ version = '0.4.0'
 
 setup(name='teefaa',
       version=version,
-      description="FutureGrid: Baremetal Provisioning Toolkit",
+      description="Cloudmesh Teefaa - Baremetal Provisioner",
       long_description="""\
 """,
       classifiers=[], # Get strings from http://pypi.python.org/pypi?%3Aaction=list_classifiers
@@ -29,7 +29,7 @@ setup(name='teefaa',
       author = ['Koji Tanaka','Javier Diaz'],
       author_email = 'kj.tanaka@gmail.com',
       maintainer = ['Koji Tanaka', 'Javier Diaz', 'Gregor von Laszewski'],
-      url='https://github.com/cloudmesh/teefaa',
+      url='http://cloudmesh-teefaa.readthedocs.org',
       license='Apache Software License',
       packages=find_packages(exclude=['ez_setup', 'examples', 'tests']),
       include_package_data=True,

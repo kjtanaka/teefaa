@@ -8,14 +8,13 @@ from fabric.api import (
         env,
         get,
         hide,
+        put,
         run,
         sudo,
         task
         )
-from fabric.contrib.files import (
-        append,
-        put
-        )
+from fabric.contrib.files import append
+
 from cuisine import (
         dir_ensure,
         file_append,

@@ -287,7 +287,7 @@ class Boot(object):
         cmd = ['ipmitool', '-I', 'lanplus', '-U', ipmi_user, '-P', ipmi_password, '-E',
                 '-H', bmc_address, 'power', 'status']
         while count < limit:
-            output = subprocess.check_output(cmd)
+            output = subprocess.check_output(cmd, stderr=FNULL)
             if "Power is off" in output: break
             time.sleep(interval)
         if count == limit:

@@ -13,7 +13,7 @@ baremetal/virtual machine.
    install
    usersguide
    adminguide
-   modules
+   support
    license
 
 Support
@@ -21,11 +21,3 @@ Support
 
 If you run into problems when using this framework, please use our 
 help form at `https://portal.futuregrid.org/help <https://portal.futuregrid.org/help>`_.
- 
-Indices and tables
-------------------
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
-

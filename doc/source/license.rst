@@ -1,8 +1,6 @@
 License
 =======
 
-Please do not remove this file
-
 Copyright [2012,2013,2014] Indiana University
 
 Licensed under the Apache License, Version 2.0 (the "License");

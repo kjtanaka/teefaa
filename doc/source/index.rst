@@ -10,7 +10,7 @@ baremetal/virtual machine.
 
    install
    usersguide
-   adminguide
+   devguide
    support
    license
 

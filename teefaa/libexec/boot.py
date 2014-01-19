@@ -82,7 +82,7 @@ class Boot(object):
         FNULL = open(os.devnull, 'w')
         cmd = ['ipmitool', '-I', 'lanplus', '-U', ipmi_user, '-P', ipmi_password, '-E',
                 '-H', bmc_address, 'power', 'off']
-        subprocess.check_call(cmd, stdout=FNULL, stderr=FNULL)
+        subprocess.check_call(cmd, stderr=FNULL)
         self._ensure_power_off_ipmi()
         FNULL.close()
 
@@ -129,7 +129,7 @@ class Boot(object):
         FNULL = open(os.devnull, 'w')
         cmd = ['ipmitool', '-I', 'lanplus', '-U', ipmi_user, '-P', ipmi_password, '-E',
                 '-H', bmc_address, 'power', 'status']
-        subprocess.check_call(cmd, stdout=FNULL, stderr=FNULL)
+        subprocess.check_call(cmd, stderr=FNULL)
         time.sleep(1)
         FNULL.close()
 
@@ -175,6 +175,8 @@ class Boot(object):
             subprocess.check_call(cmd)
 
     def _setup_installer_boot_pxe(self):
+
+        print("Boot installer...")
 
         server = self.boot_driver_config['pxe_server']
         user = self.boot_driver_config['pxe_server_user']
@@ -243,7 +245,7 @@ class Boot(object):
         FNULL = open(os.devnull, 'w')
         cmd = ['ipmitool', '-I', 'lanplus', '-U', ipmi_user, '-P', ipmi_password, '-E',
                 '-H', bmc_address, 'power', 'on']
-        subprocess.check_call(cmd, stdout=FNULL, stderr=FNULL)
+        subprocess.check_call(cmd, stderr=FNULL)
         time.sleep(1)
         FNULL.close()
 
@@ -290,21 +292,21 @@ class Boot(object):
         count = 1
         limit = 50
         interval = 10
-        #FNULL = open(os.devnull, 'w')
+        FNULL = open(os.devnull, 'w')
         ipmi_password = self.power_driver_config['ipmi_password']
         ipmi_user = self.power_driver_config['ipmi_user']
         bmc_address = self.power_driver_config['bmc_address']
         cmd = ['ipmitool', '-I', 'lanplus', '-U', ipmi_user, '-P', ipmi_password, '-E',
                 '-H', bmc_address, 'power', 'status']
         while count < limit:
-            output = subprocess.check_output(cmd)
+            output = subprocess.check_output(cmd, stderr=FNULL)
             if "Power is off" in output: break
             time.sleep(interval)
         if count == limit:
             raise SystemExit("Power won't be off.")
         else:
             print("Confirmed power is off...")
-        #FNULL.close()
+        FNULL.close()
 
     def boot_installer(self):
         try:

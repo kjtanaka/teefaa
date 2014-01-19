@@ -16,6 +16,7 @@ and provision it on a VM of your VirtualBox.
 I use Vagrant to simplify the procesedure, so please install VirtualBox and Vagrant
 before starting this tutorial.
 
+
 Make a Teefaa ISO/PXE boot image
 --------------------------------
 

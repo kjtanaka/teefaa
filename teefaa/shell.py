@@ -23,7 +23,8 @@ __author__ = 'Koji Tanaka, Javier Diaz'
 import os
 import argparse
 from . import (
-        boot, 
+        boot,
+        init,
         install,
         make, 
         partition,
@@ -43,6 +44,7 @@ class TeefaaShell(object):
         self.subparsers = self.parser.add_subparsers(help='sub-command help')
 
         commands = [boot.TeefaaBoot(),
+                    init.TeefaaInit(),
                     install.TeefaaInstall(),
                     make.TeefaaMake(),
                     partition.TeefaaPartition(),

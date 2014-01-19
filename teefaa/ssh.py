@@ -10,16 +10,6 @@ from .libexec.common import read_config
 
 class TeefaaSsh(object):
 
-    def __init__(self):
-
-        config = read_config()
-        self.ssh_config = config['ssh_config']
-        self.hostname = config['host_config']['hostname']
-        try:
-            self.ssh_key = os.path.abspath(config['ssh_key'])
-        except:
-            self.ssh_key = None
-
     def setup(self, parser):
 
         ssh = parser.add_parser(
@@ -29,8 +19,9 @@ class TeefaaSsh(object):
 
     def do_ssh(self, args):
 
+        self._init_ssh()
         print("\nssh to machine '{0}'...\n".format(self.hostname))
-        self.check_ssh()
+        self._check_ssh()
         cmd = ['ssh', '-F', self.ssh_config, self.hostname]
         if self.ssh_key: cmd.append('-i' + self.ssh_key)
         try:
@@ -39,6 +30,22 @@ class TeefaaSsh(object):
             print("SSH is disconnected...")
 
     def check_ssh(self):
+
+        self._init_ssh()
+        self._check_ssh()
+
+    def _init_ssh(self):
+
+        config = read_config()
+        self.ssh_config = config['ssh_config']
+
+        self.hostname = config['host_config']['hostname']
+        try:
+            self.ssh_key = os.path.abspath(config['ssh_key'])
+        except:
+            self.ssh_key = None
+
+    def _check_ssh(self):
 
         count = 1
         limit = 50

@@ -126,10 +126,12 @@ class Boot(object):
         ipmi_password = self.power_driver_config['ipmi_password']
         ipmi_user = self.power_driver_config['ipmi_user']
         bmc_address = self.power_driver_config['bmc_address']
+        FNULL = open(os.devnull, 'w')
         cmd = ['ipmitool', '-I', 'lanplus', '-U', ipmi_user, '-P', ipmi_password, '-E',
                 '-H', bmc_address, 'power', 'status']
-        subprocess.check_call(cmd)
+        subprocess.check_call(cmd, stdout=FNULL, stderr=FNULL)
         time.sleep(1)
+        FNULL.close()
 
     def setup_installer_boot(self):
         """
@@ -238,10 +240,12 @@ class Boot(object):
         ipmi_password = self.power_driver_config['ipmi_password']
         ipmi_user = self.power_driver_config['ipmi_user']
         bmc_address = self.power_driver_config['bmc_address']
+        FNULL = open(os.devnull, 'w')
         cmd = ['ipmitool', '-I', 'lanplus', '-U', ipmi_user, '-P', ipmi_password, '-E',
                 '-H', bmc_address, 'power', 'on']
-        subprocess.check_call(cmd)
+        subprocess.check_call(cmd, stdout=FNULL, stderr=FNULL)
         time.sleep(1)
+        FNULL.close()
 
     def _power_on_virtualbox(self):
         """

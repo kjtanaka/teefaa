@@ -163,7 +163,6 @@ class Condition(object):
             file_write(file_path, text)
 
         for iface in self.interfaces['add']:
-            print(iface + "...")
             bootp = self.interfaces['add'][iface]['bootp']
             if bootp == 'dhcp':
                 text = text_strip_margin("""
@@ -293,7 +292,6 @@ class Condition(object):
     def _condition_centos_network(self):
 
         for iface in self.interfaces['add']:
-            print(iface + "...")
             file_path = "/mnt/etc/sysconfig/network-scripts/ifcfg-" + iface
             bootp = self.interfaces['add'][iface]['bootp']
             if bootp == 'dhcp':

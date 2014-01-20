@@ -79,12 +79,12 @@ class Boot(object):
         ipmi_password = self.power_driver_config['ipmi_password']
         ipmi_user = self.power_driver_config['ipmi_user']
         bmc_address = self.power_driver_config['bmc_address']
-        FNULL = open(os.devnull, 'w')
+        #FNULL = open(os.devnull, 'w')
         cmd = ['ipmitool', '-I', 'lanplus', '-U', ipmi_user, '-P', ipmi_password, '-E',
                 '-H', bmc_address, 'power', 'off']
-        subprocess.check_call(cmd, stderr=FNULL)
+        subprocess.check_call(cmd)
         self._ensure_power_off_ipmi()
-        FNULL.close()
+        #FNULL.close()
 
     def _power_off_virtualbox(self):
         """
@@ -126,12 +126,12 @@ class Boot(object):
         ipmi_password = self.power_driver_config['ipmi_password']
         ipmi_user = self.power_driver_config['ipmi_user']
         bmc_address = self.power_driver_config['bmc_address']
-        FNULL = open(os.devnull, 'w')
+        #FNULL = open(os.devnull, 'w')
         cmd = ['ipmitool', '-I', 'lanplus', '-U', ipmi_user, '-P', ipmi_password, '-E',
                 '-H', bmc_address, 'power', 'status']
-        subprocess.check_call(cmd, stderr=FNULL)
+        subprocess.check_call(cmd)
         time.sleep(1)
-        FNULL.close()
+        #FNULL.close()
 
     def setup_installer_boot(self):
         """
@@ -183,13 +183,14 @@ class Boot(object):
         pxe_config = self.boot_driver_config['boot_config_file']
         pxe_config_installer = self.boot_driver_config['installer_boot_config_file']
         #NOTE: This will hit a bug of Fabric
-        #env.host_string = server
-        #env.user = user
-        #cmd = ['cp', pxe_config_installer, pxe_config]
-        #run(' '.join(cmd))
+        env.host_string = server
+        env.user = user
+        cmd = ['cat', pxe_config_installer, '>', pxe_config]
+        run(' '.join(cmd))
         # Workaround
-        cmd = ['ssh', user+'@'+server, 'cp', pxe_config_installer, pxe_config]
-        local(' '.join(cmd))
+        #cmd = ['ssh', user+'@'+server, 'cp', pxe_config_installer, pxe_config]
+        #with hide('stderr'):
+        #    local(' '.join(cmd))
         
 
     def setup_diskboot(self):
@@ -242,12 +243,12 @@ class Boot(object):
         ipmi_password = self.power_driver_config['ipmi_password']
         ipmi_user = self.power_driver_config['ipmi_user']
         bmc_address = self.power_driver_config['bmc_address']
-        FNULL = open(os.devnull, 'w')
+        #FNULL = open(os.devnull, 'w')
         cmd = ['ipmitool', '-I', 'lanplus', '-U', ipmi_user, '-P', ipmi_password, '-E',
                 '-H', bmc_address, 'power', 'on']
-        subprocess.check_call(cmd, stderr=FNULL)
+        subprocess.check_call(cmd)
         time.sleep(1)
-        FNULL.close()
+        #FNULL.close()
 
     def _power_on_virtualbox(self):
         """
@@ -292,21 +293,21 @@ class Boot(object):
         count = 1
         limit = 50
         interval = 10
-        FNULL = open(os.devnull, 'w')
+        #FNULL = open(os.devnull, 'w')
         ipmi_password = self.power_driver_config['ipmi_password']
         ipmi_user = self.power_driver_config['ipmi_user']
         bmc_address = self.power_driver_config['bmc_address']
         cmd = ['ipmitool', '-I', 'lanplus', '-U', ipmi_user, '-P', ipmi_password, '-E',
                 '-H', bmc_address, 'power', 'status']
         while count < limit:
-            output = subprocess.check_output(cmd, stderr=FNULL)
+            output = subprocess.check_output(cmd)
             if "Power is off" in output: break
             time.sleep(interval)
         if count == limit:
             raise SystemExit("Power won't be off.")
         else:
             print("Confirmed power is off...")
-        FNULL.close()
+        #FNULL.close()
 
     def boot_installer(self):
         try:

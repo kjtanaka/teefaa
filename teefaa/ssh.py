@@ -63,6 +63,7 @@ class TeefaaSsh(object):
                     h=self.hostname,c=count,l=limit))
                 count += 1
                 time.sleep(10)
+        FNULL.close()
 
 
 def check_ssh():

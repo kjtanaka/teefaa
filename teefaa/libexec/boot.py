@@ -183,14 +183,14 @@ class Boot(object):
         pxe_config = self.boot_driver_config['boot_config_file']
         pxe_config_installer = self.boot_driver_config['installer_boot_config_file']
         #NOTE: This will hit a bug of Fabric
-        env.host_string = server
-        env.user = user
-        cmd = ['cat', pxe_config_installer, '>', pxe_config]
-        run(' '.join(cmd))
+        #env.host_string = server
+        #env.user = user
+        #cmd = ['cat', pxe_config_installer, '>', pxe_config]
+        #run(' '.join(cmd))
         # Workaround
-        #cmd = ['ssh', user+'@'+server, 'cp', pxe_config_installer, pxe_config]
-        #with hide('stderr'):
-        #    local(' '.join(cmd))
+        cmd = ['ssh', user+'@'+server, 'cp', pxe_config_installer, pxe_config]
+        with hide('stderr'):
+            local(' '.join(cmd))
         
 
     def setup_diskboot(self):

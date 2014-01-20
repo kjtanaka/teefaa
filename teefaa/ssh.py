@@ -4,7 +4,7 @@ import os
 import time
 import argparse
 import subprocess
-from fabric.api import local, execute, task, hide
+from fabric.api import local, execute, hide
 
 from .libexec.common import read_config
 
@@ -26,13 +26,14 @@ class TeefaaSsh(object):
         if self.ssh_key: cmd.append('-i' + self.ssh_key)
         try:
             subprocess.check_call(cmd)
-        except subprocess.CalledProcessError:
+        except:
             print("SSH is disconnected...")
 
     def check_ssh(self):
 
         self._init_ssh()
-        self._check_ssh()
+        with hide('everything'):
+            self._check_ssh()
 
     def _init_ssh(self):
 
@@ -49,21 +50,22 @@ class TeefaaSsh(object):
 
         count = 1
         limit = 50
-        FNULL = open(os.devnull, 'w')
+        #FNULL = open(os.devnull, 'w')
         cmd = ['ssh', '-o', 'ConnectTimeout=5', '-F', self.ssh_config]
         if self.ssh_key: cmd.append('-i' + self.ssh_key)
         cmd.append(self.hostname)
-        cmd.append('hostname')
+        cmd.append('echo Confirmed $HOSTNAME is online.')
         while count < limit:
             try:
-                subprocess.check_call(cmd, stdout=FNULL, stderr=subprocess.STDOUT)
+                subprocess.check_call(cmd)
                 break
-            except subprocess.CalledProcessError:
+            except:
+                time.sleep(3)
                 print ("'{h}' is offline. Wait and retry ssh ({c}/{l})...".format(
                     h=self.hostname,c=count,l=limit))
                 count += 1
-                time.sleep(10)
-        FNULL.close()
+                time.sleep(7)
+        #FNULL.close()
 
 
 def check_ssh():

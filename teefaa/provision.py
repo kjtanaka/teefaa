@@ -44,7 +44,7 @@ class TeefaaProvision(object):
         if args.debug:
             self._do_provision()
         else:
-            with hide('everything'):
+            with hide('running', 'stdout'):
                 self._do_provision()
 
     def _do_provision(self):

@@ -18,7 +18,7 @@ from cuisine import (
         text_strip_margin
         )
 
-from .common import read_config
+from .common import read_config, do_sudo
 
 class Partition(object):
     """Make snapshot"""
@@ -49,26 +49,26 @@ class Partition(object):
 
         # Create label
         cmd = ['parted', self.device, '--script', '--', 'mklabel', 'msdos']
-        sudo(' '.join(cmd))
+        do_sudo(cmd)
         time.sleep(2)
 
         # Set unit as MB
         cmd = ['parted', self.device, '--script', '--', 'unit', 'MB']
-        sudo(' '.join(cmd))
+        do_sudo(cmd)
         time.sleep(2)
 
         # Create swap partition
         a, b = 1, int(self.swap['size']) * 1000
         cmd = ['parted', self.device, '--script', '--', 'mkpart', 
                 'primary', 'linux-swap', str(a), str(b)]
-        sudo(' '.join(cmd))
+        do_sudo(cmd)
         time.sleep(2)
 
         # Create system partition
         a, b = b, b + int(self.system['size']) * 1000
         cmd = ['parted', self.device, '--script', '--', 'mkpart', 
                 'primary', str(a), str(b)]
-        sudo(' '.join(cmd))
+        do_sudo(cmd)
         time.sleep(2)
 
         # Create data partition
@@ -78,18 +78,18 @@ class Partition(object):
             a, b = b, b + int(self.data['size']) * 1000
         cmd = ['parted', self.device, '--script', '--', 'mkpart', 
                 'primary', str(a), str(b)]
-        sudo(' '.join(cmd))
+        do_sudo(cmd)
         time.sleep(2)
 
         # Set boot partition
         bootid = '2'
         cmd = ['parted', self.device, '--script', '--', 'set', bootid, 'boot', 'on']
-        sudo(' '.join(cmd))
+        do_sudo(cmd)
         time.sleep(2)
 
         # Print partition table
         cmd = ['parted', self.device, '--script', '--', 'print']
-        sudo(' '.join(cmd))
+        do_sudo(cmd)
         time.sleep(2)
             
     def _make_partition_gpt(self):
@@ -101,35 +101,35 @@ class Partition(object):
 
         # Create label
         cmd = ['parted', self.device, '--script', '--', 'mklabel', 'gpt']
-        sudo(' '.join(cmd))
+        do_sudo(cmd)
         time.sleep(2)
 
         # Set unit as MB
         cmd = ['parted', self.device, '--script', '--', 'unit', 'MB']
-        sudo(' '.join(cmd))
+        do_sudo(cmd)
         time.sleep(2)
 
         # Make BIOS-GRUB partiton
         cmd = ['parted', self.device, '--script', '--', 'mkpart', 
                 'non-fs', '1', '3']
-        sudo(' '.join(cmd))
+        do_sudo(cmd)
         time.sleep(2)
         cmd = ['parted', self.device, '--script', '--', 'set', '1', 'bios_grub', 'on']
-        sudo(' '.join(cmd))
+        do_sudo(cmd)
         time.sleep(2)
 
         # Create swap partition
         a, b = 3, int(self.swap['size']) * 1000
         cmd = ['parted', self.device, '--script', '--', 'mkpart', 
                 'primary', 'linux-swap', str(a), str(b)]
-        sudo(' '.join(cmd))
+        do_sudo(cmd)
         time.sleep(2)
 
         # Create system partition
         a, b = b, b + int(self.system['size']) * 1000
         cmd = ['parted', self.device, '--script', '--', 'mkpart', 
                 'primary', str(a), str(b)]
-        sudo(' '.join(cmd))
+        do_sudo(cmd)
         time.sleep(2)
 
         # Create data partition
@@ -139,18 +139,18 @@ class Partition(object):
             a, b = b, b + int(self.data['size']) * 1000
         cmd = ['parted', self.device, '--script', '--', 'mkpart', 
                 'primary', str(a), str(b)]
-        sudo(' '.join(cmd))
+        do_sudo(cmd)
         time.sleep(2)
 
         # Set boot partition
         bootid = '2'
         cmd = ['parted', self.device, '--script', '--', 'set', bootid, 'boot', 'on']
-        sudo(' '.join(cmd))
+        do_sudo(cmd)
         time.sleep(2)
 
         # Print partition table
         cmd = ['parted', self.device, '--script', '--', 'print']
-        sudo(' '.join(cmd))
+        do_sudo(cmd)
         time.sleep(2)
 
     def mount_partition(self):

@@ -9,8 +9,7 @@ baremetal/virtual machine.
    :maxdepth: 2
 
    install
-   usersguide
-   devguide
+   make_snapshot
    support
    license
 

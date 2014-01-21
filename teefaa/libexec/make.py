@@ -7,7 +7,6 @@ from fabric.api import (
         cd,
         env,
         get,
-        hide,
         local,
         put,
         run,
@@ -46,6 +45,10 @@ class MakeSnapshot(object):
             self.exclude_list = config['snapshot_config']['exclude']
         except:
             self.exclude_list = None
+        try:
+            self.compressor = config['snapshot_config']['compressor']
+        except:
+            self.compressor = 'squashfs'
         self.tmp_dir = "/tmp/teefaa"
         self.user = run("echo $USER")
         self.squashfs = "{tmp_dir}/filesystem.squashfs".format(tmp_dir=self.tmp_dir)
@@ -85,10 +88,9 @@ class MakeSnapshot(object):
             cmd.append(self.rootimg)
             do_sudo(cmd)
             # Make sure /boot is copied.
-            cmd = ['rsync', '-a', '--stats', '--delete',
-                    '--one-file-system', '/boot/', 
-                    self.rootimg + '/boot']
-            do_sudo(cmd)
+            do_sudo(['rsync', '-a', '--stats', '--delete',
+                     '--one-file-system', '/boot/',
+                     self.rootimg + '/boot'])
 
     def _make_squashfs(self):
         """
@@ -123,10 +125,8 @@ class MakeSnapshot(object):
         |""".format(h=env.host_string))
         print(text)
 
-    def run(self):
-        """
-        Make a snapshot of the system
-        """
+    def _run_squashfs(self):
+
         print("Starts making a snapshot of machine '{0}'...".format(env.host_string))
         self._install_required_packages()
         self._copy_system_to_tmp()
@@ -139,6 +139,13 @@ class MakeSnapshot(object):
         |Snapshot is downloaded and saved as {f}.
         |""".format(f=self.save_as))
         print(text)
+
+    def run(self):
+        """
+        Make a snapshot of the system
+        """
+        sub_func = getattr(self, '_run_'+ self.compressor)
+        sub_func()
 
 
 class MakeInstaller(object):
@@ -253,16 +260,13 @@ class MakeInstaller(object):
         # Mount /proc
         output = sudo("df -ha")
         if not '/proc' in output:
-            cmd = ['mount', '-t', 'proc', 'proc', self.new_squashfs_dir + '/proc']
-            do_sudo(cmd)
+            do_sudo(['mount', '-t', 'proc', 'proc', self.new_squashfs_dir + '/proc'])
         # Mount /sys
         if not '/sys' in output:
-            cmd = ['mount', '-t', 'sysfs', 'sys', self.new_squashfs_dir + '/sys']
-            do_sudo(cmd)
+            do_sudo(['mount', '-t', 'sysfs', 'sys', self.new_squashfs_dir + '/sys'])
         # Mount /dev
         if not '/dev' in output:
-            cmd = ['mount', '-o', 'bind', '/dev', self.new_squashfs_dir + '/dev']
-            do_sudo(cmd)
+            do_sudo(['mount', '-o', 'bind', '/dev', self.new_squashfs_dir + '/dev'])
 
     def _install_packages_in_new_image(self):
         """
@@ -272,14 +276,11 @@ class MakeInstaller(object):
         time.sleep(1)
         #TODO: /etc/resolve.conf should be recovered after this.
         # Copy /etc/resolv.conf to new image's dir
-        cmd = ['cp', '/etc/resolv.conf', self.new_squashfs_dir + '/etc/resolv.conf']
-        do_sudo(cmd)
+        do_sudo(['cp', '/etc/resolv.conf', self.new_squashfs_dir + '/etc/resolv.conf'])
         # Install packages
-        cmd = ['chroot', self.new_squashfs_dir, 'aptitude', 'update']
-        do_sudo(cmd)
-        cmd = ['chroot', self.new_squashfs_dir, 'aptitude', '-y', 'install',
-                'openssh-server', 'vim', 'squashfs-tools', 'xfsprogs', 'parted']
-        do_sudo(cmd)
+        do_sudo(['chroot', self.new_squashfs_dir, 'aptitude', 'update'])
+        do_sudo(['chroot', self.new_squashfs_dir, 'aptitude', '-y', 'install',
+                 'openssh-server', 'vim', 'squashfs-tools', 'xfsprogs', 'parted'])
 
     def _create_user(self):
         """
@@ -291,31 +292,27 @@ class MakeInstaller(object):
         user = self.user
         home_dir = '/home/' + user
         # Create admin user
-        cmd = ['grep', user, self.new_squashfs_dir + '/etc/passwd']
-        output = do_sudo(cmd, warn_only=True)
+        output = do_sudo(['grep', user, self.new_squashfs_dir + '/etc/passwd'], 
+                         warn_only=True)
         if not user in output:
-            cmd = ['chroot', root_dir, 'useradd', user, '-m',
-                    '-s', '/bin/bash', '-d', home_dir]
-            do_sudo(cmd)
+            do_sudo(['chroot', root_dir, 'useradd', user, '-m',
+                     '-s', '/bin/bash', '-d', home_dir])
         # Copy ~/.ssh
         ssh_dir = root_dir + home_dir + '/.ssh'
         ssh_authorize = ssh_dir + '/authorized_keys'
         with mode_sudo(): 
             dir_ensure(ssh_dir, recursive=True, mode=700)
         put(self.ssh_key + '.pub', ssh_authorize, mode=0644, use_sudo=True)
-        cmd = ['chroot', root_dir, 'chown', '-R', self.user, home_dir + '/.ssh']
-        do_sudo(cmd)
+        do_sudo(['chroot', root_dir, 'chown', '-R', self.user, home_dir + '/.ssh'])
         # Copy /etc/ssh
         text1 = do_sudo(['cat', '/etc/ssh/ssh_host_dsa_key'])
         text2 = do_sudo(['cat', root_dir+'/etc/ssh/ssh_host_dsa_key'], warn_only=True)
         if not text1 == text2:
-            cmd = ['cp', '-rp', '/etc/ssh/*', root_dir + '/etc/ssh']
-            do_sudo(cmd)
+            do_sudo(['cp', '-rp', '/etc/ssh/*', root_dir + '/etc/ssh'])
         # Enable sudo
         config = root_dir + '/etc/sudoers'
         text = user + "   ALL=NOPASSWD:ALL"
-        cmd = ['grep', '\"'+text+'\"', config]
-        output = do_sudo(cmd, warn_only=True)
+        output = do_sudo(['grep', '\"'+text+'\"', config], warn_only=True)
         if not text in output:
             append(config, text, use_sudo=True)
 
@@ -331,8 +328,7 @@ class MakeInstaller(object):
                         self.new_squashfs_dir + '/proc',
                         self.base_squashfs_dir ]:
             if mpoint in mlist:
-                cmd = ['umount', mpoint]
-                do_sudo(cmd)
+                do_sudo(['umount', mpoint])
 
     def _make_new_squashfs(self):
         """
@@ -340,14 +336,12 @@ class MakeInstaller(object):
         """
         print("Making new squashfs...")
         
-        cmd = ['ls', self.new_squashfs]
-        output = do_sudo(cmd, warn_only=True)
+        output = do_sudo(['ls', self.new_squashfs], warn_only=True)
         if output.startswith(self.new_squashfs):
             print("New SquashFS already exists. Skip...")
         else:
-            cmd = ['mksquashfs', self.new_squashfs_dir, 
-                    self.new_squashfs, '-noappend']
-            do_sudo(cmd)
+            do_sudo(['mksquashfs', self.new_squashfs_dir,
+                     self.new_squashfs, '-noappend'])
 
     def _make_new_iso(self):
         """
@@ -355,8 +349,7 @@ class MakeInstaller(object):
         """
         print("Making new iso image...")
         new_iso = '/tmp/teefaa/custom.iso'
-        cmd = ['ls', new_iso]
-        output = do_sudo(cmd, warn_only=True)
+        output = do_sudo(['ls', new_iso], warn_only=True)
         if output.startswith(new_iso):
             print("New ISO image aready exists. Skip...")
         else:
@@ -382,29 +375,25 @@ class MakeInstaller(object):
         |    KERNEL /live/vmlinuz
         |    APPEND initrd=/live/initrd.img boot=live config quiet noprompt noeject
         |""")
-        cmd = ['chmod', 'u+w', menu_cfg_file]
-        do_sudo(cmd)
+        do_sudo(['chmod', 'u+w', menu_cfg_file])
         file_write(menu_cfg_file, new_menu_cfg, sudo=True)
 
     def _update_md5sum(self):
         """
         Update md5sum.txt
         """
-        cmd = ['rm', '-f', 'md5sum.txt']
-        do_sudo(cmd)
-        cmd = ['find', '-type', 'f', '-print0', '|', 
-                'xargs', '-0', 'md5sum', '|',
-                'grep', '-v', 'isolinux/boot.cat', '|', 
-                'tee md5sum.txt']
-        do_sudo(cmd)
+        do_sudo(['rm', '-f', 'md5sum.txt'])
+        do_sudo(['find', '-type', 'f', '-print0', '|',
+                 'xargs', '-0', 'md5sum', '|',
+                 'grep', '-v', 'isolinux/boot.cat', '|',
+                 'tee md5sum.txt'])
 
     def _mkisofs(self, new_iso):
 
-        cmd = ['mkisofs', '-D', '-r', '-V', 'CustomISO', '-cache-inodes',
-                '-J', '-l', '-b', 'isolinux/isolinux.bin', '-c', 
-                'isolinux/boot.cat', '-no-emul-boot', '-boot-load-size', 
-                '4', '-boot-info-table', '-o', new_iso, '.']
-        do_sudo(cmd)
+        do_sudo(['mkisofs', '-D', '-r', '-V', 'CustomISO', '-cache-inodes',
+                 '-J', '-l', '-b', 'isolinux/isolinux.bin', '-c',
+                 'isolinux/boot.cat', '-no-emul-boot', '-boot-load-size',
+                 '4', '-boot-info-table', '-o', new_iso, '.'])
 
     def setup(self):
         self._install_required_pkgs()
@@ -449,16 +438,14 @@ class MakeFilesystem(object):
     
         print("Making swap partition...")
         p = self.device + str(1 + self.n)
-        cmd = ['mkswap', p]
-        do_sudo(cmd)
+        do_sudo(['mkswap', p])
 
     def make_fs_system(self):
 
         print("Making system partition...")
         p = self.device + str(2 + self.n)
         mkfs = 'mkfs.' + self.system['format']
-        cmd = [mkfs, p]
-        do_sudo(cmd)
+        do_sudo([mkfs, p])
         time.sleep(1)
 
     def make_fs_data(self):
@@ -466,8 +453,7 @@ class MakeFilesystem(object):
         print("Making data partition...")
         p = self.device + str(3 + self.n)
         mkfs = 'mkfs.' + self.data['format']
-        cmd = [mkfs, '-f', p]
-        do_sudo(cmd)
+        do_sudo([mkfs, '-f', p])
         time.sleep(1)
 
     def make_fs(self):

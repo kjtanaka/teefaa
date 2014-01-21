@@ -50,7 +50,7 @@ class TeefaaSsh(object):
 
         count = 1
         limit = 50
-        FNULL = open(os.devnull, 'w')
+        #FNULL = open(os.devnull, 'w')
         cmd = ['ssh', '-o', 'PasswordAuthentication=no', 
                 '-o', 'ConnectTimeout=5', '-F', self.ssh_config]
         if self.ssh_key: cmd.append('-i' + self.ssh_key)
@@ -58,7 +58,7 @@ class TeefaaSsh(object):
         cmd.append('echo Confirmed $HOSTNAME is online.')
         while count < limit:
             try:
-                subprocess.check_call(cmd, stderr=FNULL)
+                subprocess.check_call(cmd)
                 break
             except:
                 time.sleep(3)
@@ -66,7 +66,7 @@ class TeefaaSsh(object):
                     h=self.hostname,c=count,l=limit))
                 count += 1
                 time.sleep(7)
-        FNULL.close()
+        #FNULL.close()
 
 
 def check_ssh():

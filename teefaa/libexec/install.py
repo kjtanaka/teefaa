@@ -25,7 +25,7 @@ from cuisine import (
         text_strip_margin
         )
 
-from .common import read_config
+from .common import read_config, do_sudo
 
 class InstallSnapshot(object):
 
@@ -40,11 +40,9 @@ class InstallSnapshot(object):
         self.squashfs = self.tmp_dir + "/filesystem.squashfs"
         self.rootimg = self.tmp_dir + "/rootimg"
         if not file_exists(self.rootimg):
-            cmd = ['mkdir', '-p', self.rootimg]
-            sudo(' '.join(cmd))
-        cmd = ['chmod', '700', self.tmp_dir, '&&',
-               'chown', '\$USER', self.tmp_dir]
-        sudo(' '.join(cmd))
+            do_sudo(['mkdir', '-p', self.rootimg])
+        do_sudo(['chmod', '700', self.tmp_dir, '&&',
+                 'chown', '\$USER', self.tmp_dir])
 
     def _upload_squashfs(self):
         # Download snapshot
@@ -55,19 +53,16 @@ class InstallSnapshot(object):
 
     def _mount_squashfs(self):
 
-        print("Mounting snapshot '{f}'...".format(f=self.squashfs))
+        print("Mounting snapshot...")
         output = sudo("df -a")
         if not self.rootimg in output:
-            cmd = ['mount', '-o', 'loop', self.squashfs, self.rootimg]
-            sudo(' '.join(cmd))
+            do_sudo(['mount', '-o', 'loop', self.squashfs, self.rootimg])
 
     def _copy_files(self):
 
         print("Copying system from snapshot to local disk...")
-        cmd = ['rsync', '-a', '--stats', '--exclude=\'/tmp/*\'']
-        cmd.append(self.rootimg + '/') 
-        cmd.append('/mnt')
-        sudo(' '.join(cmd))
+        do_sudo(['rsync', '-a', '--stats', '--exclude=\'/tmp/*\'',
+                 self.rootimg + '/', '/mnt'])
         sudo("sync && echo 3 > /proc/sys/vm/drop_caches")
 
     def run(self):
@@ -104,25 +99,21 @@ class Condition(object):
         file_path = "/mnt/etc/udev/rules.d/70-persistent-net.rules"
         if file_exists(file_path):
             if not file_is_link(file_path):
-                cmd = ['rm', '-rf', file_path]
-                sudo(' '.join(cmd))
-                cmd = ['ln', '-s', '/dev/null', file_path]
-                sudo(' '.join(cmd))
+                do_sudo(['rm', '-rf', file_path])
+                do_sudo(['ln', '-s', '/dev/null', file_path])
 
     def _condition_common_user(self):
 
-        cmd = ['chroot', self.rootimg, 'id', self.user, '||',
-                'chroot', self.rootimg, 'useradd', self.user, '-m',
-                '-s', '/bin/bash', '-d', self.home_dir]
-        sudo(' '.join(cmd))
+        do_sudo(['chroot', self.rootimg, 'id', self.user, '||',
+                 'chroot', self.rootimg, 'useradd', self.user, '-m',
+                 '-s', '/bin/bash', '-d', self.home_dir])
         with mode_sudo():
             ssh_dir = '/mnt/' + self.home_dir + '/.ssh'
             dir_ensure(ssh_dir, mode=700, recursive=True)
         put(self.authorized_keys, ssh_dir + '/authorized_keys',
                 use_sudo=True, mode=0644)
-        cmd = ['chroot', self.rootimg, 'chown', '-R', self.user,
-                self.home_dir + '/.ssh']
-        sudo(' '.join(cmd))
+        do_sudo(['chroot', self.rootimg, 'chown', '-R', self.user,
+                  self.home_dir + '/.ssh'])
 
         sudo_conf = self.rootimg + '/etc/sudoers'
         append_text = "{u}   ALL=NOPASSWD:ALL".format(u=self.user)
@@ -441,8 +432,7 @@ class InstallBootloader(object):
         #cmd = ['chroot', '/mnt', 'apt-get', '-o','Dpkg::Options::=\'--force-confdef\'','-o',
         #        'Dpkg::Options::=\'--force-confold\'', '-f','-q', '-y', 'install', 'grub2']
         #sudo(' '.join(cmd))
-        cmd = ['chroot', '/mnt', 'update-grub']
-        sudo(' '.join(cmd))
+        do_sudo(['chroot', '/mnt', 'update-grub'])
 
     def _update_grub_conf(self):
 

@@ -47,7 +47,7 @@ class Boot(object):
         print("Shutting down '{h}'...".format(h=self.hostname))
         with hide('running', 'stdout'):
             try:
-                sudo("shutdown -h now")
+                do_sudo(['shutdown', '-h','now'])
             except fabric.exceptions.NetworkError:
                 print("machine is offline.")
                 exit(1)
@@ -57,7 +57,7 @@ class Boot(object):
         print("Shutting down '{h}'...".format(h=self.hostname))
         with hide('running', 'stdout'):
             try:
-                sudo("shutdown -h now")
+                do_sudo(['shutdown', '-h','now'])
             except fabric.exceptions.NetworkError:
                 print("machine is offline.")
                 exit(1)

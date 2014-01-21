@@ -188,7 +188,9 @@ class Boot(object):
         #cmd = ['cat', pxe_config_installer, '>', pxe_config]
         #run(' '.join(cmd))
         # Workaround
-        cmd = ['ssh', user+'@'+server, 'cp', pxe_config_installer, pxe_config]
+        cmd = ['ssh', '-F', env.ssh_config_path, '-i', 
+                env.key_filename, user+'@'+server, 
+                'cp', pxe_config_installer, pxe_config]
         with hide('stderr'):
             local(' '.join(cmd))
         

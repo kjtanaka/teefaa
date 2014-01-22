@@ -152,16 +152,25 @@ class Boot(object):
         time.sleep(1)
         self._check_id_controller_virtualbox()
 
-        cmd = ['VBoxManage', 'storageattach', vbox_name, '--storagectl', 'IDE Controller', 
+        try:
+            cmd = ['VBoxManage', 'storageattach', vbox_name, '--storagectl', 'IDE Controller', 
                 '--port', '0', '--device', '1', '--type', 'dvddrive', '--medium', iso_file]
-        subprocess.check_call(cmd)
-        time.sleep(1)
-        cmd = ['VBoxManage', 'modifyvm', vbox_name, '--boot1', 'dvd']
-        subprocess.check_call(cmd)
-        time.sleep(1)
-        cmd = ['VBoxManage', 'modifyvm', vbox_name, '--boot2', 'disk']
-        subprocess.check_call(cmd)
-        time.sleep(1)
+            subprocess.check_call(cmd)
+            time.sleep(1)
+        except subprocess.CalledProcessError:
+            pass
+        try:
+            cmd = ['VBoxManage', 'modifyvm', vbox_name, '--boot1', 'dvd']
+            subprocess.check_call(cmd)
+            time.sleep(1)
+        except subprocess.CalledProcessError:
+            pass
+        try:
+            cmd = ['VBoxManage', 'modifyvm', vbox_name, '--boot2', 'disk']
+            subprocess.check_call(cmd)
+            time.sleep(1)
+        except subprocess.CalledProcessError:
+            pass
 
     def _check_id_controller_virtualbox(self):
 

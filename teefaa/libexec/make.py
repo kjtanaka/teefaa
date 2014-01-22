@@ -51,16 +51,15 @@ class MakeSnapshot(object):
             self.compressor = 'squashfs'
         self.tmp_dir = "/tmp/teefaa"
         self.user = run("echo $USER")
-        self.squashfs = "{tmp_dir}/filesystem.squashfs".format(tmp_dir=self.tmp_dir)
-        self.rootimg = "{tmp_dir}/rootimg".format(tmp_dir=self.tmp_dir)
+        self.squashfs = "{0}/filesystem.squashfs".format(self.tmp_dir)
+        self.rootimg = "{0}/rootimg".format(self.tmp_dir)
 
     def _install_required_packages(self):
         """
         Install required packages
         """
         print("Ensuring required packages are installed...")
-        pkgs = ['squashfs-tools',
-                'rsync']
+        pkgs = ['squashfs-tools', 'rsync']
         if self.distro in ['ubuntu', 'debian']:
             for pkg in pkgs: package_ensure_apt(pkg)
         elif self.distro in ['centos', 'fedora']:
@@ -97,13 +96,13 @@ class MakeSnapshot(object):
         Make SquashFS of system
         """
         print("Making squashFS of system...")
-        with mode_sudo():
-            if not file_exists(self.squashfs) \
-                    or self.overwrite==True:
-                cmd = ['mksquashfs', self.rootimg, self.squashfs, '-noappend']
-                run(' '.join(cmd))
-                user = run("echo \$USER")
-                file_ensure(self.squashfs, owner=user, mode=600)
+        if not file_exists(self.squashfs) \
+                or self.overwrite==True:
+            cmd = ['mksquashfs', self.rootimg, self.squashfs, '-noappend']
+            do_sudo(cmd)
+            user = run("echo \$USER")
+            do_sudo(['chmod', '600', self.squashfs])
+            do_sudo(['chown', user, self.squashfs])
             
     def _download_squashfs(self):
         """

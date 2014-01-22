@@ -57,7 +57,7 @@ class TeefaaSsh(object):
         cmd.append('echo Confirmed $HOSTNAME is online.')
         while count < limit:
             try:
-                subprocess.check_call(cmd)
+                local(' '.join(cmd))
                 break
             except:
                 time.sleep(3)

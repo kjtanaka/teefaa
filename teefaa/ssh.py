@@ -4,7 +4,7 @@ import os
 import time
 import argparse
 import subprocess
-from fabric.api import local, execute, hide
+from fabric.api import local, run,execute, hide, settings, env
 
 from .libexec.common import read_config
 
@@ -22,7 +22,8 @@ class TeefaaSsh(object):
         self._init_ssh()
         print("\nssh to machine '{0}'...\n".format(self.hostname))
         self._check_ssh()
-        cmd = ['ssh', '-F', self.ssh_config, self.hostname]
+        cmd = ['ssh', '-o', 'PasswordAuthentication=no', 
+                '-F', self.ssh_config, self.hostname]
         if self.ssh_key: cmd.append('-i' + self.ssh_key)
         try:
             subprocess.check_call(cmd)
@@ -57,7 +58,7 @@ class TeefaaSsh(object):
         cmd.append('echo Confirmed $HOSTNAME is online.')
         while count < limit:
             try:
-                local(' '.join(cmd))
+                subprocess.check_call(cmd)
                 break
             except:
                 time.sleep(3)

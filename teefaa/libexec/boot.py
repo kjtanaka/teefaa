@@ -47,7 +47,8 @@ class Boot(object):
         print("Shutting down '{h}'...".format(h=self.hostname))
         with hide('running', 'stdout'):
             try:
-                do_sudo(['shutdown', '-h','now'])
+                with settings(abort_on_prompts=True):
+                    do_sudo(['shutdown', '-h','now'])
             except fabric.exceptions.NetworkError:
                 print("machine is offline.")
                 exit(1)
@@ -57,7 +58,8 @@ class Boot(object):
         print("Shutting down '{h}'...".format(h=self.hostname))
         with hide('running', 'stdout'):
             try:
-                do_sudo(['shutdown', '-h','now'])
+                with settings(abort_on_prompts=True):
+                    do_sudo(['shutdown', '-h','now'])
             except fabric.exceptions.NetworkError:
                 print("machine is offline.")
                 exit(1)
@@ -202,7 +204,6 @@ class Boot(object):
                 'cp', pxe_config_installer, pxe_config]
         with hide('stderr'):
             local(' '.join(cmd))
-        
 
     def setup_diskboot(self):
         """
@@ -220,10 +221,15 @@ class Boot(object):
         user = self.boot_driver_config['pxe_server_user']
         pxe_config = self.boot_driver_config['boot_config_file']
         pxe_config_localdisk = self.boot_driver_config['disk_boot_config_file']
-        env.host_string = server
-        env.user = user
-        cmd = ['cat', pxe_config_localdisk, '>', pxe_config]
-        run(' '.join(cmd))
+        #env.host_string = server
+        #env.user = user
+        #cmd = ['cat', pxe_config_localdisk, '>', pxe_config]
+        #run(' '.join(cmd))
+        cmd = ['ssh', '-F', env.ssh_config_path, '-i', 
+                env.key_filename, user+'@'+server, 
+                'cp', pxe_config_localdisk, pxe_config]
+        with hide('stderr'):
+            local(' '.join(cmd))
 
     def _setup_diskboot_virtualbox(self):
         """

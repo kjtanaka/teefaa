@@ -62,7 +62,7 @@ class TeefaaSsh(object):
                 break
             except:
                 time.sleep(3)
-                print ("'{h}' is offline. Wait and retry ssh ({c}/{l})...".format(
+                print ("Waiting machine '{h}' to be offline. Retrying ssh... ({c}/{l})...".format(
                     h=self.hostname,c=count,l=limit))
                 count += 1
                 time.sleep(7)

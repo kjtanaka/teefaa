@@ -1,16 +1,13 @@
-Make a system snapshot
+Make a snapshot of a remote system
 ============
 
 Prerequisites
 ------------
 
-* You need to be able to ssh login to the system.
-* You need to be able to use sudo.
-* The partition for /tmp on the system has to have enough
-  space to have clone of system and the compressed image file.
-  Roughly estimate, compressed image will be 30~40% of original,
-  so /tmp should be able to have 130~140% of system size. You can
-  check it df command.::
+* SSH Login to the remote system.
+* Sudo on the remote system.
+* 130~140% of system size for /tmp to process the snapshot creation. 
+  You can check the size df command.::
 
        df -h
 
@@ -21,12 +18,13 @@ Prerequisites
        none            5.0M     0  5.0M   0% /run/lock
        none            246M     0  246M   0% /run/shm
 
-  In this example, you need to have 2.1*140/100 = 2.94G on the same
-  partition /dev/sda2.
+  In this example, system size is 2.1G. The /tmp is a part of 
+  root(/) partition. Meaning there needs to be 2.1*140/100 = 2.94G 
+  available on the same partition /dev/sda2.
 
 
 Write Teefaafile.yml
-------------
+--------------------
 
 Create a directory for teefaa and write Teefaafile.yml.
 This example is for a machine named host1 which is 

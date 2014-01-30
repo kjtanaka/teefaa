@@ -1,9 +1,11 @@
 Welcome to Cloudmesh Teefaa!
 ====================
 
-Cloudmesh Teefaa is a simplified baremetal provisioner of Linux based system. 
-It allows you to make a snapshot of system and provision it on another
-baremetal/virtual machine.
+What is Teefaa?
+---------------
+Cloudmesh Teefaa is a simplified baremetal provisioner of Linux based Operating
+System. It allows you to make a snapshot of a running OS and provision it on 
+another baremetal/virtual machine.
 
   .. toctree::
    :maxdepth: 2

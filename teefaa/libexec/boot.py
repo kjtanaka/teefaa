@@ -11,6 +11,7 @@ from fabric.api import (
         local,
         task,
         run,
+        settings,
         sudo
         )
 from fabric.contrib.files import (
@@ -31,6 +32,11 @@ class Boot(object):
     def __init__(self):
         # Set config
         config = read_config()
+        self.ssh_config = config['ssh_config']
+        try:
+            self.ssh_key = os.path.abspath(config['ssh_key'])
+        except:
+            self.ssh_key = None
         env.host_string = self.hostname = config['host_config']['hostname']
         self.distro = config['snapshot_config']['os']['distro']
         self.power_driver = config['host_config']['power_driver']
@@ -47,8 +53,12 @@ class Boot(object):
         print("Shutting down '{h}'...".format(h=self.hostname))
         with hide('running', 'stdout'):
             try:
-                with settings(abort_on_prompts=True):
-                    do_sudo(['shutdown', '-h','now'])
+                cmd = ['ssh', '-o', 'PasswordAuthentication=no',
+                        '-o', 'ConnectTimeout=5', '-F', self.ssh_config]
+                if self.ssh_key: cmd.append('-i' + self.ssh_key)
+                cmd.append(self.hostname)
+                cmd.append('sudo shutdown -h now')
+                subprocess.check_call(cmd)
             except fabric.exceptions.NetworkError:
                 print("machine is offline.")
                 exit(1)
@@ -58,8 +68,12 @@ class Boot(object):
         print("Shutting down '{h}'...".format(h=self.hostname))
         with hide('running', 'stdout'):
             try:
-                with settings(abort_on_prompts=True):
-                    do_sudo(['shutdown', '-h','now'])
+                cmd = ['ssh', '-o', 'PasswordAuthentication=no',
+                        '-o', 'ConnectTimeout=5', '-F', self.ssh_config]
+                if self.ssh_key: cmd.append('-i' + self.ssh_key)
+                cmd.append(self.hostname)
+                cmd.append('sudo shutdown -h now')
+                subprocess.check_call(cmd)
             except fabric.exceptions.NetworkError:
                 print("machine is offline.")
                 exit(1)
@@ -96,10 +110,10 @@ class Boot(object):
         time.sleep(1)
         vbox_name = self.power_driver_config['vbox_name']
         cmd = ['VBoxManage', 'list', 'runningvms']
-        output = subprocess.check_output(cmd)
+        output = local(' '.join(cmd), capture=True)
         if vbox_name in output:
             cmd = ['VBoxManage', 'controlvm', vbox_name, 'poweroff']
-            subprocess.check_call(cmd)
+            local(' '.join(cmd))
             self._ensure_power_off_virtualbox()
 
     def power_state(self):
@@ -331,6 +345,7 @@ class Boot(object):
             self.shutdown()
         except:
             self.power_off()
+        self.power_off()
         time.sleep(1)
         self.setup_installer_boot()
         time.sleep(1)

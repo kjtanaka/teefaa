@@ -28,7 +28,7 @@ class TeefaaSsh(object):
         try:
             subprocess.check_call(cmd)
         except:
-            print("SSH is disconnected...")
+            print("SSH is disconnected.")
 
     def check_ssh(self):
 
@@ -55,7 +55,7 @@ class TeefaaSsh(object):
                 '-o', 'ConnectTimeout=5', '-F', self.ssh_config]
         if self.ssh_key: cmd.append('-i' + self.ssh_key)
         cmd.append(self.hostname)
-        cmd.append('echo Confirmed $HOSTNAME is online.')
+        cmd.append('echo Confirmed machine is online.')
         while count < limit:
             try:
                 subprocess.check_call(cmd)

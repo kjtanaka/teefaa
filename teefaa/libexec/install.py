@@ -197,7 +197,6 @@ class Condition(object):
 
     def _condition_ubuntu_fstab(self):
 
-        time.sleep(1)
         file_path = "/mnt/etc/fstab"
         label_type = self.disk_config['label_type']
         device = self.disk_config['device']
@@ -207,7 +206,6 @@ class Condition(object):
         elif label_type == 'gpt':
             num = 1
         text = text_strip_margin("""
-        |#TEEFAA-BEGIN
         |# /etc/fstab: static file system information.
         |#
         |# Use 'blkid' to print the universally unique identifier for a
@@ -218,13 +216,31 @@ class Condition(object):
         |proc  /proc  proc  nodev,noexec,nosuid  0 0
         |{device}{swap_num}  none  swap  sw  0 0
         |{device}{system_num}  /  {system_format}  errors=remount-ro  0 1
-        |#TEEFAA-END
         |""".format(device=device,
             swap_num=num+1,
             system_num=num+2,
             system_format=system_format))
         with mode_sudo():
             file_write(file_path, text)
+        self._append_data_dir_fstab(file_path, device, num+3)
+
+    def _append_data_dir_fstab(self, file_path, device, data_num):
+
+        try:
+            data_format = self.disk_config['data']['format']
+            data_dir = self.disk_config['data']['dir']
+            if data_format == 'xfs':
+                line = "{dev}{num}  {d}  xfs  defaults,noatime  0 0".format(
+                        dev=device,num=data_num,d=data_dir)
+            elif data_format in ['ext3', 'ext4']:
+                line = "{dev}{num}  {d}  {f}  defaults  0 0".format(
+                        dev=device,num=data_num,d=data_dir,f=data_format)
+            else:
+                line = "#Data partition is not mounted by Teefaa."
+            with mode_sudo():
+                file_append(file_path, line+'\n')
+        except:
+            pass
 
     def _condition_ubuntu_mtab(self):
 
@@ -334,7 +350,6 @@ class Condition(object):
         elif label_type == 'gpt':
             num = 1
         text = text_strip_margin("""
-        |#TEEFAA-BEGIN
         |# /etc/fstab
         |# Created by Teefaa
         |#
@@ -347,13 +362,13 @@ class Condition(object):
         |devpts  /dev/pts  devpts  gid=5,mode=620  0 0
         |sysfs  /sys  sysfs  defaults  0 0
         |proc  /proc  proc  defaults  0 0
-        |#TEEFAA-END
         |""".format(device=device,
             swap_num=num+1,
             system_num=num+2,
             system_format=system_format))
         with mode_sudo():
             file_write(file_path, text)
+        self._append_data_dir_fstab(file_path, device, num+3)
 
     def _condition_centos_mtab(self):
 

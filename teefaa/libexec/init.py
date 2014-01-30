@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import os
+import re
 import time
 
 from fabric.api import (
@@ -26,7 +27,6 @@ class Init(object):
 
     def __init__(self, args):
 
-        self.ip_address = args.ip_address
         self.hostname = args.hostname
         self.dot_teefaa_dir = ".teefaa"
         self.ssh_key = self.dot_teefaa_dir + "/ssh_key"
@@ -52,29 +52,32 @@ class Init(object):
         if not os.path.isfile(self.vagrantfile):
         
             text = text_strip_margin("""
-            |Vagrant::Config.run do |config|
-            |  config.vm.box = 'tf-ubuntu-12.04'
-            |  config.vm.box_url = 'http://cloud-images.ubuntu.com/vagrant/precise/current/precise-server-cloudimg-amd64-vagrant-disk1.box'
+            |Vagrant.configure("2") do |config|
+            |  config.vm.define :{host} do |{host}|
+            |    {host}.vm.box = 'tf-ubuntu-12.04'
+            |    {host}.vm.box_url = 'http://cloud-images.ubuntu.com/vagrant/precise/current/precise-server-cloudimg-amd64-vagrant-disk1.box'
+            |    {host}.vm.hostname = '{host}'
+            |  end
             |end
-            |""")
+            |""".format(host=self.hostname))
             with open(self.vagrantfile, 'w') as f:
                 f.write(text)
 
     def _vagrant_up(self):
 
         with lcd(self.dot_teefaa_dir):
-            cmd = ['vagrant', 'status', '|', 'grep', 'default']
+            cmd = ['vagrant', 'status', '|', 'grep', self.hostname]
             output = local(' '.join(cmd), capture=True)
             if not "running" in output:
                 print("booting vagrant box...")
-                local("vagrant up")
+                local("vagrant up " + self.hostname)
             else:
                 print("vagrant box is running...")
 
     def _ssh_config_for_vbox(self):
 
         with lcd(self.dot_teefaa_dir):
-            cmd = ['vagrant', 'ssh-config', 'default']
+            cmd = ['vagrant', 'ssh-config', self.hostname]
             output = local(' '.join(cmd), capture=True)
         with open(self.ssh_config, 'w') as f:
             start = False
@@ -90,9 +93,16 @@ class Init(object):
             cmd = ['mkdir', self.hostname]
             local(' '.join(cmd))
 
+    def _check_vbox_name(self):
+
+        cmd = ['VBoxManage', 'list', 'runningvms', '|',
+                'grep', self.hostname, '|', 'cut', '-d\\\"', '-f2']
+        return local(' '.join(cmd), capture=True)
+
     def _create_teefaafile(self):
 
         dot_teefaa = os.path.abspath(self.dot_teefaa_dir)
+        vbox_name = self._check_vbox_name()
         text = text_strip_margin("""
         |ssh_config: {d}/ssh_config
         |ssh_key: {d}/ssh_key
@@ -101,10 +111,74 @@ class Init(object):
         |  base_iso: debian-live-7.2-amd64-standard.iso
         |  base_iso_url: http://cdimage.debian.org/debian-cd/current-live/amd64/iso-hybrid/debian-live-7.2-amd64-standard.iso
         |  builder:
-        |    hostname: default
+        |    hostname: {host}
         |    distro: ubuntu
         |  iso_path: {d}/teefaa-debian-live.iso
-        |""".format(d=dot_teefaa))
+        |
+        |snapshot_config:
+        |  snapshot_url: http://teefaa.futuregrid.org/images/latest/centos-6.5.squashfs
+        |  snapshot_path: {d}/centos-6.5.squashfs
+        |  os:
+        |    distro: centos
+        |    ver: 6.5
+        |  #snapshot_url: http://teefaa.futuregrid.org/images/latest/ubuntu-12.04.squashfs
+        |  #snapshot_path: {d}/ubuntu-12.04.squashfs
+        |  #os:
+        |  #  distro: ubuntu
+        |  #  ver: 12.04
+        |  hostname: {host}
+        |  #exclude:
+        |  #  - /path/to/exclude/dir
+        |
+        |# VirtualBox
+        |host_config:
+        |  hostname: {host}
+        |  power_driver: virtualbox
+        |  power_driver_config:
+        |    vbox_name: {name}
+        |  boot_driver: virtualbox
+        |  boot_driver_config:
+        |    installer_boot: iso
+        |    iso_file: {d}/teefaa-debian-live.iso
+        |
+        |# Baremetal
+        |#host_config:
+        |#  hostname: host1
+        |#  power_driver: ipmi
+        |#  power_driver_config:
+        |#  ipmi_password: XXXXXXXXXX
+        |#  ipmi_user: ipmiadmin
+        |#  bmc_address: 192.168.1.1
+        |#  boot_driver: pxe
+        |#  boot_driver_config:
+        |#  boot_config_file: /tftpboot/pxelinux.cfg/host1
+        |#  installer_boot_config_file: /tftpboot/pxelinux.cfg/netboot
+        |#  disk_boot_config_file: /tftpboot/pxelinux.cfg/localboot
+        |
+        |disk_config:
+        |  label_type: mbr
+        |  device: /dev/sda
+        |  swap:
+        |    size: 2
+        |  system:
+        |    size: 10
+        |    format: ext4
+        |  data:
+        |    size: -1
+        |    dir: /data
+        |    format: xfs
+        |
+        |network_config:
+        |  add:
+        |    eth0:
+        |      bootp: dhcp
+        |#    eth1:
+        |#      bootp: static
+        |#      address: 192.168.32.101
+        |#      netmask: 255.255.255.0
+        |#      gateway: 192.168.32.254
+        |#      dnsserver: 192.168.32.1
+        |""".format(d=dot_teefaa, host=self.hostname, name=vbox_name))
         teefaafile = self.hostname + "/Teefaafile.yml"
         with open(teefaafile, 'w') as f:
             f.write(text)
@@ -114,30 +188,30 @@ class Init(object):
         with lcd(self.hostname):
             local("teefaa make-installer")
 
-    def _vagrant_destroy(self):
+    def _vagrant_halt(self):
         
         with lcd(self.dot_teefaa_dir):
-            cmd = ['vagrant', 'status', '|', 'grep', 'default']
+            cmd = ['vagrant', 'status', '|', 'grep', self.hostname]
             output = local(' '.join(cmd), capture=True)
             if "running" in output:
-                print("destroying vagrant box...")
-                local("vagrant destroy --force")
+                print("halting vagrant box...")
+                local("vagrant halt " + self.hostname + " --force")
             else:
                 print("vagrant box is not running...")
 
     def _create_ssh_config(self):
 
         ssh_key = os.path.abspath(self.ssh_key)
-        text = text_strip_margin("""
-        |UserKnownHostsFile /dev/null
-        |StrictHostKeyChecking no
-        |IdentityFile {f}
-        |PasswordAuthentication no
-        |IdentitiesOnly yes
-        |LogLevel FATAL
-        |""".format(f=ssh_key))
+        with open(self.ssh_config, 'r') as f:
+            lines = f.readlines()
         with open(self.ssh_config, 'w') as f:
-            f.write(text)
+            for line in lines:
+                if "User vagrant" in line:
+                    f.write(re.sub(r'User vagrant', 'User teefaa', line))
+                elif "IdentityFile" in line:
+                    f.write("  IdentityFile {k}\n".format(k=ssh_key))
+                else:
+                    f.write(line)
  
     def run(self):
 
@@ -148,7 +222,7 @@ class Init(object):
         self._create_host_dir()
         self._create_teefaafile()
         self._create_teefaa_iso()
-        self._vagrant_destroy()
+        self._vagrant_halt()
         self._create_ssh_config()
 
 

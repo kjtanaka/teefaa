@@ -1,7 +1,7 @@
 Welcome to Cloudmesh Teefaa!
 ============================
 
-Your baremetal machines should be as easily and reproducibly installed 
+Your systems on baremetal machines should be as easily and reproducibly provisioned 
 as virtual machines.
 
 What is Cloudmesh Teefaa?
@@ -10,9 +10,9 @@ The Cloudmesh Teefaa is a simplified baremetal provisioner of Linux based Operat
 System. It allows you to make a snapshot of a running OS and provision it on 
 another baremetal machine. 
 
-Here's a test with two virtual machines.
+Teefaa supports VirtualBox as default, so here's a test with two virtual machines.
 
-First, provision a base system on a virtual machine and make a snapshot ::
+First, provision a base system on a virtual machine and make a snapshot. ::
 
     $ mkdir try_teefaa
     $ cd try_teefaa
@@ -24,7 +24,7 @@ First, provision a base system on a virtual machine and make a snapshot ::
     [teefaa@sputnik1 ~]$ exit
     $ teefaa make-snapshot
 
-And then, provision the snapshot on another virtual machine ::
+And then, provision the snapshot on another virtual machine. ::
    
     $ cd ..
     $ teefaa init sputnik2
@@ -35,15 +35,18 @@ And then, provision the snapshot on another virtual machine ::
     Hello World!
 
 .. note::
+   * It takes a while at the steps of "teefaa init" and "teefaa provision".
    * Prerequisites and installation are written below.
-   * There are two ways, ISO boot and PXE boot, for baremetal machine.
-     Which is explained on the next pages.
+   * There are two ways for baremetal provisioning, ISO boot and PXE boot,
+     it's explained on the next pages.
 
 Characteristics
 ---------------
 * Simple to use.
 * Written in Python and Fabric.
 * Inspired by Vagrant and Test Kitchen.
+* Able to provision Ubuntu and CentOS right now. Will cover 
+  Debian and Fedora soon. And more distros later.
 
 Prerequisites
 -------------
@@ -58,14 +61,18 @@ Installation
     git clone https://github.com/kjtanaka/teefaa.git
     cd teefaa
     python setup.py install
-    teefaa -h
 
-For more information go to the following pages.
+Provisioning on baremetal machine
+---------------------------------
+
+There are two ways to go, and it all depends on 
+what you have on your environment.
 
   .. toctree::
    :maxdepth: 2
 
    how_to_iso_boot
    how_to_pxe_boot
+   how_to_scale
    license
 

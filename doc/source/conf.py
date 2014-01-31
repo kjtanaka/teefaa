@@ -15,9 +15,6 @@
 import sys
 import os
 
-sys.path.insert(0, os.path.abspath('../../'))
-import sphinx_bootstrap_theme
-
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
@@ -31,11 +28,7 @@ import sphinx_bootstrap_theme
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
-extensions = ['sphinx.ext.autodoc', 
-              'sphinx.ext.todo', 
-              'sphinx.ext.ifconfig', 
-              'sphinx.ext.viewcode',
-              'sphinxcontrib.bibtex']
+extensions = []
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -51,7 +44,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'Cloudmesh Teefaa'
-copyright = u'2012-2014 Indiana University, developed by K. Tanaka, G. von Laszewski, F. Wang, J. Diaz, A. Streib'
+copyright = u'2012-2014 Indiana University, developed by Koji Tanaka, Gregor von Laszewski, Fugang Wang, Javier Diaz, Allan Streib.'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -105,84 +98,15 @@ pygments_style = 'sphinx'
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-html_theme = 'bootstrap'
+html_theme = 'default'
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
-html_theme_options = {
-    # Navigation bar title. (Default: ``project`` value)
-    'navbar_title': "Cloudmesh Teefaa",
-
-    # Tab name for entire site. (Default: "Site")
-    'navbar_site_name': "Site",
-
-    # A list of tuples containing pages or urls to link to.
-    # Valid tuples should be in the following forms:
-    #    (name, page)                 # a link to a page
-    #    (name, "/aa/bb", 1)          # a link to an arbitrary relative url
-    #    (name, "http://example.com", True) # arbitrary absolute url
-    # Note the "1" or "True" value above as the third argument to indicate
-    # an arbitrary url.
-    # 'navbar_links': [
-    #     ("Examples", "examples"),
-    #     ("Link", "http://example.com", True),
-    # ],
-
-    # Global TOC depth for "site" navbar tab. (Default: 1)
-    # Switching to -1 shows all levels.
-    'globaltoc_depth': 2,
-
-    # Include hidden TOCs in Site navbar?
-    #
-    # Note: If this is "false", you cannot have mixed ``:hidden:`` and
-    # non-hidden ``toctree`` directives in the same page, or else the build
-    # will break.
-    #
-    # Values: "true" (default) or "false"
-    'globaltoc_includehidden': "true",
-
-    # HTML navbar class (Default: "navbar") to attach to <div> element.
-    # For black navbar, do "navbar navbar-inverse"
-    'navbar_class': "navbar",
-
-    # Fix navigation bar to top of page?
-    # Values: "true" (default) or "false"
-    'navbar_fixed_top': "true",
-
-    # Location of link to source.
-    # Options are "nav" (default), "footer" or anything else to exclude.
-    'source_link_position': "nav",
-
-    # Bootswatch (http://bootswatch.com/) theme.
-    #
-    # Options are nothing with "" (default) or the name of a valid theme such
-    # as "amelia" or "cosmo".
-    #
-    # Themes:
-    # * amelia
-    # * cerulean
-    # * cosmo
-    # * cyborg
-    # * flatly
-    # * journal
-    # * readable
-    # * simplex
-    # * slate
-    # * spacelab
-    # * spruce (v2 only)
-    # * superhero (v2 only)
-    # * united
-    'bootswatch_theme': "cosmo",
-
-    # Choose Bootstrap version.
-    # Values: "3" (default) or "2" (in quotes)
-    'bootstrap_version': "3",
-}
-
+#html_theme_options = {}
 
 # Add any paths that contain custom themes here, relative to this directory.
-html_theme_path = sphinx_bootstrap_theme.get_html_theme_path()
+#html_theme_path = []
 
 # The name for this set of Sphinx documents.  If None, it defaults to
 # "<project> v<release> documentation".
@@ -238,7 +162,7 @@ html_static_path = ['_static']
 #html_show_sourcelink = True
 
 # If true, "Created using Sphinx" is shown in the HTML footer. Default is True.
-html_show_sphinx = False
+#html_show_sphinx = True
 
 # If true, "(C) Copyright ..." is shown in the HTML footer. Default is True.
 #html_show_copyright = True
@@ -273,7 +197,7 @@ latex_elements = {
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
   ('index', 'CloudmeshTeefaa.tex', u'Cloudmesh Teefaa Documentation',
-   u'Koji Tanaka and Gregor von Laszewski', 'manual'),
+   u'Koji Tanaka', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
@@ -303,7 +227,7 @@ latex_documents = [
 # (source start file, name, description, authors, manual section).
 man_pages = [
     ('index', 'cloudmeshteefaa', u'Cloudmesh Teefaa Documentation',
-     [u'Koji Tanaka and Gregor von Laszewski'], 1)
+     [u'Koji Tanaka'], 1)
 ]
 
 # If true, show URL addresses after external links.
@@ -317,7 +241,7 @@ man_pages = [
 #  dir menu entry, description, category)
 texinfo_documents = [
   ('index', 'CloudmeshTeefaa', u'Cloudmesh Teefaa Documentation',
-   u'Koji Tanaka and Gregor von Laszewski', 'CloudmeshTeefaa', 'One line description of project.',
+   u'Koji Tanaka', 'CloudmeshTeefaa', 'One line description of project.',
    'Miscellaneous'),
 ]
 
@@ -332,4 +256,3 @@ texinfo_documents = [
 
 # If true, do not generate a @detailmenu in the "Top" node's menu.
 #texinfo_no_detailmenu = False
-

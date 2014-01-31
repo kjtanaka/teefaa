@@ -24,8 +24,9 @@ And then, provision the snapshot on a Baremetal Machine ::
    
     $ cd ..
     $ cp -r sputnik1 sputnik2
+    $ vi sputnik2/Teefaafile.yml .teefaa/ssh_config # Modify two files for Baremetal
     $ cd sputnik2
-    $ vi Teefaafile.yml # Modify config for Baremetal
+    ##### Setup iso/pxe boot of sputnik2 #####
     $ teefaa provision
     $ teefaa ssh
     [teefaa@sputnik2 ~]$ cat test.txt
@@ -56,7 +57,7 @@ Install
   .. toctree::
    :maxdepth: 2
 
-   virtualbox
-   baremetal
+   how_to_iso_boot
+   how_to_pxe_boot
    license
 

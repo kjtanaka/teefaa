@@ -53,6 +53,7 @@ Install
     python setup.py install
     teefaa -h
 
+For more information go to the following pages.
 
   .. toctree::
    :maxdepth: 2

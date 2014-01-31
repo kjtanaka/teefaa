@@ -345,7 +345,6 @@ class Boot(object):
             self.shutdown()
         except:
             self.power_off()
-        self.power_off()
         time.sleep(1)
         self.setup_installer_boot()
         time.sleep(1)

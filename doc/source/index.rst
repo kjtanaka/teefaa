@@ -8,10 +8,14 @@ What is Cloudmesh Teefaa?
 -------------------------
 The Cloudmesh Teefaa is a simplified baremetal provisioner of Linux based Operating
 System. It allows you to make a snapshot of a running OS and provision it on 
-another baremetal machine. Here's an example.
+another baremetal machine. 
+
+Here's a test with two virtual machines.
 
 First, provision a base system on a virtual machine and make a snapshot ::
 
+    $ mkdir try_teefaa
+    $ cd try_teefaa
     $ teefaa init sputnik1
     $ cd sputnik1
     $ teefaa provision
@@ -20,12 +24,10 @@ First, provision a base system on a virtual machine and make a snapshot ::
     [teefaa@sputnik1 ~]$ exit
     $ teefaa make-snapshot
 
-And then, provision the snapshot on a baremetal machine ::
+And then, provision the snapshot on another virtual machine ::
    
     $ cd ..
-    $ cp -r sputnik1 sputnik2
-    $ vi sputnik2/Teefaafile.yml .teefaa/ssh_config # Modify two files for Baremetal
-    $ # Setup ISO/PXE boot of sputnik2, the go to the next.
+    $ teefaa init sputnik2
     $ cd sputnik2
     $ teefaa provision
     $ teefaa ssh
@@ -33,7 +35,9 @@ And then, provision the snapshot on a baremetal machine ::
     Hello World!
 
 .. note::
-   Details about ISO/PXE boot setting is written on the next pages.
+   * Prerequisites and installation are written below.
+   * There are two ways, ISO boot and PXE boot, for baremetal machine.
+     Which is explained on the next pages.
 
 Characteristics
 ---------------
@@ -47,7 +51,7 @@ Prerequisites
 * VirtualBox
 * Vagrant
 
-Install
+Installation
 -------
 ::
 

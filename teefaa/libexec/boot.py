@@ -53,11 +53,11 @@ class Boot(object):
         print("Shutting down '{h}'...".format(h=self.hostname))
         with hide('running', 'stdout'):
             try:
-                cmd = ['ssh', '-o', 'PasswordAuthentication=no',
+                cmd = ['ssh', '-t', '-o', 'PasswordAuthentication=no',
                         '-o', 'ConnectTimeout=5', '-F', self.ssh_config]
                 if self.ssh_key: cmd.append('-i' + self.ssh_key)
                 cmd.append(self.hostname)
-                cmd.append('sudo shutdown -h now')
+                cmd.append('sudo -n shutdown -h now')
                 subprocess.check_call(cmd)
             except fabric.exceptions.NetworkError:
                 print("machine is offline.")
@@ -68,11 +68,11 @@ class Boot(object):
         print("Shutting down '{h}'...".format(h=self.hostname))
         with hide('running', 'stdout'):
             try:
-                cmd = ['ssh', '-o', 'PasswordAuthentication=no',
+                cmd = ['ssh', '-t', '-o', 'PasswordAuthentication=no',
                         '-o', 'ConnectTimeout=5', '-F', self.ssh_config]
                 if self.ssh_key: cmd.append('-i' + self.ssh_key)
                 cmd.append(self.hostname)
-                cmd.append('sudo shutdown -h now')
+                cmd.append('sudo -n shutdown -h now')
                 subprocess.check_call(cmd)
             except fabric.exceptions.NetworkError:
                 print("machine is offline.")

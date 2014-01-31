@@ -30,15 +30,19 @@ class Init(object):
         self.hostname = args.hostname
         self.dot_teefaa_dir = ".teefaa"
         self.ssh_key = self.dot_teefaa_dir + "/ssh_key"
-        self.ssh_config = self.dot_teefaa_dir + "/ssh_config"
-        self.vagrantfile = self.dot_teefaa_dir + "/Vagrantfile"
+        self.ssh_config = self.dot_teefaa_dir + "/ssh_config_" + self.hostname 
+        self.vagrantfile = self.hostname + "/Vagrantfile"
+
+    def _ensure_dirs_exist(self):
+
+        for _dir in [self.hostname, self.dot_teefaa_dir]:
+
+            if  not os.path.isdir(_dir):
+
+                cmd = ['mkdir', _dir]
+                local(' '.join(cmd))
 
     def _create_key_pair(self):
-
-        if not os.path.isdir(self.dot_teefaa_dir):
-
-            cmd = ['mkdir', self.dot_teefaa_dir]
-            local(' '.join(cmd))
 
         if not os.path.isfile(self.ssh_key):
 
@@ -65,7 +69,7 @@ class Init(object):
 
     def _vagrant_up(self):
 
-        with lcd(self.dot_teefaa_dir):
+        with lcd(self.hostname):
             cmd = ['vagrant', 'status', '|', 'grep', self.hostname]
             output = local(' '.join(cmd), capture=True)
             if not "running" in output:
@@ -76,7 +80,7 @@ class Init(object):
 
     def _ssh_config_for_vbox(self):
 
-        with lcd(self.dot_teefaa_dir):
+        with lcd(self.hostname):
             cmd = ['vagrant', 'ssh-config', self.hostname]
             output = local(' '.join(cmd), capture=True)
         with open(self.ssh_config, 'w') as f:
@@ -85,13 +89,6 @@ class Init(object):
                 if line.startswith("Host") or start:
                     start = True
                     f.write(line + '\n')
-
-    def _create_host_dir(self):
-
-        if not os.path.isdir(self.hostname):
-
-            cmd = ['mkdir', self.hostname]
-            local(' '.join(cmd))
 
     def _check_vbox_name(self):
 
@@ -104,7 +101,7 @@ class Init(object):
         dot_teefaa = os.path.abspath(self.dot_teefaa_dir)
         vbox_name = self._check_vbox_name()
         text = text_strip_margin("""
-        |ssh_config: {d}/ssh_config
+        |ssh_config: {d}/ssh_config_{host}
         |ssh_key: {d}/ssh_key
         |
         |iso_config:
@@ -184,13 +181,18 @@ class Init(object):
             f.write(text)
 
     def _create_teefaa_iso(self):
+
+        teefaa_iso = os.path.abspath(self.dot_teefaa_dir) + "/teefaa-debian-live.iso"
         
-        with lcd(self.hostname):
-            local("teefaa make-installer")
+        if not os.path.exists(teefaa_iso):
+            with lcd(self.hostname):
+                local("teefaa make-installer")
+        else:
+            pass
 
     def _vagrant_halt(self):
         
-        with lcd(self.dot_teefaa_dir):
+        with lcd(self.hostname):
             cmd = ['vagrant', 'status', '|', 'grep', self.hostname]
             output = local(' '.join(cmd), capture=True)
             if "running" in output:
@@ -215,11 +217,11 @@ class Init(object):
  
     def run(self):
 
+        self._ensure_dirs_exist()
         self._create_key_pair()
         self._create_vagrantfile()
         self._vagrant_up()
         self._ssh_config_for_vbox()
-        self._create_host_dir()
         self._create_teefaafile()
         self._create_teefaa_iso()
         self._vagrant_halt()

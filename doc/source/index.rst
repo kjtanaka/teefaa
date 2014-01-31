@@ -25,7 +25,7 @@ And then, provision the snapshot on a baremetal machine ::
     $ cd ..
     $ cp -r sputnik1 sputnik2
     $ vi sputnik2/Teefaafile.yml .teefaa/ssh_config # Modify two files for Baremetal
-    $ # Setup ISO/PXE boot of sputnik2
+    $ # Setup ISO/PXE boot of sputnik2, the go to the next.
     $ cd sputnik2
     $ teefaa provision
     $ teefaa ssh
@@ -51,7 +51,7 @@ Install
 -------
 ::
 
-    git clone https://github.com/cloudmesh/teefaa.git
+    git clone https://github.com/kjtanaka/teefaa.git
     cd teefaa
     python setup.py install
     teefaa -h

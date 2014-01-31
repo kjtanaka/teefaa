@@ -1,4 +1,4 @@
-How to setup ISO boot
-=====================
+Baremetal provisioning with ISO boot
+====================================
 
 This will be written soon.

@@ -10,7 +10,7 @@ The Cloudmesh Teefaa is a simplified baremetal provisioner of Linux based Operat
 System. It allows you to make a snapshot of a running OS and provision it on 
 another baremetal machine. Here's an example.
 
-Provision a base system on a Virtual Machine and make a snapshot ::
+First, provision a base system on a Virtual Machine and make a snapshot ::
 
     $ teefaa init sputnik1
     $ cd sputnik1
@@ -20,7 +20,7 @@ Provision a base system on a Virtual Machine and make a snapshot ::
     [teefaa@sputnik1 ~]$ exit
     $ teefaa make-snapshot
 
-Provision the snapshot on a Baremetal Machine ::
+And then, provision the snapshot on a Baremetal Machine ::
    
     $ cd ..
     $ cp -r sputnik1 sputnik2

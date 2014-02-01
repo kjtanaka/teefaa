@@ -67,12 +67,11 @@ Provisioning on baremetal machine
 ---------------------------------
 
 There are two ways to do baremetal provisioning, and it all depends 
-on what you have on your environment. 
-
-* If you have a CD/DVD drive on your server you can go with ISO boot. 
-* If you have a PXE boot server and a NFS server you can go with PXE boot.
-  If you also have IPMI access to the BMC of your server, you can operate
-  it like a VM.
+on what you have on your environment. If you have a CD/DVD drive on 
+your server, the simple way is to go with ISO boot. If you also have 
+a PXE boot server and a NFS server, to go with PXE boot is more efficient.
+If you also have IPMI access to the BMC of your server, you can operate 
+baremetal like a VM.
 
 .. toctree::
  :maxdepth: 1

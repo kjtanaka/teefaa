@@ -10,7 +10,10 @@ The Cloudmesh Teefaa is a simplified baremetal provisioner of Linux based Operat
 System. It allows you to make a snapshot of a running OS and provision it on 
 another baremetal machine. 
 
-Teefaa supports VirtualBox as default, so here's a test with two virtual machines.
+Cloudmesh Teefaa also supports VirtualBox so that you can build a custom OS on 
+a VM on VirtualBox, and then provision the snapshot on another baremetal/virtual 
+machine. Means you can easily try Cloudmesh Teefaa with two VMs on VirtualBox to
+see what Cloudmesh Teefaa actually does.
 
 First, provision a base system on a virtual machine and make a snapshot. ::
 
@@ -35,10 +38,8 @@ And then, provision the snapshot on another virtual machine. ::
     Hello World!
 
 .. note::
-   * It takes a while at the steps of "teefaa init" and "teefaa provision".
+   * It takes a while at the step "teefaa init" and "teefaa provision".
    * Prerequisites and installation are written below.
-   * There are two ways for baremetal provisioning, ISO boot and PXE boot,
-     it's explained on the next pages.
 
 Characteristics
 ---------------
@@ -55,7 +56,7 @@ Prerequisites
 * Vagrant
 
 Installation
--------
+------------
 ::
 
     git clone https://github.com/kjtanaka/teefaa.git
@@ -65,8 +66,13 @@ Installation
 Provisioning on baremetal machine
 ---------------------------------
 
-There are two ways to go, and it all depends on 
-what you have on your environment.
+There are two ways to do baremetal provisioning, and it all depends 
+on what you have on your environment. 
+
+* If you have a CD/DVD drive on your server you can go with ISO boot. 
+* If you have a PXE boot server and a NFS server you can go with PXE boot.
+  If you also have IPMI access to the BMC of your server, you can operate
+  it like a VM.
 
   .. toctree::
    :maxdepth: 2

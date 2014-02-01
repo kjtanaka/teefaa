@@ -80,4 +80,3 @@ baremetal like a VM.
  how_to_pxe_boot
  how_to_scale
  license
-

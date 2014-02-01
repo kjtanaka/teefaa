@@ -74,11 +74,11 @@ on what you have on your environment.
   If you also have IPMI access to the BMC of your server, you can operate
   it like a VM.
 
-  .. toctree::
-   :maxdepth: 2
+.. toctree::
+ :maxdepth: 1
 
-   how_to_iso_boot
-   how_to_pxe_boot
-   how_to_scale
-   license
+ how_to_iso_boot
+ how_to_pxe_boot
+ how_to_scale
+ license
 

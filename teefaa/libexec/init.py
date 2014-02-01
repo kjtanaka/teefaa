@@ -113,12 +113,12 @@ class Init(object):
         |  iso_path: {d}/teefaa-debian-live.iso
         |
         |snapshot_config:
-        |  snapshot_url: http://teefaa.futuregrid.org/images/latest/centos-6.5.squashfs
+        |  snapshot_url: https://s3-us-west-2.amazonaws.com/teefaaimg/centos-6.5.squashfs
         |  snapshot_path: {d}/centos-6.5.squashfs
         |  os:
         |    distro: centos
         |    ver: 6.5
-        |  #snapshot_url: http://teefaa.futuregrid.org/images/latest/ubuntu-12.04.squashfs
+        |  #snapshot_url: https://s3-us-west-2.amazonaws.com/teefaaimg/ubuntu-12.04.squashfs
         |  #snapshot_path: {d}/ubuntu-12.04.squashfs
         |  #os:
         |  #  distro: ubuntu

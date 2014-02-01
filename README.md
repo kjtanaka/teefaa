@@ -1,4 +1,4 @@
 Cloudmesh Teefaa
 =================
 
-The project Documentation is located at http://cloudmesh-teefaa.readthedocs.org
+The project Documentation is located at http://teefaa.readthedocs.org

@@ -315,6 +315,12 @@ class MakeInstaller(object):
         if not text in output:
             append(config, text, use_sudo=True)
 
+    def _update_hostname(self):
+
+        location = self.new_squashfs_dir + '/etc/hostname'
+        with mode_sudo():
+            file_write(location, 'teefaa')
+
     def _unmount_all(self):
         """
         Unmount all dir...
@@ -406,6 +412,7 @@ class MakeInstaller(object):
     def customize(self):
         self._install_packages_in_new_image()
         self._create_user()
+        self._update_hostname()
 
     def teardown(self):
         self._unmount_all()
@@ -413,6 +420,7 @@ class MakeInstaller(object):
     def epilogue(self):
         self._make_new_squashfs()
         self._make_new_iso()
+        self._download_nfs_rootimg_dir()
 
     def run(self):
         self.setup()

@@ -36,6 +36,9 @@ class TeefaaProvision(object):
     def setup(self, parser):
 
         provision = parser.add_parser('provision', help='Provision OS')
+        provision.add_argument('--no-reboot',
+                               help="No reboot at beginning/end of provisioning",
+                               action="store_true")
         provision.set_defaults(func=self.do_provision)
 
     def do_provision(self, args):
@@ -45,11 +48,14 @@ class TeefaaProvision(object):
             self._do_provision()
         else:
             with hide('running', 'stdout'):
-                self._do_provision()
+                self._do_provision(args)
 
-    def _do_provision(self):
+    def _do_provision(self, args):
 
-        execute(boot_installer)
+        if args.no_reboot:
+            print("Starts provisioning without reboot.")
+        else:
+            execute(boot_installer)
         check_ssh()
         execute(make_partition)
         time.sleep(2)
@@ -65,4 +71,14 @@ class TeefaaProvision(object):
         time.sleep(2)
         execute(install_grub)
         time.sleep(2)
-        execute(boot_disk)
+        print("Done.")
+        if args.no_reboot:
+            text = text_strip_margin("""
+            |
+            |IMPORTANT:
+            | Remove Teefaa ISO image, or change PXE config
+            | to boot the machine with localdisk, then reboot.
+            |""")
+            print(text)
+        else:
+            execute(boot_disk)

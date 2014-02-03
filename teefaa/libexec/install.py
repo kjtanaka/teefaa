@@ -8,6 +8,7 @@ from fabric.api import (
         env,
         get,
         hide,
+        local,
         put,
         run,
         sudo,
@@ -32,7 +33,8 @@ class InstallSnapshot(object):
     def __init__(self):
         # Set config
         config = read_config()
-        env.host_string = config['host_config']['hostname']
+        env.host_string = self.hostname = config['host_config']['hostname']
+        self.snapshot_url = config['snapshot_config']['snapshot_url']
         self.snapshot_file = config['snapshot_config']['snapshot_path']
         distro = config['snapshot_config']['os']['distro']
         # Create tmp dir
@@ -44,9 +46,20 @@ class InstallSnapshot(object):
         do_sudo(['chmod', '700', self.tmp_dir, '&&',
                  'chown', '\$USER', self.tmp_dir])
 
+    def _download_squashfs(self):
+
+        if not os.path.exists(self.snapshot_file):
+
+            print("Downloading '{url}'...".format(url=self.snapshot_url))
+
+            cmd = ['wget', self.snapshot_url, '-O', self.snapshot_file]
+            local(' '.join(cmd))
+
     def _upload_squashfs(self):
         # Download snapshot
-        print("Uploading snapshot '{f}'...".format(f=self.snapshot_file))
+        print("Uploading '{f}' to '{h}'...".format(
+            f=self.snapshot_file,
+            h=self.hostname))
         if not file_exists(self.squashfs):
             put(self.snapshot_file, self.squashfs)
             sudo("sync && echo 3 > /proc/sys/vm/drop_caches")
@@ -67,6 +80,7 @@ class InstallSnapshot(object):
 
     def run(self):
 
+        self._download_squashfs()
         self._upload_squashfs()
         self._mount_squashfs()
         self._copy_files()

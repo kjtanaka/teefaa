@@ -7,24 +7,25 @@ Baremetal provisioning with ISO boot
    $ teefaa init vm1
 
 2. It will take a while to complete the initial setting, 
-and the following files are created. ::
+and the following files are created. 
+   ::
 
-   $ tree -a -L 2
-   .
-   ├── .teefaa
-   │   ├── ssh_config_vm1          --- ssh config
-   │   ├── ssh_key                 --- ssh private key
-   │   ├── ssh_key.pub             --- ssh public key
-   │   └── teefaa-debian-live.iso  --- customized livecd for teefaa
-   └── vm1
-       ├── Teefaafile.yml          --- teefaa config
-       ├── .vagrant                --- vagrant dot directory
-       └── Vagrantfile             --- vagrant config
+     $ tree -a -L 2
+     .
+     ├── .teefaa
+     │   ├── ssh_config_vm1          --- ssh config
+     │   ├── ssh_key                 --- ssh private key
+     │   ├── ssh_key.pub             --- ssh public key
+     │   └── teefaa-debian-live.iso  --- customized livecd for teefaa
+     └── vm1
+         ├── Teefaafile.yml          --- teefaa config
+         ├── .vagrant                --- vagrant dot directory
+         └── Vagrantfile             --- vagrant config
 
-.. note::
+   .. note::
 
-   Take a look at ``vm1/Teefaafile.yml``. 
-   Teefaa provisions CentOS 6 basic image as default.
+      Take a look at ``vm1/Teefaafile.yml``. 
+      Teefaa provisions CentOS 6 basic image as default.
 
 3. Move to vm1 directory and provision a base system. ::
 
@@ -73,9 +74,9 @@ baremetal machine(named bm1 in this example) with the livecd.
 
 9. Reboot the machine from localdisk.
 
-10. Should be able to login with this. ::
-   
-   teefaa ssh
-   [teefaa@bm1 ~]$ which screen
-   [teefaa@bm1 ~]$ cat text.txt
-   Hello World!
+10. Should be able to login with this. 
+    ::
+      teefaa ssh
+      [teefaa@bm1 ~]$ which screen
+      [teefaa@bm1 ~]$ cat text.txt
+      Hello World!

@@ -33,11 +33,11 @@ and the following files are created. ::
 
 4. Add some software packages and make a snapshot. ::
 
-   $ teefaa ssh
-   [teefaa@vm1 ~]$ sudo yum install screen
-   [teefaa@vm1 ~]$ echo Hello World! > test.txt
-   [teefaa@vm1 ~]$ exit
-   $ teefaa make-snapshot
+    $ teefaa ssh
+    [teefaa@vm1 ~]$ sudo yum install screen
+    [teefaa@vm1 ~]$ echo Hello World! > test.txt
+    [teefaa@vm1 ~]$ exit
+    $ teefaa make-snapshot
 
 5. Burn the livecd ``.teefaa/teefaa-debian-live.iso`` to CD-R and boot your
 baremetal machine(named bm1 in this example) with the livecd.

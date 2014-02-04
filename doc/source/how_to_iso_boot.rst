@@ -50,7 +50,7 @@ and the following files are created. ::
     $ cp .teefaa/ssh_config_vm1 .teefaa/ssh_config_bm1
     $ vi .teefaa/ssh_config_bm1
 
-::
+  ::
     
     Host bm1
       HostName <update ip address>
@@ -74,8 +74,8 @@ baremetal machine(named bm1 in this example) with the livecd.
 9. Reboot the machine from localdisk.
 
 10. Should be able to login with this. ::
-
-    teefaa ssh
-    [teefaa@bm1 ~]$ which screen
-    [teefaa@bm1 ~]$ cat text.txt
-    Hello World!
+   
+   teefaa ssh
+   [teefaa@bm1 ~]$ which screen
+   [teefaa@bm1 ~]$ cat text.txt
+   Hello World!

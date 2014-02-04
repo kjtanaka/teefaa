@@ -1,13 +1,13 @@
 Baremetal provisioning with ISO boot
 ====================================
 
-Initialize a virtual machine named 'vm1'. ::
+1. Initialize a virtual machine named 'vm1'. ::
     
    $ mkdir teefaa && cd teefaa
    $ teefaa init vm1
 
-It will take a while to complete the initial setting, 
-and these files will be created. ::
+2. It will take a while to complete the initial setting, 
+and the following files are created. ::
 
    $ tree -a -L 2
    .
@@ -24,17 +24,30 @@ and these files will be created. ::
 .. note::
 
    Take a look at ``vm1/Teefaafile.yml``. 
-   As default, it provides CentOS 6 basic image.
+   Teefaa provisions CentOS 6 basic image as default.
 
-Move to vm1 directory and provision a base system. ::
+3. Move to vm1 directory and provision a base system. ::
 
    $ cd vm1
    $ teefaa provision
 
-Add some software packages and make a snapshot. ::
+4. Add some software packages and make a snapshot. ::
 
    $ teefaa ssh
    [teefaa@vm1 ~]$ sudo yum install screen
    [teefaa@vm1 ~]$ echo Hello World! > test.txt
    [teefaa@vm1 ~]$ exit
    $ teefaa make-snapshot
+
+5. Burn the livecd ``.teefaa/teefaa-debian-live.iso`` to CD-R and boot your
+baremetal machine(named bm1 in this example) with the livecd.
+
+6. Create ``bm1/Teefaafile.yml``. ::
+
+   $ mkdir bm1
+   $ cp vm1/Teefaafile.yml bm1/Teefaafile.yml
+   $ sed -i -e 's/vm1/bm1/' bm1/Teefaafile.yml
+
+7. Comment out the following lines. ::
+
+   

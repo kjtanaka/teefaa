@@ -49,7 +49,9 @@ and the following files are created. ::
 
     $ cp .teefaa/ssh_config_vm1 .teefaa/ssh_config_bm1
     $ vi .teefaa/ssh_config_bm1
+
 ::
+    
     Host bm1
       HostName <update ip address>
       User teefaa

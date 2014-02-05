@@ -24,12 +24,12 @@ and the following files are created.
 
    .. note::
 
-      * What the initial setting does is;
+      * What the ``teefaa init`` actually does is;
          * Make configuration files and keys.
          * Make a VM with Vagrant.
          * Make Teefaa Livecd image from Debian livecd.
       * Take a look at ``virtual1/Teefaafile.yml``. 
-      * Teefaa provisions CentOS 6 basic image as default.
+        You can find that Teefaa provisions CentOS 6 basic image as default.
 
 3. Change directory to ``virtual1`` and provision the basic CentOS 6 image. ::
 
@@ -39,12 +39,13 @@ and the following files are created.
    .. note::
 
       * What the provisioning process actually does is;
-        * Download CentOS 6 image if needed.
-        * Boot virtual1 with the Teefaa LiveCD.
-        * Install CentOS 6 on virtual1 over ssh.
-        * Reboot virtual1 with local disk.
+         * Download CentOS 6 image if needed.
+         * Boot virtual1 with the Teefaa LiveCD.
+         * Install CentOS 6 on virtual1 over ssh.
+         * Reboot virtual1 with local disk.
 
-4. Add some software packages and make a snapshot. ::
+4. Add some software packages, make some change and make 
+   a snapshot of the system. ::
 
       $ teefaa ssh
       [teefaa@virtual1 ~]$ sudo yum install screen
@@ -55,6 +56,6 @@ and the following files are created.
    .. note::
    
       * What ``make-snapshot`` does is;
-        * Copy all files into a temporal directory.
-        * Compress it with SquashFS.
-        * Download and save it in ``.teefaa`` directory.
+         * Copy all files into a temporal directory.
+         * Compress it with SquashFS.
+         * Download and save it in ``.teefaa`` directory.

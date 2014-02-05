@@ -1,7 +1,7 @@
 Make a VM and build your custom OS
 ==================================
 
-1. Initialize a virtual machine 'virtual1'. ::
+1. Initialize a virtual machine ``virtual1``. ::
     
    $ mkdir Teefaa && cd Teefaa
    $ teefaa init virtual1
@@ -16,8 +16,8 @@ and the following files are created.
      │   ├── ssh_config_virtual1          --- ssh config
      │   ├── ssh_key                 --- ssh private key
      │   ├── ssh_key.pub             --- ssh public key
-     │   └── teefaa-debian-live.iso  --- customized livecd for teefaa
-     └── vm1
+     │   └── teefaa-debian-live.iso  --- Teefaa LiveCD image
+     └── virtual1
          ├── Teefaafile.yml          --- teefaa config
          ├── .vagrant                --- vagrant dot directory
          └── Vagrantfile             --- vagrant config
@@ -25,11 +25,9 @@ and the following files are created.
    .. note::
 
       * What the initial setting does is;
-        * Make configuration files and keys.
-        * Make a VM with Vagrant.
-        * Make Teefaa Livecd image from Debian livecd. The process is
-          done on the VM and the livecd image is downloaded and saved
-          in .teefaa directory.
+         * Make configuration files and keys.
+         * Make a VM with Vagrant.
+         * Make Teefaa Livecd image from Debian livecd.
       * Take a look at ``virtual1/Teefaafile.yml``. 
       * Teefaa provisions CentOS 6 basic image as default.
 

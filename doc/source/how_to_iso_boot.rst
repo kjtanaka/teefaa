@@ -1,20 +1,20 @@
 Baremetal provisioning with ISO boot
 ====================================
 
-1. Create ``bm1/Teefaafile.yml``. ::
+1. Create Teefaa config file ``baremetal1/Teefaafile.yml``. ::
 
-   $ mkdir bm1
-   $ cp vm1/Teefaafile.yml bm1/Teefaafile.yml
-   $ sed -i -e 's/vm1/bm1/' bm1/Teefaafile.yml
+   $ mkdir baremetal1
+   $ cp virtual1/Teefaafile.yml baremetal1/Teefaafile.yml
+   $ sed -i -e 's/virtual1/baremetal1/' baremetal1/Teefaafile.yml
 
-2. Create ``.teefaa/ssh_config_bm1``. ::
+2. Create SSH config file ``.teefaa/ssh_config_baremetal1``. ::
 
-    $ cp .teefaa/ssh_config_vm1 .teefaa/ssh_config_bm1
-    $ vi .teefaa/ssh_config_bm1
+    $ cp .teefaa/ssh_config_virtual1 .teefaa/ssh_config_baremetal1
+    $ vi .teefaa/ssh_config_baremetal1
 
   ::
     
-    Host bm1
+    Host baremetal1
       HostName <update ip address>
       User teefaa
       Port 22
@@ -25,19 +25,21 @@ Baremetal provisioning with ISO boot
       IdentitiesOnly yes
       LogLevel FATAL
 
-3. Burn the livecd ``.teefaa/teefaa-debian-live.iso`` to CD-R and boot your
-baremetal machine(named bm1 in this example) with the livecd.
+3. Burn the livecd ``.teefaa/teefaa-debian-live.iso`` to CD-R and boot
+   ``baremetal1`` with CD boot.
 
-4. If everything is configured fine, the snapshot will be installed with this. ::
+4. If everything is configured fine, the snapshot should be able to install with this. ::
 
-   $ cd bm1
+   $ cd baremetal1
    $ teefaa provision --no-reboot
 
-5. Reboot the machine from localdisk.
+5. Reboot ``baremetal1`` from localdisk.
 
-6. Should be able to login to the node with this. 
+6. Should be able to login to ``baremetal1`` with this. 
     ::
       $ teefaa ssh
-      [teefaa@bm1 ~]$ which screen
-      [teefaa@bm1 ~]$ cat text.txt
+
+7. Check if it's the same as ``virtual1``. ::
+      [teefaa@baremetal1 ~]$ which screen
+      [teefaa@baremetal1 ~]$ cat text.txt
       Hello World!

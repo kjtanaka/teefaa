@@ -69,13 +69,13 @@ For baremetal provisioning, it is needed to boot your machine with your
 ``.teefaa/teefaa-debian-live.iso`` with CD/DVD boot, or configure the
 livecd with PXE boot server.
 
-The following chapters explain with an example.
+The following chapters explain it with an example as follows.
 
-1. Make a vm named ``virtual``, build a custom OS and make a snapshot.
-2. Boot a baremetal named ``baremetal`` with Teefaa livecd, and provision 
-   the snapshot of ``virtual`` on ``baremetal``.
+1. Make a VM ``virtual1``, build a custom OS and make a snapshot.
+2. Boot a baremetal machine ``baremetal1`` with Teefaa livecd, and provision 
+   the snapshot of ``virtual1`` on ``baremetal1``.
 3. Configure DHCP, PXE, NFS and IPMI and make it possible to easily and
-   reproducibly provision the snapshot on ``baremetal``.
+   reproducibly provision the snapshot on ``baremetal1``.
 
 .. toctree::
  :maxdepth: 1

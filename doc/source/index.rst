@@ -65,16 +65,22 @@ Installation
 Provisioning on baremetal machine
 ---------------------------------
 
-There are two ways to do baremetal provisioning, and it all depends 
-on what you have on your environment. If you have a CD/DVD drive on 
-your server, the simple way is to go with ISO boot. If you also have 
-a PXE boot server and a NFS server, PXE boot is more efficient.
-If you also have IPMI access to the BMC of your server, you can 
-provision a system and make a snapshot, easily and reproducibly.
+For baremetal provisioning, it is needed to boot your machine with your
+``.teefaa/teefaa-debian-live.iso`` with CD/DVD boot, or configure the
+livecd with PXE boot server.
+
+The following chapters explain with an example.
+
+1. Make a vm named ``virtual``, build a custom OS and make a snapshot.
+2. Boot a baremetal named ``baremetal`` with Teefaa livecd, and provision 
+   the snapshot of ``virtual`` on ``baremetal``.
+3. Configure DHCP, PXE, NFS and IPMI and make it possible to easily and
+   reproducibly provision the snapshot on ``baremetal``.
 
 .. toctree::
  :maxdepth: 1
 
+ make_a_vm
  how_to_iso_boot
  how_to_pxe_boot
  how_to_scale

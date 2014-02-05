@@ -45,8 +45,9 @@ Characteristics
 * Simple to use.
 * Written in Python and Fabric.
 * Inspired by Vagrant and Test Kitchen.
-* Able to provision Ubuntu and CentOS right now. Will cover 
-  Debian and Fedora soon. And more distros later.
+* Able to provision Ubuntu and CentOS. 
+  Will cover Debian and Fedora soon. 
+  And more distros later.
 
 Prerequisites
 -------------

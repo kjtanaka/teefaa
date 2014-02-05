@@ -35,11 +35,12 @@ Baremetal provisioning with ISO boot
 
 5. Reboot ``baremetal1`` from localdisk.
 
-6. Should be able to login to ``baremetal1`` with this. 
-    ::
+6. Should be able to login to ``baremetal1`` with this. ::
+
       $ teefaa ssh
 
 7. Check if it's the same as ``virtual1``. ::
+
       [teefaa@baremetal1 ~]$ which screen
       [teefaa@baremetal1 ~]$ cat text.txt
       Hello World!

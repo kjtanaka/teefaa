@@ -1,8 +1,8 @@
 Welcome to Cloudmesh Teefaa!
 ============================
 
-Your system on baremetal machine should be as easily and reproducibly provisioned 
-as virtual machine.
+Your system on baremetal machine should be as easily and reproducibly provisioned
+and cloned as virtual machine.
 
 What is Cloudmesh Teefaa?
 -------------------------
@@ -12,16 +12,17 @@ another baremetal machine.
 
 Cloudmesh Teefaa also supports VirtualBox so that you can build a custom OS on 
 a VM, and then provision the snapshot on another baremetal/virtual machine. 
-Means you can easily try it with two VMs to see what it actually does.
+You can easily try it with two VMs to see what it actually does.
 
-Here's example. Provision a base system on a virtual machine and make a snapshot. ::
+Here's an example. Provision a base system on a virtual machine and make a snapshot. ::
 
-    $ mkdir try_teefaa
-    $ cd try_teefaa
+    $ mkdir project1
+    $ cd project1
     $ teefaa init sputnik1
     $ cd sputnik1
     $ teefaa provision
     $ teefaa ssh
+    [teefaa@sputnik1 ~]$ sudo yum install screen
     [teefaa@sputnik1 ~]$ echo Hello World! > test.txt
     [teefaa@sputnik1 ~]$ exit
     $ teefaa make-snapshot
@@ -33,6 +34,8 @@ And then, provision the snapshot on another virtual machine. ::
     $ cd sputnik2
     $ teefaa provision
     $ teefaa ssh
+    [teefaa@sputnik2 ~]$ which screen
+    /usr/bin/screen
     [teefaa@sputnik2 ~]$ cat test.txt
     Hello World!
 

@@ -24,10 +24,10 @@ and the following files are created.
 
    .. note::
 
-      * What the ``teefaa init`` actually does is;
-         * Make configuration files and keys.
-         * Make a VM with Vagrant.
-         * Make Teefaa Livecd image from Debian livecd.
+      * What ``teefaa init`` actually does is;
+         * Make configuration files and ssh key pair.
+         * Make a VM with using Vagrant and VirtualBox.
+         * Download Debian LiveCD to the VM and build Teefaa LiveCD.
       * Take a look at ``virtual1/Teefaafile.yml``. 
         You can find that Teefaa provisions CentOS 6 basic image as default.
 
@@ -38,14 +38,13 @@ and the following files are created.
 
    .. note::
 
-      * What the provisioning process actually does is;
-         * Download CentOS 6 image if needed.
-         * Boot virtual1 with the Teefaa LiveCD.
-         * Install CentOS 6 on virtual1 over ssh.
-         * Reboot virtual1 with local disk.
+      * What ``teefaa provision`` does is;
+         * Download CentOS 6 image if it doesn't exist on local.
+         * Boot ``virtual1`` with the Teefaa LiveCD.
+         * Install CentOS 6 on ``virtual1`` over ssh.
+         * Reboot ``virtual1`` with local disk.
 
-4. Add some software packages, make some change and make 
-   a snapshot of the system. ::
+4. Make some changes and make a snapshot of the system. ::
 
       $ teefaa ssh
       [teefaa@virtual1 ~]$ sudo yum install screen

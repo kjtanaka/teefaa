@@ -14,10 +14,10 @@ Baremetal provisioning with ISO boot
 
   ::
     
-    Host baremetal1
-      HostName <update ip address>
+    Host baremetal1                 <-- CHANGE HERE
+      HostName <update ip address>  <-- CHANGE HERE
       User teefaa
-      Port 22
+      Port 22                       <-- CHANGE HERE
       UserKnownHostsFile /dev/null
       StrictHostKeyChecking no
       PasswordAuthentication no
@@ -35,12 +35,13 @@ Baremetal provisioning with ISO boot
 
 5. Reboot ``baremetal1`` from localdisk.
 
-6. Should be able to login to ``baremetal1`` with this. ::
+6. Login to ``baremetal1`` with this. ::
 
       $ teefaa ssh
 
-7. Check if it's the same as ``virtual1``. ::
+7. Check if the system is the same as ``virtual1``. ::
 
       [teefaa@baremetal1 ~]$ which screen
+      /usr/bin/screen
       [teefaa@baremetal1 ~]$ cat text.txt
       Hello World!

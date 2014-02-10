@@ -52,7 +52,8 @@ class InstallSnapshot(object):
 
             print("Downloading '{url}'...".format(url=self.snapshot_url))
 
-            cmd = ['wget', self.snapshot_url, '-O', self.snapshot_file]
+            cmd = ['wget', self.snapshot_url, '-O', self.snapshot_file,
+                    '--no-check-certificate']
             local(' '.join(cmd))
 
     def _upload_squashfs(self):

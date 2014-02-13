@@ -150,8 +150,6 @@ class MakeSnapshot(object):
 class MakeInstaller(object):
 
     def __init__(self):
-        """Make ISO image"""
-        # Set variables
         config = read_config()
         env.host_string = config['iso_config']['builder']['hostname']
         self.user = 'teefaa'

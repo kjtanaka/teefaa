@@ -418,7 +418,6 @@ class MakeInstaller(object):
     def epilogue(self):
         self._make_new_squashfs()
         self._make_new_iso()
-        self._download_nfs_rootimg_dir()
 
     def run(self):
         self.setup()

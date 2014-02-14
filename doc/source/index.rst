@@ -14,11 +14,12 @@ Cloudmesh Teefaa also supports VirtualBox so that you can build a custom OS on
 a VM, and then provision the snapshot on another baremetal/virtual machine. 
 Which means that you can easily try it with two VMs to see what it actually does.
 
+Here's an example. Provision a base system on a virtual machine and make a snapshot.
+
 .. note::
-   Before trying it, please read the sections about "Prerequisites" and "Installation."
+   Before trying this example, please read "Prerequisites" and "Installation" written below.
 
-Here's an example. Provision a base system on a virtual machine and make a snapshot. ::
-
+::
     $ mkdir project1
     $ cd project1
     $ teefaa init sputnik1

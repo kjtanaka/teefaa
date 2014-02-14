@@ -149,8 +149,8 @@ class MakeSnapshot(object):
 
 class MakeInstaller(object):
 
-    def __init__(self):
-        config = read_config()
+    def __init__(self, ymlfile):
+        config = read_config(ymlfile)
         env.host_string = config['iso_config']['builder']['hostname']
         self.user = 'teefaa'
         self.ssh_key = config['ssh_key']
@@ -166,9 +166,6 @@ class MakeInstaller(object):
         self.new_squashfs_dir = "/tmp/teefaa/new_squashfs_dir"
 
     def _install_required_pkgs(self):
-        """ 
-        Ensure reuqired packages are installed...
-        """
         print("Ensuring reuqired packages are installed...")
         time.sleep(1)
         # Install squashfs-tools
@@ -184,9 +181,6 @@ class MakeInstaller(object):
             exit(1)
 
     def _download_iso(self):
-        """
-        Download base image...
-        """
         print("Downloading base image...")
         time.sleep(1)
         if not file_exists(self.base_iso):
@@ -477,8 +471,8 @@ def make_fs():
     mf.make_fs()
 
 @task
-def make_installer():
-    mkinst = MakeInstaller()
+def make_installer(config):
+    mkinst = MakeInstaller(config)
     mkinst.run()
 
 @task

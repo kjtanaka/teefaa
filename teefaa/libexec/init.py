@@ -22,6 +22,7 @@ from cuisine import (
         )
 
 from .common import read_config, do_sudo
+from .make import make_installer
 
 class Init(object):
 
@@ -73,7 +74,7 @@ class Init(object):
             cmd = ['vagrant', 'status', '|', 'grep', self.hostname]
             output = local(' '.join(cmd), capture=True)
             if not "running" in output:
-                print("booting vagrant box...")
+                print("Booting vagrant box...")
                 local("vagrant up " + self.hostname)
             else:
                 print("vagrant box is running...")
@@ -183,10 +184,11 @@ class Init(object):
     def _create_teefaa_iso(self):
 
         teefaa_iso = os.path.abspath(self.dot_teefaa_dir) + "/teefaa-debian-live.iso"
+        teefaafile = self.hostname + "/Teefaafile.yml"
         
         if not os.path.exists(teefaa_iso):
             with lcd(self.hostname):
-                local("teefaa make-installer")
+                make_installer(teefaafile)
         else:
             pass
 

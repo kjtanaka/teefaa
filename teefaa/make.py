@@ -55,10 +55,10 @@ class TeefaaMake(object):
     def do_make_installer(self, args):
 
         if args.debug:
-            execute(make_installer)
+            execute(make_installer, args.config)
         else:
-            with hide('running', 'stdout'):
-                execute(make_installer)
+            with hide('everything'):
+                execute(make_installer, args.config)
 
     def do_make_swap(self, args):
 

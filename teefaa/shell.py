@@ -40,6 +40,9 @@ class TeefaaShell(object):
         self.parser.add_argument("--debug", 
                                  help="Enable debugging",
                                  action="store_true")
+        self.parser.add_argument("--config",
+                                 metavar='<file>',
+                                 help="Configurtion file")
         
         self.subparsers = self.parser.add_subparsers(help='sub-command help')
 

@@ -9,10 +9,12 @@ import time
 from fabric.api import env, sudo, settings, hide
 from cuisine import text_strip_margin
 
-def read_config():
+def read_config(ymlfile=None):
     """Make snapshot"""
+    if not ymlfile:
+        ymlfile = "Teefaafile.yml"
     try:
-        f = open("Teefaafile.yml")
+        f = open(ymlfile)
         config = yaml.safe_load(f)
         f.close()
     except IOError:

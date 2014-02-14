@@ -29,6 +29,6 @@ class TeefaaInit(object):
         if args.debug:
             execute(init, args)
         else:
-            with hide('running', 'stdout'):
+            with hide('everything'):
                 execute(init, args)
 

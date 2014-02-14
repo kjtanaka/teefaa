@@ -114,16 +114,16 @@ class Init(object):
         |  iso_path: {d}/teefaa-debian-live.iso
         |
         |snapshot_config:
-        |  snapshot_url: https://s3-us-west-2.amazonaws.com/teefaaimg/centos-6.5.squashfs
-        |  snapshot_path: {d}/centos-6.5.squashfs
+        |  snapshot_url: https://s3-us-west-2.amazonaws.com/teefaaimg/ubuntu-12.04.squashfs
+        |  snapshot_path: {d}/ubuntu-12.04.squashfs
         |  os:
-        |    distro: centos
-        |    ver: 6.5
-        |  #snapshot_url: https://s3-us-west-2.amazonaws.com/teefaaimg/ubuntu-12.04.squashfs
-        |  #snapshot_path: {d}/ubuntu-12.04.squashfs
+        |    distro: ubuntu
+        |    ver: 12.04
+        |  #snapshot_url: https://s3-us-west-2.amazonaws.com/teefaaimg/centos-6.5.squashfs
+        |  #snapshot_path: {d}/centos-6.5.squashfs
         |  #os:
-        |  #  distro: ubuntu
-        |  #  ver: 12.04
+        |  #  distro: centos
+        |  #  ver: 6.5
         |  hostname: {host}
         |  #exclude:
         |  #  - /path/to/exclude/dir
@@ -144,14 +144,16 @@ class Init(object):
         |#  hostname: host1
         |#  power_driver: ipmi
         |#  power_driver_config:
-        |#  ipmi_password: XXXXXXXXXX
-        |#  ipmi_user: ipmiadmin
-        |#  bmc_address: 192.168.1.1
+        |#    ipmi_password: XXXXXXXXXX
+        |#    ipmi_user: ipmiadmin
+        |#    bmc_address: <ip address>
         |#  boot_driver: pxe
         |#  boot_driver_config:
-        |#  boot_config_file: /tftpboot/pxelinux.cfg/host1
-        |#  installer_boot_config_file: /tftpboot/pxelinux.cfg/netboot
-        |#  disk_boot_config_file: /tftpboot/pxelinux.cfg/localboot
+        |#    pxe_server: <hostname>
+        |#    pxe_server_user: <username>
+        |#    boot_config_file: /tftpboot/pxelinux.cfg/01-11-22-aa-bb-cc-dd
+        |#    installer_boot_config_file: /tftpboot/pxelinux.cfg/netboot
+        |#    disk_boot_config_file: /tftpboot/pxelinux.cfg/localboot
         |
         |disk_config:
         |  label_type: mbr

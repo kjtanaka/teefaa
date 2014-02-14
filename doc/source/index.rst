@@ -20,6 +20,7 @@ Here's an example. Provision a base system on a virtual machine and make a snaps
    Before trying this example, please read "Prerequisites" and "Installation" written below.
 
 ::
+
     $ mkdir project1
     $ cd project1
     $ teefaa init sputnik1

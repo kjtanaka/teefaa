@@ -106,8 +106,8 @@ class Init(object):
         |ssh_key: {d}/ssh_key
         |
         |iso_config:
-        |  base_iso: debian-live-7.4-amd64-standard.iso
-        |  base_iso_url: http://ftp.acc.umu.se/debian-cd/current-live/amd64/iso-hybrid/debian-live-7.4-amd64-standard.iso
+        |  base_iso: debian-live-7.5-amd64-standard.iso
+        |  base_iso_url: http://ftp.acc.umu.se/debian-cd/current-live/amd64/iso-hybrid/debian-live-7.5.0-amd64-standard.iso
         |  builder:
         |    hostname: {host}
         |    distro: ubuntu

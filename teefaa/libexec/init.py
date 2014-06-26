@@ -239,6 +239,8 @@ class Init(object):
         self._create_ssh_config()
         self._delete_vagrantfile()
 
+        print("Done.")
+
 
 @task
 def init(args):

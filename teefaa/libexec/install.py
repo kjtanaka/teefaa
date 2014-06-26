@@ -355,6 +355,14 @@ class Condition(object):
                         file_append(file_path, text)
                 except:
                     pass
+                try:
+                    dnsserver = self.interfaces['add'][iface]['dnsserver']
+                except:
+                    dnsserver = None
+                if dnsserver:
+                    text = "DNS1={d}\n".format(d=dnsserver)
+                    with mode_sudo():
+                        file_append(file_path, text)
 
     def _condition_centos_fstab(self):
 

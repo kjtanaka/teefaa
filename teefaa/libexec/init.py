@@ -68,6 +68,13 @@ class Init(object):
             with open(self.vagrantfile, 'w') as f:
                 f.write(text)
 
+    def _delete_vagrantfile(self):
+
+        if os.path.isfile(self.vagrantfile):
+
+            cmd = ['rm', '-f', self.vagrantfile]
+            local(' '.join(cmd))
+
     def _vagrant_up(self):
 
         with lcd(self.hostname):
@@ -230,6 +237,7 @@ class Init(object):
         self._create_teefaa_iso()
         self._vagrant_halt()
         self._create_ssh_config()
+        self._delete_vagrantfile()
 
 
 @task
